@@ -1,0 +1,11 @@
+require "basic.macros"
+require "basic.global"
+require "basic.errno"
+
+require "basic.ltypes"
+require "basic.lstring"
+require "basic.ltable"
+require "basic.lobject"
+require "basic.ltimer"
+require "basic.lfunction"
+require "basic.ldebugger"

@@ -1,0 +1,6 @@
+engine = "./engine/"
+luaservice = engine.."service/?.lua;"..engine.."test/?.lua;"..engine.."examples/?.lua;"..engine.."test/?/init.lua"
+lualoader = engine .. "lualib/loader.lua"
+lua_path = engine.."lualib/?.lua;"..engine.."lualib/?/init.lua"
+lua_cpath = engine .. "luaclib/?.so"
+snax = engine.."examples/?.lua;"..engine.."test/?.lua"

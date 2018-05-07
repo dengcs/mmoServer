@@ -1,0 +1,8 @@
+include "config.chess.common"
+
+engine = "./engine/"
+luaservice = luaservice..";"..engine.."service/?.lua"
+lualoader = engine .. "lualib/loader.lua"
+lua_path = lua_path..";"..engine.."lualib/?.lua;"..engine.."lualib/?/init.lua"
+lua_cpath = engine .. "luaclib/?.so"
+snax = engine.."examples/?.lua;"..engine.."test/?.lua"
