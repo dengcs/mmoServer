@@ -41,6 +41,7 @@ GLOBAL.PROTO_NAME =
 GLOBAL.SERVICE_NAME = 
 {
     SUMMD       = ".summd",
+    GATED       = ".gated",
     DATABASED   = "DATABASE",
     DATACACHED  = "DATACACHE",
     USERCENTERD = "USERCENTER",

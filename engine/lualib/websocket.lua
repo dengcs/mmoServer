@@ -120,6 +120,7 @@ function ws.new(id, header, handler, conf)
         handler = handler,
         client_terminated = false,
         server_terminated = false,
+        addr = conf.addr,
         mask_outgoing = conf.mask_outgoing,
         check_origin = conf.check_origin
     }

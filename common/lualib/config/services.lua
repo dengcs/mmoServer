@@ -9,8 +9,6 @@ M.summ = {
          proto = GLOBAL.PROTO_TYPE.TERMINAL,
          module = "db.databased",
          unique = true,
-         init = {},
-         exit = {},
      },
      {
          name = GLOBAL.SERVICE_NAME.DATACACHED,
@@ -18,8 +16,6 @@ M.summ = {
          proto = GLOBAL.PROTO_TYPE.TERMINAL,
          module = "db.datacached",
          unique = true,
-         init = {},
-         exit = {},
      },
 }
 

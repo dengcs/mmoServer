@@ -153,13 +153,6 @@ function server.start(conf)
         for _, v in pairs(conf) do
             v.auto = true
             local s = do_open(v)
-            -- 服务初始化过程
-            if v.init then
-                for _, c in pairs(v.init) do
-                    assert(c.func, string.format("call: %s: init function must be non-nil", v.name))
-                    method.call(s, c.func, c.args)
-                end
-            end
         end
 
         return 0
