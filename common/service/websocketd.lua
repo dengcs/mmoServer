@@ -14,10 +14,6 @@ end
 function handler.on_message(ws, message)
     print(string.format("%d receive:%s", ws.id, message))
     ws:send_text(message .. " from server")
-    
-    if message == "bye" then
-      ws:close()
-    end
 end
 
 function handler.on_close(ws, code, reason)
@@ -41,10 +37,7 @@ skynet.start(function()
     local address = "0.0.0.0:8001"
     skynet.error("Listening "..address)
     local listen_id = assert(socket.listen(address))
-    print("dcs1--"..listen_id)
     socket.start(listen_id , function(socket_id, addr)
-       print("dcs2--"..listen_id)
-       print("dcs3--"..socket_id)
        socket.start(socket_id)
        pcall(handle_socket, socket_id)
     end)

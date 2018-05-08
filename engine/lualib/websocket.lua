@@ -84,20 +84,19 @@ function H.check_origin_ok(origin, host)
 end
 
 function H.on_open(ws)
-    
+    error("This function is not implemented.")
 end
 
 function H.on_message(ws, message)
-   
+   error("This function is not implemented.")
 end
 
 function H.on_close(ws, code, reason)
-    
+    error("This function is not implemented.")
 end
 
 function H.on_pong(ws, data)
-    -- Invoked when the response to a ping frame is received.
-
+    error("This function is not implemented.")
 end
 
 
