@@ -1,44 +1,68 @@
 local skynet = require "skynet"
 local wsservice = require "service_factory.wsservice"
-local netpack = require "skynet.netpack"
 
-local connection = {}	-- fd -> connection : { fd , client, agent , ip, mode }
+local connection = {}
 
 local conf = {ip = "0.0.0.0", port = 8001}
 
+local CMD = {}
 local handler = {}
 
-function handler.on_connect(ws)
-
+function handler.on_open(fd)
     local agent = skynet.newservice("client/agentd")
-
+    
     local c = {
-      fd = ws.id,
-      ws = ws,
+      fd = fd,
       agent = agent
     }
-    connection[c.fd] = c
     
-    skynet.call(agent, "lua", "connect", c)
+    connection[fd] = c    
+end
+
+function handler.on_close(fd)
+    local c = connection[fd]
+    if c then
+        skynet.send(c.agent, "lua", "disconnect")
+        connection[fd] = nil
+    end
+end
+
+function handler.on_connect(ws)
+    local c = connection[ws.id]
+    
+    if c then
+        skynet.call(c.agent, "lua", "connect", c)
+    end
 end
 
 function handler.on_message(ws, message)
     local c = connection[ws.id]
     if c then
-        skynet.call(c.agent, "lua", "message", message)
+        skynet.send(c.agent, "lua", "message", message)
     end
 end
 
 function handler.on_disconnect(ws)
     local c = connection[ws.id]
     if c then
-        skynet.call(c.agent, "lua", "disconnect")
+        skynet.send(c.agent, "lua", "disconnect")
         connection[ws.id] = nil
     end
 end
 
 function handler.configure()
     return conf
+end
+
+function handler.command(cmd,...)
+    local fn = CMD[cmd]
+    if fn then
+      fn(...)
+    end
+end
+
+function CMD.test()
+  
 end
 
 wsservice.start(handler)

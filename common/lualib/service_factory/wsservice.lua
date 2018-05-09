@@ -22,7 +22,7 @@ function wsService.start(processor)
             processor.on_connect(ws)
         end
         
-        connection[ws.id] = true
+        connection[ws.id] = ws
         client_number = client_number + 1
     end
     
@@ -41,7 +41,7 @@ function wsService.start(processor)
         print(string.format("%d close:%s  %s", ws.id, code, reason))
         
         local c = connection[ws.id]
-        if c ~= nil then
+        if c then
             if processor.on_disconnect then
                 processor.on_disconnect(ws, code, reason)
             end
@@ -51,6 +51,36 @@ function wsService.start(processor)
         end
     end
     
+    -- 关闭客户端
+    function CMD.logout(fd)
+      local ws = connection[fd]
+      if ws then
+          ws:close()
+      end
+    end
+    
+    -- 返回消息到客户端
+    function CMD.response(fd,msg)
+        local ws = connection[fd]
+        if ws then
+            ws:send_text(msg .. " from server")
+        end
+    end
+    
+    local function handle_open(socket_id)
+        if processor.on_open then
+            processor.on_open(socket_id)
+        end
+    end
+    
+    local function handle_close(socket_id)
+        socket.close(socket_id)
+        if processor.on_close then
+            processor.on_close(socket_id)
+        end
+    end
+    
+    
     local function handle_socket(id, addr)
         -- limit request body size to 8192 (you can pass nil to unlimit)
         local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(id), 8192)
@@ -58,23 +88,15 @@ function wsService.start(processor)
             if header.upgrade == "websocket" then
                 local conf = {addr = addr}
                 local ws = websocket.new(id, header, handler, conf)
-                ws:start()
+                if ws then
+                    ws:start()
+                else
+                    handle_close(id)
+                end
+            else
+                handle_close(id)
             end
         end  
-    end
-    
-    function CMD.openclient(ws)
-      if connection[ws.id] then
-        socket.start(ws.id)
-      end
-    end
-    
-    function CMD.closeclient(ws)
-      local c = connection[ws.id]
-      if c then
-        connection[ws.id] = false
-        ws:close()
-      end
     end
     
     local conf = processor.configure()
@@ -86,9 +108,11 @@ function wsService.start(processor)
         skynet.error("Listening "..address)
         local listen_id = assert(socket.listen(conf.ip,conf.port))
         socket.start(listen_id , function(socket_id, addr)
+            -- 最大连接数
             if client_number > maxclient then
                 socket.close(socket_id)
             else
+                handle_open(socket_id)
                 socket.start(socket_id)
                 pcall(handle_socket, socket_id, addr)
             end
@@ -97,9 +121,9 @@ function wsService.start(processor)
         skynet.dispatch("lua", function (_, address, cmd, ...)
           local f = CMD[cmd]
           if f then
-            skynet.ret(skynet.pack(f(address, ...)))
+            skynet.ret(skynet.pack(f(...)))
           else
-            skynet.ret(skynet.pack(handler.command(cmd, address, ...)))
+            skynet.ret(skynet.pack(processor.command(cmd,...)))
           end
         end)
     end)

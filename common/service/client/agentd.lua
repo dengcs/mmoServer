@@ -1,5 +1,4 @@
 local skynet = require "skynet"
-local netpack = require "skynet.netpack"
 
 local csession
 
@@ -14,11 +13,12 @@ function CMD.disconnect()
 end
 
 function CMD.message(msg)
-  skynet.error("dcs--"..msg)
-  csession.ms:send_text(msg .. " from server")
-  
-  if msg=="bye" then
-    skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","closeclient")
+  if csession then
+      if msg == "bye" then
+        skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","logout",csession.fd)
+      else
+        skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",csession.fd,msg)
+      end
   end
 end
 
@@ -26,17 +26,18 @@ end
 -- 1. 命令来源
 -- 2. 命令名称
 -- 3. 命令参数
-local function command_handler(source, command, ...)
+local function command_handler(command, ...)
+    skynet.error("This function is not implemented.")
 end
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, source, command, ...)
-	   local safe_handler = SAFE_HANDLER(session)
-		 local fn = CMD[command]
+	skynet.dispatch("lua", function(session, source, cmd, ...)
+	   skynet.error("dcs---cmd--"..cmd)
+		 local fn = assert(CMD[cmd])
 		 if fn then
-		    return safe_handler(fn, source, ...)
+       skynet.ret(skynet.pack(fn(...)))
 		 else
-		    return safe_handler(command_handler, source, command, ...)
+		   skynet.ret(skynet.pack(command_handler(cmd, ...)))
 		 end
 	end)
 end)
