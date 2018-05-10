@@ -1,3 +1,0 @@
-common = "./common/"
-luaservice = common.."service/?.lua"
-lua_path = common.."lualib/?.lua"

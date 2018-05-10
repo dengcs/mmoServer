@@ -1,0 +1,3 @@
+common = "./common/"
+common_service = common.."service/?.lua"
+common_path = common.."lualib/?.lua"
