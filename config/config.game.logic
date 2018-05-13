@@ -1,0 +1,3 @@
+logic = "./logic/"
+logic_service = logic.."service/?.lua"
+logic_path = logic.."lualib/?.lua"

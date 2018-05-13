@@ -33,28 +33,28 @@ local M =
 		},
 		
 		-------------------------------
-    --- 'REDIS'
-    -------------------------------
-    
-    datacached = {
-          {
-            category  = GLOBAL.DB.REDIS,
-            host      = skynet.getenv("dc_host") or "192.168.8.26",
-            port      = skynet.getenv("dc_port") or "10002",
-            auth      = skynet.getenv("dc_auth") or "888888",
-            password  = "",
-            database  = DB.REDIS_A,
-            maxclient = 2,
-          },
-          {
-            category  = GLOBAL.DB.REDIS,
-            host      = skynet.getenv("dc_host") or "192.168.8.26",
-            port      = skynet.getenv("dc_port") or "10002",
-            auth      = skynet.getenv("dc_auth") or "888888",
-            password  = "",
-            database  = DB.REDIS_B,
-            maxclient = 2,
-          },
-    }
+        --- 'REDIS'
+        -------------------------------
+        
+        datacached = {
+              {
+                category  = GLOBAL.DB.REDIS,
+                host      = skynet.getenv("dc_host") or "192.168.8.26",
+                port      = skynet.getenv("dc_port") or "10002",
+                auth      = skynet.getenv("dc_auth") or "888888",
+                password  = "",
+                database  = DB.REDIS_A,
+                maxclient = 2,
+              },
+              {
+                category  = GLOBAL.DB.REDIS,
+                host      = skynet.getenv("dc_host") or "192.168.8.26",
+                port      = skynet.getenv("dc_port") or "10002",
+                auth      = skynet.getenv("dc_auth") or "888888",
+                password  = "",
+                database  = DB.REDIS_B,
+                maxclient = 2,
+              },
+        }
 }
 return M

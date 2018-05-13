@@ -45,6 +45,7 @@ GLOBAL.SERVICE_NAME =
     DATABASED   = "DATABASE",
     DATACACHED  = "DATACACHE",
     USERCENTERD = "USERCENTER",
+    PBD = ".pbd",
 }
 
 --->>> 系统内置常量定义 <<<---
