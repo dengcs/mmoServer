@@ -1,0 +1,30 @@
+##
+## 用户充值事件上传（英雄互娱 - LOGROTATE）
+##
+rotate 4
+nocompress
+notifempty
+/root/server-v2/log/bdc/chargeinfo.log {
+	sharedscripts
+	postrotate
+		## 常量定义
+		ROOTPATH="/root/server-v2"
+		CMDURL="http://localhost:12171/bdc/charge/roll"
+		APPKEY=`cat ${ROOTPATH}/shell/config/appkey`
+		BDCKEY=`cat ${ROOTPATH}/shell/config/bdckey`
+		ZONEID=`cat ${ROOTPATH}/shell/config/zoneid`
+		DATE=`date -d last-hour +%Y-%m-%d`
+		SOURCE=chargeinfo.log.1
+		TARGET=${APPKEY}_chargeinfo_${DATE}.zip
+		TEMP=${APPKEY}_${BDCKEY}${ZONEID}_chargeinfo_${DATE}.log
+		## 文件滚动
+		curl ${CMDURL}
+		cd ${ROOTPATH}/log/bdc
+		mv ${SOURCE} ${TEMP}
+		## 文件压缩
+		zip -r ${TARGET} ${TEMP}
+		mv ${TEMP} ${SOURCE}
+		## 文件上传
+		${ROOTPATH}/shell/ftp.sh ${ROOTPATH}/log/bdc ${TARGET}
+	endscript
+}

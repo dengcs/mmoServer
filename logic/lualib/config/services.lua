@@ -23,7 +23,6 @@ M.summ = {
          proto = GLOBAL.PROTO_TYPE.TERMINAL,
          module = "pbd",
          unique = true,
-         server = "logic",
      },
 }
 

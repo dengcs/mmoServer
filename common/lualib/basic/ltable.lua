@@ -130,7 +130,7 @@ end
 
 table.tostring = function (t)
     if type(t) ~= "table" then
-        return "UNKNOWN"
+        return string.format("type is not table,type = %s",type(t))
     end
     return __dump_table(t, 0)
 end

@@ -1,4 +1,5 @@
 local skynet = require "skynet"
+local netpack = require "skynet.netpack"
 
 local csession
 
@@ -17,7 +18,11 @@ function CMD.message(msg)
       if msg == "bye" then
         skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","logout",csession.fd)
       else
-        skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",csession.fd,msg)
+        local code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","decode",msg)
+        print(table.tostring(result.data))
+        code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","encode",0,"AwesomeMessage",result.data)
+        print(type(result))
+        skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",csession.fd,result)
       end
   end
 end

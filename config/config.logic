@@ -1,5 +1,6 @@
 include "config.game.engine"
 include "config.game.common"
+include "config.game.logic"
 
 root = "./engine/"
 luaservice = logic_service..";"..common_service..";"..engine_service
@@ -21,3 +22,6 @@ bootstrap = "snlua bootstrap"	-- The service for bootstrap
 cpath = root.."cservice/?.so"
 -- daemon = "./skynet.pid"
 datasource = "config.datasource"
+
+
+node = "logic"

@@ -13,13 +13,15 @@ function CMD.encode(uid, name, data, errcode)
 end
 
 function CMD.decode(data)
-    return pbhelper.pb_decode(data)
+    local message,result = pbhelper.pb_decode(data)
+    return {info = message,data = result}
 end
 
-function server.init_handler(conf)
+function server.init_handler()
     local new_pbs = {}
     for _,v in pairs(pbs) do
-        local bp_file = string.format(".%s/%s/%s",conf.server,"config/proto/pb",v)
+        local node = assert(skynet.getenv("node"),"getenv获取不到node值！")
+        local bp_file = string.format("./%s/%s/%s",node,"lualib/config/proto/pb",v)
         table.insert(new_pbs,bp_file)
     end
     pbhelper.register(new_pbs)
@@ -41,7 +43,7 @@ end
 function server.command_handler(source, cmd, ...)
     local f = CMD[cmd]
     if f then
-        return f(source, ...)
+        return f(...)
     else
         ERROR(EFAULT, "call: %s: command not found", cmd)
     end

@@ -63,7 +63,7 @@ function wsService.start(processor)
     function CMD.response(fd,msg)
         local ws = connection[fd]
         if ws then
-            ws:send_text(msg .. " from server")
+            ws:send_text(msg)
         end
     end
     

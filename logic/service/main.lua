@@ -5,10 +5,10 @@ skynet.start(function()
   skynet.newservice("debug_console",8000)
 
   -- 启动公共服务
---  local services = require("config.services")
---  local summdriver = skynet.summdriver()
---  summdriver.start()
---  summdriver.autoload(services.summ)
+  local services = require("config.services")
+  local summdriver = skynet.summdriver()
+  summdriver.start()
+  summdriver.autoload(services.summ)
 
 --  local userdriver = skynet.userdriver()
 --  local sql = string.format("INSERT %s(uid, data) VALUES(%s,'%s') ON DUPLICATE KEY UPDATE data = '%s'", "account", 1001, "dcs---test", "dcs---test-new")
@@ -22,6 +22,8 @@ skynet.start(function()
 
   local gated = skynet.newservice("client/gated")
   skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
+  
+  --skynet.newservice("testproto")
 
   skynet.error("Server end")
   skynet.exit()

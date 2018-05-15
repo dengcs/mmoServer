@@ -14,7 +14,7 @@ message NetError
 // 协议头
 message NetHeader
 {
-	uint32 uid   = 1;		// 用户编号
+	uint64 uid   = 1;		// 用户编号
 	string proto = 2;		// 协议名称
 }
 
