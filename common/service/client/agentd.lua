@@ -19,9 +19,7 @@ function CMD.message(msg)
         skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","logout",csession.fd)
       else
         local code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","decode",msg)
-        print(table.tostring(result.data))
-        code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","encode",0,"AwesomeMessage",result.data)
-        print(type(result))
+        code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","encode",1001,"AwesomeMessage",result.data,0)
         skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",csession.fd,result)
       end
   end
