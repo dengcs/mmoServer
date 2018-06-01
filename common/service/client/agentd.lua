@@ -1,12 +1,18 @@
 local skynet = require "skynet"
-local netpack = require "skynet.netpack"
+local dispatcher = require "net.dispatcher"
 
 local csession
+-- 网络消息分发器
+local net_dispatcher
+local usermeta
 
 local CMD = {}
+local Handle = {}
 
 function CMD.connect(c)
   csession = c
+  net_dispatcher = dispatcher.new()
+  net_dispatcher:register_handle()
 end
 
 function CMD.disconnect()
@@ -15,14 +21,21 @@ end
 
 function CMD.message(msg)
   if csession then
-      if msg == "bye" then
-        skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","logout",csession.fd)
-      else
-        local code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","decode",msg)
-        code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","encode",1001,"AwesomeMessage",result.data,0)
-        skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",csession.fd,result)
-      end
+--      local code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","decode",msg)
+--      code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","encode",1001,"AwesomeMessage",result.data,0)
+--      skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",csession.fd,result)
+        if usermeta then
+            net_dispatcher:message_dispatch(usermeta, msg)
+        end
   end
+end
+
+function Handle.login()
+    usermeta = {}
+end
+
+function Handle.logout()
+    usermeta = nil
 end
 
 -- 内部命令转发
@@ -30,7 +43,12 @@ end
 -- 2. 命令名称
 -- 3. 命令参数
 local function command_handler(command, ...)
-    skynet.error("This function is not implemented.")
+    local fn = assert(Handle[command])
+    if fn then
+       return fn(...)
+    else   
+       skynet.error("This function is not implemented.")
+    end
 end
 
 skynet.start(function()
