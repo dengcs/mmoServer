@@ -1,4 +1,5 @@
 local skynet = require "skynet_ex"
+local cluster = require "skynet.cluster"
 
 skynet.start(function()
   skynet.error("Server start")
@@ -10,6 +11,8 @@ skynet.start(function()
   summdriver.start()
   summdriver.autoload(services.summ)
  
+  cluster.open "login"
+  
   skynet.error("Server end")
   skynet.exit()
 end)

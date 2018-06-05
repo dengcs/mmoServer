@@ -1,4 +1,5 @@
 local skynet = require "skynet_ex"
+local cluster = require "skynet.cluster"
 
 skynet.start(function()
   skynet.error("Server start")
@@ -25,6 +26,8 @@ skynet.start(function()
   
   --skynet.newservice("testproto")
 
+  cluster.open "logic"
+  
   skynet.error("Server end")
   skynet.exit()
 end)

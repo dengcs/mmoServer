@@ -16,7 +16,8 @@ harbor = 0
 start = "main"	-- main script
 bootstrap = "snlua bootstrap"	-- The service for bootstrap
 cpath = root.."cservice/?.so"
+cluster = "./common/lualib/config/clustername.lua"
+-- daemon = "./login.pid"
+
 datasource = "config.datasource"
-
-
 node = "login"
