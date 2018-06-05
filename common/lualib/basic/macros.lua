@@ -42,10 +42,11 @@ GLOBAL.SERVICE_NAME =
 {
     SUMMD       = ".summd",
     GATED       = ".gated",
+    PBD         = ".pbd",
     DATABASED   = "DATABASE",
     DATACACHED  = "DATACACHE",
     USERCENTERD = "USERCENTER",
-    PBD = ".pbd",
+    HANDSHAKE   = "handshake",
 }
 
 --->>> 系统内置常量定义 <<<---

@@ -25,6 +25,9 @@ local REQUEST = {}
 
 -- 用户登录请求
 function REQUEST:account_login()
+
+  skynet.send(GLOBAL.SERVICE_NAME.HANDSHAKE,"lua","sign","account")
+
 	return 0
 end
 

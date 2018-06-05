@@ -24,6 +24,13 @@ M.summ = {
          module = "pbd",
          unique = true,
      },
+     {
+         name = GLOBAL.SERVICE_NAME.HANDSHAKE,
+         master = GLOBAL.MASTER_TYPE.SUMMD,
+         proto = GLOBAL.PROTO_TYPE.TERMINAL,
+         module = "handshake",
+         unique = true,
+     },
 }
 
 return M

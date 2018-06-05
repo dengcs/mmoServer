@@ -3,7 +3,7 @@ local cluster = require "skynet.cluster"
 
 skynet.start(function()
   skynet.error("Server start")
-  skynet.newservice("debug_console",8000)
+  skynet.newservice("debug_console",41001)
 
   -- 启动公共服务
   local services = require("config.services")

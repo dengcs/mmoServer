@@ -3,7 +3,7 @@ local cluster = require "skynet.cluster"
 
 skynet.start(function()
   skynet.error("Server start")
-  skynet.newservice("debug_console",8800)
+  skynet.newservice("debug_console",40001)
 
   -- 启动公共服务
   local services = require("config.services")
@@ -15,6 +15,9 @@ skynet.start(function()
   skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
  
   cluster.open "login"
+  
+  local hand_sev = cluster.proxy("logic", GLOBAL.SERVICE_NAME.HANDSHAKE)
+  skynet.name(GLOBAL.SERVICE_NAME.HANDSHAKE,hand_sev)
   
   skynet.error("Server end")
   skynet.exit()
