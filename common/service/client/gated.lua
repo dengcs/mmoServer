@@ -3,7 +3,7 @@ local wsservice = require "service_factory.wsservice"
 
 local connection = {}
 
-local conf = {ip = "0.0.0.0", port = 8001}
+local ip,port = ...
 
 local CMD = {}
 local handler = {}
@@ -51,7 +51,7 @@ function handler.on_disconnect(ws)
 end
 
 function handler.configure()
-    return conf
+    return {ip=ip,port=port}
 end
 
 function handler.command(cmd,...)

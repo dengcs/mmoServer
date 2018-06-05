@@ -21,7 +21,7 @@ skynet.start(function()
 --  userdriver.dc_del(10,"1001")
 --  userdriver.dc_del(11,"1001")
 
-  local gated = skynet.newservice("client/gated")
+  local gated = skynet.newservice("client/gated", "0.0.0.0", 51001)
   skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
   
   --skynet.newservice("testproto")

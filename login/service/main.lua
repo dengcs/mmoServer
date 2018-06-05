@@ -10,6 +10,9 @@ skynet.start(function()
   local summdriver = skynet.summdriver()
   summdriver.start()
   summdriver.autoload(services.summ)
+  
+  local gated = skynet.newservice("client/gated", "0.0.0.0", 50001)
+  skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
  
   cluster.open "login"
   
