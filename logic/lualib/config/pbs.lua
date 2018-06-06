@@ -1,7 +1,7 @@
 local pbs = 
 {
     "base.pb",
-    "awesome.pb",
+    "auth.pb",
 }
 
 return pbs

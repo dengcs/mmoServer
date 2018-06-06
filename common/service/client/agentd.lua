@@ -4,7 +4,6 @@ local dispatcher = require "net.dispatcher"
 local csession
 -- 网络消息分发器
 local net_dispatcher
-local usermeta
 
 local CMD = {}
 local Handle = {}
@@ -24,9 +23,7 @@ function CMD.message(msg)
 --      local code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","decode",msg)
 --      code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","encode",1001,"AwesomeMessage",result.data,0)
 --      skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",csession.fd,result)
-        if usermeta then
-            net_dispatcher:message_dispatch(usermeta, msg)
-        end
+        net_dispatcher:message_dispatch(csession, msg)
   end
 end
 

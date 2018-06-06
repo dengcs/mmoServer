@@ -17,6 +17,7 @@ local function fetch_token()
 end
 
 function CMD.sign(account)
+    skynet.error("dcs--"..account)
     local token = fetch_token()
     tokenMap[account] = token
 end
