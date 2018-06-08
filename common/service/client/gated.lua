@@ -9,7 +9,7 @@ local CMD = {}
 local handler = {}
 
 function handler.on_open(fd)
-    local agent = skynet.newservice("client/agentd")
+    local agent = skynet.newservice("agentd")
     
     local c = {
       fd = fd,
