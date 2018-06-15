@@ -1,9 +1,12 @@
 local skynet = require "skynet"
 local dispatcher = require "net.dispatcher"
+local userdata = require "data.userdata"
+local usermeta = require "config.usermeta"
 
 local csession
 -- 网络消息分发器
 local net_dispatcher
+local playerdata      -- 用户数据
 
 local CMD = {}
 local Handle = {}
@@ -12,6 +15,9 @@ function CMD.connect(c)
   csession = c
   net_dispatcher = dispatcher.new()
   net_dispatcher:register_handle()
+  
+  playerdata = userdata.new("w")
+  playerdata:register(usermeta)
 end
 
 function CMD.disconnect()
@@ -28,11 +34,19 @@ function CMD.message(msg)
 end
 
 function Handle.login()
-    usermeta = {}
+    
 end
 
 function Handle.logout()
-    usermeta = nil
+
+end
+
+function Handle.initdata(name, data)    
+    local retval = playerdata:init(name, data)
+    if not retval then
+      ERROR("usermeta:init(name = %s) failed!!!", name)
+    end
+    return retval:copy()
 end
 
 -- 内部命令转发
@@ -51,7 +65,7 @@ end
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, ...)
 	   skynet.error("dcs---cmd--"..cmd)
-		 local fn = assert(CMD[cmd])
+		 local fn = CMD[cmd]
 		 if fn then
        skynet.ret(skynet.pack(fn(...)))
 		 else

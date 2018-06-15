@@ -4,7 +4,7 @@
 local skynet     = require "skynet"
 
 local HANDLER    = {}
-local PREPARE    = {}
+local REQUEST = {}
 local HANDSHAKE  = {}
 
 -----------------------------------------------------------
@@ -21,20 +21,21 @@ function HANDSHAKE:handshake()
 end
 
 -- 请求关联角色（选角状态）
-function PREPARE:query_players()
+function REQUEST:query_players()
 	
 end
 
 -- 请求创建角色（选角状态，创角成功则转为正常游戏状态）
-function PREPARE:create_player()
-	
+function REQUEST:create_player()
+    skynet.error("dcs---create_player")
+    skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", "1001")
 end
 
 -- 选择指定角色（选角状态，选角成功则转为正常游戏状态）
-function PREPARE:choice_player()
+function REQUEST:choice_player()
 	
 end
 
-HANDLER.PREPARE   = PREPARE
+HANDLER.REQUEST   = REQUEST
 HANDLER.HANDSHAKE = HANDSHAKE
 return HANDLER

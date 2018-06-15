@@ -18,6 +18,13 @@ M.summ = {
          unique = true,
      },
      {
+         name = GLOBAL.SERVICE_NAME.USERCENTERD,
+         master = GLOBAL.MASTER_TYPE.SUMMD,
+         proto = GLOBAL.PROTO_TYPE.TERMINAL,
+         module = "usercenterd",
+         unique = true,
+     },
+     {
          name = GLOBAL.SERVICE_NAME.PBD,
          master = GLOBAL.MASTER_TYPE.SUMMD,
          proto = GLOBAL.PROTO_TYPE.TERMINAL,

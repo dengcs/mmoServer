@@ -2,8 +2,11 @@
 --- 用户管理服务（因为共享内存的关系，仅能管理所在节点用户）
 ---------------------------------------------------------------------
 local service = require "service_factory.service"
-local skynet   = require "skynet"
-local userdata = require "persistent.userdata"
+local skynet   = require "skynet_ex"
+local userdata = require "data.userdata"
+local configure = require "config.usermeta"
+
+local userdriver = skynet.userdriver()
 
 ---------------------------------------------------------------------
 --- 内部变量/内部逻辑
@@ -19,7 +22,7 @@ local function save(uid, user)
     for name, c in pairs(user.configure) do
         local data = user:get(name)
         if data:update() then
-            skynet.call(GAME.SERVICE.DATACACHED, "lua", "set", c.mode, uid, skynet.packstring(data.__data))
+            userdriver.dc_set(c.mode,uid,skynet.packstring(data.__data))
         end
     end
 end
@@ -27,7 +30,7 @@ end
 -- 构造'userdata'只读实例
 -- 1. 用户编号
 -- 2. 配置信息
-local function ucreate(uid, configure)
+local function ucreate()
     local user = userdata.new("r")
     if configure then
         user:register(configure)
@@ -44,29 +47,32 @@ local COMMAND = {}
 -- 1. 命令来源
 -- 2. 角色编号
 -- 3. 配置信息
-function COMMAND.load(source, uid, configure)
+function COMMAND.load(source, uid)
+    skynet.error("dcs---usercentd--load")
     -- 防止重复加载
     if onlines[uid] then
         ERROR("usercenterd : user[%s] already exists!!!", uid)
     end
     -- 加载角色数据
-    local user = ucreate(uid, configure)
+    local user = ucreate()
     for name, c in pairs(user.configure) do
         -- 加载角色组件数据
         -- name : 组件名称
-        -- c    : 组件描述
-        local ok, retval = skynet.call(GAME.SERVICE.DATACACHED, "lua", "get", c.mode, uid)
-        if ok ~= 0 then
+        -- c    : 组件描述        
+        local retval = userdriver.dc_get(c.mode,"1001")
+        if not retval then
             ERROR("usercenterd : component[%s] load failed!!!", name)
         end
         -- 角色绑定组件数据
-        local object = nil
-        if retval then
-            object = skynet.unpack(retval)
+        local object = skynet.unpack(retval)
+        local ok, objcpy = skynet.call(source, "lua", "initdata", name, object)
+        skynet.error("dcs--name--1-"..table.tostring(objcpy))
+        if ok ~= 0 then
+            ERROR("usercenterd : component[%s] bind failed!!!", name)
         end
-        
-        user:init(name, object)
+        user:init(name, objcpy)
     end
+    skynet.error("dcs--2")
     -- 记录在线角色
     onlines[uid] = 
     {
