@@ -46,7 +46,10 @@ function Handle.initdata(name, data)
     if not retval then
       ERROR("usermeta:init(name = %s) failed!!!", name)
     end
-    return retval:copy()
+    
+    local result = retval:copy()
+    
+    return result
 end
 
 -- 内部命令转发

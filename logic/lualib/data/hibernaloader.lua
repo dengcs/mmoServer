@@ -1,6 +1,5 @@
 local parser = require "sprotoparser"
-local core = require "sproto.core"
-local sproto = require "sproto"
+local sprotoloader = require "sprotoloader"
 
 local loader = {}
 
@@ -33,19 +32,16 @@ function loader.register(conf)
         data = __fin(conf.path, conf.file)
     end
     -- 注册数据序列化协议
-    local sp = core.newproto(parser.parse(data))
-    core.saveproto(sp, 0)
+    local sp = parser.parse(data)
+    sprotoloader.save(sp,0)
 end
 
 function loader.save(bin, index)
-    local sp = core.newproto(bin)
-    core.saveproto(sp, index)
+    sprotoloader.save(bin, index)
 end
 
 function loader.load(index)
-    local sp = core.loadproto(index)
-    -- no __gc in metatable
-    return sproto.sharenew(sp)
+    return sprotoloader.load(index)
 end
 
 return loader

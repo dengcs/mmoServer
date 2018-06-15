@@ -74,42 +74,27 @@ function userdata:init(name, data)
     local m         = self.mode     -- 可读标志
     local cb        = nil           -- 模型逻辑
     local init_func = nil           -- 初始逻辑
-    print("user------1")
     if m == "w" then
-        print("user------2")
         cb = load_cb(conf)
-        print("user------3")
-        if conf.on_init and conf.on_init ~= "" then
-            init_func = conf.on_init
-        end
-        print("user------4")
-    elseif m == "v" then --访客模式
-        print("user------9")
-        cb = load_cb(conf)
-
         if conf.on_init and conf.on_init ~= "" then
             init_func = conf.on_init
         end
     end
 
-    print("user------5")
     -- 构造模块实例
     local inst = create_instance(name, data, m, cb)
     if not inst then
         error("hibernator object instance failed")
     end
     
-    print("user------6")
     -- 初始模块实例
     if init_func then
         inst:call(init_func, m)
     end
     
-    print("user------7")
     -- 绑定模块实例
     self.datatable[name] = inst
     
-    print("user------8")
     return inst
 end
 

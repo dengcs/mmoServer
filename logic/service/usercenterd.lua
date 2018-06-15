@@ -48,7 +48,6 @@ local COMMAND = {}
 -- 2. 角色编号
 -- 3. 配置信息
 function COMMAND.load(source, uid)
-    skynet.error("dcs---usercentd--load")
     -- 防止重复加载
     if onlines[uid] then
         ERROR("usercenterd : user[%s] already exists!!!", uid)
@@ -65,14 +64,13 @@ function COMMAND.load(source, uid)
         end
         -- 角色绑定组件数据
         local object = skynet.unpack(retval)
-        local ok, objcpy = skynet.call(source, "lua", "initdata", name, object)
-        skynet.error("dcs--name--1-"..table.tostring(objcpy))
-        if ok ~= 0 then
+        local objcpy = skynet.call(source, "lua", "initdata", name, object)
+        if not objcpy then
             ERROR("usercenterd : component[%s] bind failed!!!", name)
         end
         user:init(name, objcpy)
     end
-    skynet.error("dcs--2")
+    skynet.error("dcs--"..table.tostring(user))
     -- 记录在线角色
     onlines[uid] = 
     {

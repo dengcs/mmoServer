@@ -22,7 +22,7 @@ skynet.start(function()
   local udata = {
     uid      = "1001",
     nickname = "dcstest",
-    portrait = "",
+    portrait = "1",
     sex      = 1,
     experience = 1000,
     level    = 1
