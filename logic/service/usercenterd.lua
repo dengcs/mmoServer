@@ -70,7 +70,6 @@ function COMMAND.load(source, uid)
         end
         user:init(name, objcpy)
     end
-    skynet.error("dcs--"..table.tostring(user))
     -- 记录在线角色
     onlines[uid] = 
     {

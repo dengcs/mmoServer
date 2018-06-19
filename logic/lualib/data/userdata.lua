@@ -68,6 +68,7 @@ end
 function userdata:init(name, data)
     -- 获取模块配置
     local conf = self.configure[name]
+    assert(table.empty(data)==false, string.format("Unknow config data %s", name))
     assert(conf, string.format("Unknow config name %s", name))
     assert(not self.datatable[name], "Already exist hibernator object")
     -- 绑定模型

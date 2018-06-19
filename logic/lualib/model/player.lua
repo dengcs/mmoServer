@@ -12,8 +12,6 @@ function Player:on_init()
   self.sex      = self.sex or 1
   self.level    = self.level or 1
   self.experience = self.experience or 0
-  
-  print("dcs----on_init")
 end
 
 -- 角色创建操作
