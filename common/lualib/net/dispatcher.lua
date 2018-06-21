@@ -125,7 +125,7 @@ function M:user_context(user, extra)
 	-- 构造用户上下文
 	local context = 
 	{
-		user     = user,
+		user     = user.data,
 		response = __message_response,
 		call     = __command_execute,
 		trigger  = __event_trigger,
