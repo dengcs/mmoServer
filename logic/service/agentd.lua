@@ -6,7 +6,7 @@ local usermeta = require "config.usermeta"
 local csession
 -- 网络消息分发器
 local net_dispatcher
-local playerdata      -- 用户数据
+local datameta      -- 用户数据
 
 local CMD = {}
 local Handle = {}
@@ -16,8 +16,10 @@ function CMD.connect(c)
   net_dispatcher = dispatcher.new()
   net_dispatcher:register_handle()
   
-  playerdata = userdata.new("w")
-  playerdata:register(usermeta)
+  datameta = userdata.new("w")
+  datameta:register(usermeta)
+  
+  csession.data = datameta
 end
 
 function CMD.disconnect()
@@ -41,8 +43,8 @@ function Handle.logout()
 
 end
 
-function Handle.initdata(name, data)    
-    local retval = playerdata:init(name, data)
+function Handle.data_set(name, data)    
+    local retval = datameta:init(name, data)
     if not retval then
       ERROR("usermeta:init(name = %s) failed!!!", name)
     end

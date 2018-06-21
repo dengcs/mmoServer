@@ -64,7 +64,7 @@ function COMMAND.load(source, uid)
         end
         -- 角色绑定组件数据
         local object = skynet.unpack(retval)
-        local objcpy = skynet.call(source, "lua", "initdata", name, object)
+        local objcpy = skynet.call(source, "lua", "data_set", name, object)
         if not objcpy then
             ERROR("usercenterd : component[%s] bind failed!!!", name)
         end

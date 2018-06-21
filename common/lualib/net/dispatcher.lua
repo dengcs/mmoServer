@@ -88,7 +88,7 @@ end
 -- 3. 消息内容
 -- 4. 错误编号
 function M:message_response(user, name, message, errno)
-	local fd = user.__fd or 0
+	local fd = user.fd or 0
 	if fd == 0 then
 		return ENONET
 	end

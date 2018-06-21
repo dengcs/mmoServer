@@ -29,6 +29,9 @@ end
 function REQUEST:create_player()
     skynet.error("dcs---create_player")
     skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", "1001")
+    skynet.error("dcs---data--"..table.tostring(self.user))
+    local ret_msg = {ret = 1}
+    self.response("create_player_resp", ret_msg)
 end
 
 -- 选择指定角色（选角状态，选角成功则转为正常游戏状态）
