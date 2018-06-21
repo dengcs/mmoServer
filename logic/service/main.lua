@@ -36,7 +36,14 @@ skynet.start(function()
   local gated = skynet.newservice("client/gated", "0.0.0.0", 51001)
   skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
   
-  --skynet.newservice("testproto")
+  -- 启动控制后台
+  local cmd = skynet.newservice("httpd", "logic.cmd", 1)
+  skynet.call(cmd, "lua", "init", {
+    address = "0.0.0.0",
+    port    = 42001,
+    auto    = true,
+    router  = { "router.cmd" },
+  })
 
   cluster.open "logic"
   

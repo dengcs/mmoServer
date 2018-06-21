@@ -5,7 +5,7 @@ local service = require "service_factory.service"
 local skynet  = require "skynet"
 local json    = require "cjson"
 local url     = require "http.url"
-local router  = require "http.router"
+local router  = require "router"
 
 -- 服务启动参数
 -- 1. svcname  - 服务名称
