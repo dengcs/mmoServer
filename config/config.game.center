@@ -1,0 +1,3 @@
+center = "./center/"
+center_service = center.."service/?.lua"
+center_path = center.."lualib/?.lua"

@@ -40,7 +40,7 @@ skynet.start(function()
   local cmd = skynet.newservice("httpd", "logic.cmd", 1)
   skynet.call(cmd, "lua", "init", {
     address = "0.0.0.0",
-    port    = 42001,
+    port    = 41002,
     auto    = true,
     router  = { "router.cmd" },
   })
