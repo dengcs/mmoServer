@@ -29,7 +29,6 @@ function REQUEST:account_login()
   local passwd = self.proto.passwd
   skynet.error("dcs--account--"..account..","..passwd)
   skynet.send(GLOBAL.SERVICE_NAME.HANDSHAKE,"lua","sign",account)
-
 	return 0
 end
 

@@ -135,14 +135,14 @@ Game.__index = Game
 -- 4. 赛道编号
 -- 5. 成员列表
 -- 6. 附加数据（用于队伍恢复操作）
-function Game.new(alias, users)
+function Game.new(id, users)
 	local game = {}
 	-- 注册成员方法
 	for k, v in pairs(Game) do
 		game[k] = v
 	end
 	-- 设置战场数据
-	game.alias    = alias				-- 战场名称
+	game.id    = id				-- 战场id
 	game.state    = ESTATES.PREPARE		-- 战场状态
 	game.stime    = 0					-- 开始时间（滴答 = 10毫秒）
 	game.etime    = 0					-- 结束时间（滴答 = 10毫秒）
@@ -268,8 +268,8 @@ function Game:broadcast(name, data)
 	end
 end
 
--- 构造赛前准备信息
-function Game:prepare_snapshot()
+-- 构造赛前信息
+function Game:snapshot()
 	-- 成员快照
 	local function snapshot(member)
 		local snapshot = {}
@@ -294,39 +294,8 @@ function Game:prepare_snapshot()
 	return data
 end
 
--- 战斗开始通知（开始赛前准备）
-function Game:prepare_start()
-	local name = "game_prepare_start"
-	local data =
-	{
-		  data = self:prepare_snapshot(),
-	}
-	self:broadcast(name, data)
-end
-
--- 赛前状态同步
-function Game:prepare_notify()
-	local name = "game_prepare_notify"
-	local data =
-	{
-		data = self:prepare_snapshot(),
-	}
-	self:broadcast(name, data)
-end
-
--- 准备完成通知
-function Game:prepare_complete()
-	local name = "game_prepare_complete"
-	local data =
-	{
-		data = self:prepare_snapshot(),
-	}
-	self:broadcast(name, data)
-end
-
-
 -- 创建战场
-function COMMAND.on_create(alias)
+function COMMAND.on_create(id)
 	return 0
 end
 
@@ -341,57 +310,6 @@ function COMMAND.on_leave(uid)
 	return 0
 end
 
--- 选择'赛车/副驾'
--- 1. 角色编号
-function COMMAND.on_change(uid)
-	return 0
-end
-
--- 确定赛前准备完成
--- 1. 角色编号
-function COMMAND.on_prepare_done(uid)
-	return 0
-end
-
--- 取消赛前准备完成
--- 1. 角色编号
-function COMMAND.on_prepare_cancel(uid)
-	return 0
-end
-
--- 赛前准备完成（'准备完成/准备超时'触发）
-function COMMAND.game_prepare_complete()
-  return 0
-end
-
--- 同步场景加载进度
--- 1. 角色编号
--- 2. 加载进度
-function COMMAND.on_loading_progress(uid, value)
-	return 0
-end
-
--- 确定场景加载完成
--- 1. 角色编号
-function COMMAND.on_loading_done(uid)
-	return 0
-end
-
--- 场景加载完成（'加载完成/加载超时'触发）
-function COMMAND.game_loading_complete()
-  return 0
-end
-
--- 确定动画播放完成（包括倒计时动画）
--- 1. 角色编号
-function COMMAND.on_ready_done(uid)
-  return 0
-end
-
--- 动画播放完成（'播放完成/播放超时'触发）
-function COMMAND.game_ready_complete()
-  return 0
-end
 
 -- 战场数据同步（数据不经过战场可以提高数据转发效率）
 -- 1. 角色编号
@@ -409,44 +327,12 @@ function COMMAND.on_game_forward(uid, name, data)
 	return 0
 end
 
--- 战场数据提交（客户端提交战场统计数据）
--- 1. 寄主编号
--- 2. 角色编号
--- 3. 统计数据
-function COMMAND.on_game_submit(oid, uid, values)
-	return 0
-end
-
--- 确定完成比赛
--- 1. 寄主编号
--- 2. 角色编号
--- 3. 统计数据
-function COMMAND.on_game_success(oid, uid, values)
-	return 0
-end
-
--- 启动比赛倒计时
-function COMMAND.game_countdown_start()
-  return 0
-end
-
 -----------------------------------------------------------
 --- 结算相关逻辑
 -----------------------------------------------------------
 
-
--- 比赛结算逻辑
-function COMMAND.game_running_complete()
-  return 0
-end
-
 -- 确定完成结算
 function COMMAND.on_finish_done(uid)
-  return 0
-end
-
--- 战场关闭（延时关闭，确保用户成功返回组队服务）
-function COMMAND.game_finish_complete()
   return 0
 end
 

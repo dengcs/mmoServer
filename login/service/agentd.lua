@@ -28,11 +28,9 @@ function CMD.message(msg)
 end
 
 function Handle.login()
-    usermeta = {}
 end
 
 function Handle.logout()
-    usermeta = nil
 end
 
 -- 内部命令转发

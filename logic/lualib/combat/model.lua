@@ -19,7 +19,6 @@ local ESTATES =
 	PREPARE = 1,	-- 准备中
 	READY   = 2,	-- 已就绪
 	RUNNING = 3,	-- 比赛中
-	WAITING = 4,	-- 等待中（等待前端返回队伍）
 }
 
 -- 编号序列
@@ -38,10 +37,9 @@ local function convertible(ostate, nstate)
   -- 状态转换表
   local map = 
   {
-    [ESTATES.PREPARE] = { ESTATES.RUNNING, ESTATES.READY   },
-    [ESTATES.READY  ] = { ESTATES.PREPARE, ESTATES.RUNNING },
-    [ESTATES.RUNNING] = { ESTATES.PREPARE, ESTATES.WAITING },
-    [ESTATES.WAITING] = { ESTATES.PREPARE,                 },
+    [ESTATES.PREPARE] = { ESTATES.READY   },
+    [ESTATES.READY  ] = { ESTATES.RUNNING },
+    [ESTATES.RUNNING] = { ESTATES.PREPARE , ESTATES.READY},
   }
   -- 状态转换判断
   for _, v in pairs(map[ostate] or {}) do
@@ -102,15 +100,6 @@ end
 -- 判断成员是否比赛中
 function Member:running()
 	if self.state == ESTATES.RUNNING then
-		return true
-	else
-		return false
-	end
-end
-
--- 判断成员是否等待中
-function Member:waiting()
-	if self.state == ESTATES.WAITING then
 		return true
 	else
 		return false
@@ -213,15 +202,6 @@ function Team:running()
 	end
 end
 
--- 判断队伍是否结算中
-function Team:waiting()
-	if self.state == ESTATES.WAITING then
-		return true
-	else
-		return false
-	end
-end
-
 -- 队伍容量
 function Team:capacity()
 	local capacity = 0
@@ -257,7 +237,7 @@ function Team:join(vdata)
 	-- 查找空闲座位
 	local place = nil
 	for _, v in pairs(self.places) do
-		if (not v.locked) and (not v.member) then
+		if not v.member then
 			place = v
 			break
 		end
@@ -311,54 +291,6 @@ function Team:quit(uid)
 		end
 	end
 	return member
-end
-
--- 改变座位
-function Team:transplace(uid, pos)
-	-- 查找指定座位
-	local source = nil
-	local target = nil
-	for _, v in pairs(self.places) do
-		if v.member ~= nil then
-			if v.member.uid == uid then
-				source = v
-			end
-		else
-			if (v.id == pos) and (not v.locked) then
-				target = v
-			end
-		end
-	end
-	-- 角色座位转移
-	if source and target then
-		target.member = source.member
-		source.member = nil
-		return true
-	else
-		return false
-	end
-end
-
--- 锁定座位
-function Team:locked(pos)
-	local place = self.places[pos]
-	if (place ~= nil) and (place.member == nil) then
-		place.locked = true
-		return true
-	else
-		return false
-	end
-end
-
--- 解锁座位
-function Team:unlock(pos)
-	local place = self.places[pos]
-	if place ~= nil then
-		place.locked = nil
-		return true
-	else
-		return false
-	end
 end
 
 -- 消息广播
