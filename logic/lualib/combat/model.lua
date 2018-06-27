@@ -10,8 +10,8 @@ local userdriver = skynet.userdriver()
 -----------------------------------------------------------
 
 -- 队伍最大成员数量
-local ROOM_MAX_MEMBERS = 6
-local TEAM_MAX_MEMBERS = 3
+local ROOM_MAX_MEMBERS = 4
+local TEAM_MAX_MEMBERS = 2
 
 -- 状态枚举（成员/队伍）
 local ESTATES = 
@@ -158,7 +158,6 @@ function Team.new(vdata)
 	team.id      = allocid()					-- 队伍编号（顺序递增）
 	team.owner   = vdata.uid					-- 领队编号
 	team.state   = ESTATES.PREPARE				-- 队伍状态
-	team.index   = 0							-- 队伍索引（可用于战斗计数）
 	team.xtime   = 0							-- 匹配时间
 	team.weight  = 0							-- 匹配权重
 	team.places  = {}							-- 座位信息

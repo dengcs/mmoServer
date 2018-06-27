@@ -11,6 +11,11 @@ local COMMAND = {}
 --- 服务常量
 -----------------------------------------------------------
 
+local global_game_id = 1
+
+-- 所有比赛集合
+local games = {}
+
 -- 服务状态枚举
 local ESTATES =
 {
@@ -24,17 +29,11 @@ local ESTATES =
 -- 赛前准备时间（秒）
 local GAME_PREPARE_DURATION = 60
 
--- 赛道加载时间（秒）
-local GAME_LOADING_DURATION = 120
-
 -- 比赛预备时长（秒）
 local GAME_READY_DURATION   = 30
 
 -- 默认比赛时长（秒）
 local GAME_MATCH_DURATION   = 600
-
--- 比赛倒数时长（秒）
-local GAME_MATCH_COUNTDOWN  = 10
 
 -- 比赛结算时长（秒）
 local GAME_FINISH_DURATION  = 150
@@ -46,6 +45,12 @@ local GAME_FINISH_DURATION  = 150
 -----------------------------------------------------------
 ---  内部逻辑
 -----------------------------------------------------------
+
+-- 生成战斗id
+local function allocateId()
+  global_game_id = global_game_id + 1
+  return global_game_id
+end
 
 -- 加入战场服务
 local function enter_environment()
@@ -129,12 +134,8 @@ local Game = {}
 Game.__index = Game
 
 -- 构造战场
--- 1. 战场别名
--- 2. 战场主类型
--- 3. 战场子类型
--- 4. 赛道编号
--- 5. 成员列表
--- 6. 附加数据（用于队伍恢复操作）
+-- 1. 战场id
+-- 2. 成员列表
 function Game.new(id, users)
 	local game = {}
 	-- 注册成员方法
@@ -154,6 +155,8 @@ function Game.new(id, users)
 			return nil
 		end
 	end
+	
+	games[id] = game
 	return game
 end
 
@@ -166,8 +169,10 @@ function Game:close()
 		-- 移除战场成员
 		for _, member in pairs(self.members) do
 			self:quit(member.uid)
-		end
+		end		
 	end
+	
+	games[self.id] = nil
 end
 
 -- 加入战场
@@ -187,9 +192,9 @@ end
 function Game:quit(uid)
 	local member = nil
 	for _, v in pairs(self.members) do		
-		v.online = 3
 		-- 成员离线处理
 		if v.uid == uid then
+  		v.online = 3
 			-- 记录退出成员
 			member = v
 			leave_environment()
@@ -295,35 +300,89 @@ function Game:snapshot()
 end
 
 -- 创建战场
-function COMMAND.on_create(id)
-	return 0
+function COMMAND.on_create(users)
+  local result = {}
+  -- 构造战场
+  local id = allocateId()
+  local game = Game.new(id, users)
+  if game == nil then
+    result.ret = ERRCODE.GAME_CREATE_FAILED
+    return result
+  end
+  
+  result.ret = 0
+  result.id = id
+	return game
 end
 
 -- 关闭战场（通过'game.close'间接调用）
-function COMMAND.on_close()
+-- 1. 战场编号
+function COMMAND.on_close(id)  
   return 0
 end
 
 -- 离开战场（成员强制离开）
--- 1. 角色编号
-function COMMAND.on_leave(uid)
-	return 0
+-- 1. 战场编号
+-- 2. 角色编号
+function COMMAND.on_leave(id, uid)
+  local game = games[id]
+  assert(game, "game.on_leave() : game not exists!!!")
+  
+  local member = game:quit(uid)
+  if member ~= nil then
+    -- 战斗结算（战场未完成状态）
+    if game.state ~= ESTATES.FINISHED then
+      local vdata =
+      {
+        quit       = true,                          -- 强退标志
+        teamid     = member.teamid,                     -- 队伍编号
+        point      = 0,                           -- 获得积分
+        addition   = {},                          -- 奖励加成
+        success    = false,                         -- 胜利标志
+        complete   = false,                         -- 完成标志
+      }
+      member:notify("on_game_complete", vdata)
+    end
+    -- 清理战场
+    if game:empty() then
+      game:close()
+    else
+      game:broadcast("game_player_quit", {uid = member.uid})
+    end
+  end
+  return 0
 end
 
 
 -- 战场数据同步（数据不经过战场可以提高数据转发效率）
--- 1. 角色编号
--- 2. 战场数据
--- 3. 同步范围
-function COMMAND.on_game_update(uid, data)
+-- 1. 战场编号
+-- 2. 角色编号
+-- 3. 战场数据
+function COMMAND.on_game_update(id, uid, data)
+  local game = games[id]
+  assert(game, "on_game_update() : game not exists!!!")
+  
+  -- 成员检查
+  local member = game:get(uid)
+  if member == nil then
+    return ERRCODE.GAME_NOT_MEMBER
+  else
+    member.game.data = data
+  end
+  
+  game:broadcast("game_update_notify", data)
 	return 0
 end
 
 -- 战场数据转发
--- 1. 角色编号
+-- 1. 战场编号
 -- 2. 数据名称
 -- 3. 数据内容
-function COMMAND.on_game_forward(uid, name, data)
+function COMMAND.on_game_forward(id, name, data)
+  local game = games[id]
+  assert(game, "on_game_update() : game not exists!!!")
+  
+  game:broadcast(name, data)
 	return 0
 end
 
@@ -332,17 +391,49 @@ end
 -----------------------------------------------------------
 
 -- 确定完成结算
-function COMMAND.on_finish_done(uid)
+-- 1. 战场编号
+function COMMAND.on_finish_done(id, uid)
+  local game = games[id]
+  assert(game, "game_finish_complete() : game not exists!!!")
+  
+  game.state = ESTATES.FINISHED
   return 0
 end
 
+-- 战场关闭（延时关闭，确保用户成功返回组队服务）
+-- 1. 战场编号
+function COMMAND.game_finish_complete(id)
+  local game = games[id]
+  assert(game, "game_finish_complete() : game not exists!!!")
+  
+  if game.state == ESTATES.FINISHED then
+    -- 关闭战场
+    game:close()
+  end  
+end
+
 -- 成员掉线通知
-function COMMAND.on_disconnect(uid)
+-- 1. 战场编号
+function COMMAND.on_disconnect(id, uid)
+  local game = games[id]
+  assert(game, "on_disconnect() : game not exists!!!")
+  
+  game:disconnect(uid)
+  game:broadcast("game_disconnect_notify", {uid = uid})
   return 0
 end
 
 -- 成员重连通知
-function COMMAND.on_reconnect(uid)
+-- 1. 战场编号
+function COMMAND.on_reconnect(id, uid)
+  local game = games[id]
+  assert(game, "on_disconnect() : game not exists!!!")
+  
+  local member = game:reconnect(uid)
+  
+  if not member then
+    return ERRCODE.GAME_NOT_MEMBER
+  end
   return 0
 end
 
