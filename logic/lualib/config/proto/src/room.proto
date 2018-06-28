@@ -1,0 +1,224 @@
+syntax = "proto3";
+package game;
+
+///////////////////////////////////////////////////////////
+/// 房间数据结构
+///////////////////////////////////////////////////////////
+
+message room
+{
+	// 角色信息
+	message player
+	{
+		string uid			        = 1;		// 角色编号
+		string nickname	            = 2;		// 角色昵称
+		uint32 ulevel		        = 3;		// 角色等级
+		uint32 vlevel		        = 4;		// 贵族等级
+		uint32 stage		        = 5;		// 角色段位
+		repeated uint32 skin		= 6;		// 角色外观
+	}
+
+	// 成员信息
+	message member
+	{
+		player    player	= 1;		// 角色信息
+		uint32    teamid	= 2;		// 队伍编号
+		uint32    state	    = 3;		// 角色状态（1 : 准备中， 2 : 已就绪， 3 : 比赛中, 4 : 结算中, 5 : 选车中）
+	}
+
+	// 位置信息
+	message place
+	{
+		uint32 id			= 1;		// 位置编号
+		member member		= 2;		// 成员信息
+	}
+
+	// 详细房间信息
+	message detail
+	{
+		uint32 channel		        = 1;		// 频道标志（1 : 自由， 2 : 初级， 3 : 中级， 4 : 高级）
+		uint32 roomid		        = 2;		// 房间编号
+		string owner		        = 3;		// 房主编号
+		uint32 state		        = 4;		// 房间状态（1 : 准备中， 2 : 已就绪， 3 : 比赛中, 4 : 结算中）
+		repeated place  places		= 5;		// 位置信息
+	}
+
+	// 简单房间信息
+	message simple
+	{
+		uint32 channel		= 1;		// 频道标志（1 : 自由， 2 : 初级， 3 : 中级， 4 : 高级）
+		uint32 roomid		= 2;		// 房间编号
+		uint32 state		= 3;		// 房间状态
+		uint32 mcount		= 4;		// 成员数量
+		uint32 number		= 5;		// 房间容量
+	}
+}
+
+///////////////////////////////////////////////////////////
+/// 请求/应答
+///////////////////////////////////////////////////////////
+
+// 创建房间
+message room_create
+{
+	uint32 channel			= 1;		// 频道标志
+}
+
+// 应答
+message room_create_resp
+{
+	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+// 加入房间
+message room_join
+{
+	uint32 channel			= 1;		// 频道标志
+	uint32 roomid			= 2;		// 房间编号
+}
+
+// 应答
+message room_join_resp
+{
+	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+// 快速加入
+message room_qkjoin
+{
+	uint32 channel			= 1;		// 频道标志
+}
+
+// 应答
+message room_qkjoin_resp
+{
+	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+// 离开房间
+message room_quit
+{
+}
+
+// 应答
+message room_quit_resp
+{
+	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+
+// 转交队长
+message room_change_owner
+{
+	string uid				= 1;		// 成员编号
+}
+
+// 应答
+message room_change_owner_resp
+{
+	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+// 邀请好友
+message room_invite
+{
+	string uid				= 1;		// 好友编号
+}
+
+// 应答
+message room_invite_resp
+{
+	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+// 邀请通知（服务端通知客户端）
+message room_invite_notify
+{
+	uint32 channel			= 1;		// 频道标志
+	uint32 roomid			= 2;		// 房间编号
+	string uid				= 3;		// 邀请者编号
+	string nickname		    = 4;		// 邀请者昵称
+}
+
+// 查找房间
+message room_seek
+{
+	uint32 roomid			= 1;		// 房间编号
+}
+
+// 应答
+message room_seek_resp
+{
+	uint32      ret		    = 1;		// 操作结果（0 - 成功， 否则失败）
+	room.simple v			= 2;		// 房间信息
+}
+
+// 准备/开始
+message room_start
+{
+}
+
+// 应答
+message room_start_resp
+{
+	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+// 取消准备
+message room_stop
+{
+}
+
+// 应答
+message room_stop_resp
+{
+	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+
+// 返回房间
+message room_return
+{
+}
+
+// 应答
+message room_return_resp
+{
+	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+///////////////////////////////////////////////////////////
+/// 房间变更通知
+///////////////////////////////////////////////////////////
+
+// 房间新增通知
+message room_append_notify
+{
+	room.simple v			= 1;		// 房间信息（频道与房号不允许变更）
+}
+
+// 房间变更通知
+message room_modify_notify
+{
+	room.simple v			= 1;		// 房间信息（频道与房号不允许变更）
+}
+
+// 房间关闭通知
+message room_remove_notify
+{
+	uint32 channel			= 1;		// 频道标志
+	uint32 roomid			= 2;		// 房间编号
+}
+
+// 频道数据同步
+message channel_synchronize_notify
+{
+	uint32               channel	= 1;		// 频道标志
+	repeated room.simple rooms		= 2;		// 房间列表
+}
+
+// 房间数据同步
+message room_synchronize_notify
+{
+	room.detail v			= 1;		// 房间信息
+}

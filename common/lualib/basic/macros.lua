@@ -47,6 +47,8 @@ GLOBAL.SERVICE_NAME =
     DATACACHED  = "DATACACHE",
     USERCENTERD = "USERCENTER",
     HANDSHAKE   = "handshake",
+    GAME        = ".game",
+    ROOM        = ".room",
 }
 
 GAME = 

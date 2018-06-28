@@ -38,6 +38,20 @@ M.summ = {
          module = "handshake",
          unique = true,
      },
+     {
+         name = GLOBAL.SERVICE_NAME.GAME,
+         master = GLOBAL.MASTER_TYPE.SUMMD,
+         proto = GLOBAL.PROTO_TYPE.TERMINAL,
+         module = "combat.instance.game",
+         unique = true,
+     },
+     {
+         name = GLOBAL.SERVICE_NAME.ROOM,
+         master = GLOBAL.MASTER_TYPE.SUMMD,
+         proto = GLOBAL.PROTO_TYPE.TERMINAL,
+         module = "combat.room",
+         unique = true,
+     },
 }
 
 return M
