@@ -312,7 +312,7 @@ function COMMAND.on_create(users)
   
   result.ret = 0
   result.id = id
-	return game
+  return game
 end
 
 -- 关闭战场（通过'game.close'间接调用）
@@ -371,7 +371,7 @@ function COMMAND.on_game_update(id, uid, data)
   end
   
   game:broadcast("game_update_notify", data)
-	return 0
+  return 0
 end
 
 -- 战场数据转发
@@ -383,7 +383,7 @@ function COMMAND.on_game_forward(id, name, data)
   assert(game, "on_game_update() : game not exists!!!")
   
   game:broadcast(name, data)
-	return 0
+  return 0
 end
 
 -----------------------------------------------------------
