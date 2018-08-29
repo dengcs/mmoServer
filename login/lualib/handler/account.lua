@@ -25,10 +25,13 @@ local REQUEST = {}
 
 -- 用户登录请求
 function REQUEST:account_login()
-  local account = self.proto.account
-  local passwd = self.proto.passwd
-  skynet.error("dcs--account--"..account..","..passwd)
-  skynet.send(GLOBAL.SERVICE_NAME.HANDSHAKE,"lua","sign",account)
+	local account = self.proto.account
+	local passwd = "12345678"
+	skynet.error("dcs--account--"..account..","..passwd)
+	local ok,token = skynet.call(GLOBAL.SERVICE_NAME.HANDSHAKE,"lua","sign",account)
+	
+	local ret_msg = {ret = ok, token = token}
+    self.response("account_login_resp", ret_msg)
 	return 0
 end
 

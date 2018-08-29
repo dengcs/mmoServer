@@ -2,6 +2,8 @@
 -- 赛场服务接口
 --
 local skynet  = require "skynet"
+local ENUM    = require "gameenum"
+
 local handler = {}
 local REQUEST = {}
 local COMMAND = {}
@@ -25,26 +27,25 @@ end
 
 -- 比赛数据更新（无返回）
 function REQUEST:game_update()
-	return 0
-end
-
--- 提交统计数据（无返回）
-function REQUEST:game_submit()
-	return 0
-end
-
--- 参赛者完成比赛通知
-function REQUEST:game_success()
+	local player  = self.user:get("Player")
+	if ENUM.inspect_player_game(player) then
+		local uid     = player.uid
+		local alias   = player.scene
+		skynet.send(alias, "lua", "on_game_update", uid, self.proto.data)
+	end
 	return 0
 end
 
 -- 参赛者离线通知（强制离开比赛）
 function REQUEST:game_leave()
-	return 0
-end
-
--- 参赛者结算完成通知
-function REQUEST:game_finish_done()
+	local player  = self.user:get("Player")
+	if ENUM.inspect_player_game(player) then
+		local uid     = player.uid
+		local alias   = player.scene
+		skynet.send(alias, "lua", "on_leave", uid)
+	end
+	
+	self.response("game_leave_resp", { ret = 0 })
 	return 0
 end
 

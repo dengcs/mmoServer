@@ -7,7 +7,6 @@ local HANDLER      = {}
 local REQUEST      = {}
 local COMMAND      = {}
 
-
 -- 消息通知
 function COMMAND:on_common_notify(name, data)
 	self.response(name, data)

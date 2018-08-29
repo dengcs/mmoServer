@@ -30,7 +30,7 @@ function REQUEST:create_player()
     skynet.error("dcs---create_player")
     skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", "1001")
     skynet.error("dcs---data--"..table.tostring(self.user))
-    local ret_msg = {ret = 1}
+    local ret_msg = {ret = 0}
     self.response("create_player_resp", ret_msg)
 end
 

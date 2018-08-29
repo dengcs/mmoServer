@@ -10,8 +10,7 @@ local userdriver = skynet.userdriver()
 -----------------------------------------------------------
 
 -- 队伍最大成员数量
-local ROOM_MAX_MEMBERS = 4
-local TEAM_MAX_MEMBERS = 2
+local ROOM_MAX_MEMBERS = 3
 
 -- 状态枚举（成员/队伍）
 local ESTATES = 
@@ -74,7 +73,6 @@ function Member.new(vdata)
 	member.vlevel          = vdata.vlevel			-- 贵族等级
 	member.stage           = vdata.stage			-- 角色段位
 	member.state           = ESTATES.PREPARE		-- 角色状态
-	member.skin            = vdata.skin				-- 角色外观
 	member.exvalues        = {}						-- 扩展信息
 	return member
 end
@@ -118,7 +116,6 @@ function Member:snapshot()
 		ulevel     = self.ulevel,
 		vlevel     = self.vlevel,
 		stage      = self.stage,
-		skin       = self.skin,
 	}
 	return snapshot
 end

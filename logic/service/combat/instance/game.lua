@@ -3,6 +3,7 @@
 --
 local service = require "service_factory.service"
 local skynet  = require "skynet"
+local ENUM    = require "gameenum"
 -- 底层驱动加载
 local userdriver = require "driver.userdriver"
 
@@ -10,8 +11,6 @@ local COMMAND = {}
 -----------------------------------------------------------
 --- 服务常量
 -----------------------------------------------------------
-
-local global_game_id = 1
 
 -- 所有比赛集合
 local games = {}
@@ -46,20 +45,27 @@ local GAME_FINISH_DURATION  = 150
 ---  内部逻辑
 -----------------------------------------------------------
 
--- 生成战斗id
-local function allocateId()
-  global_game_id = global_game_id + 1
-  return global_game_id
-end
-
 -- 加入战场服务
-local function enter_environment()
-	 return 0
+-- 1. 角色编号
+-- 2. 战场别名
+-- 3. 强制标志
+local function enter_environment(uid, alias, force)
+	local errcode, retval = userdriver.usercall(uid, "on_enter_environment", ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias, force)
+	if not retval then
+		errcode = (errcode ~= 0 and errcode) or ERRCODE.GAME_ENTERENV_FAILED
+	end
+	return errcode
 end
 
 -- 离开战场服务
-local function leave_environment()
-	 return 0
+-- 1. 角色编号
+-- 2. 战场别名
+local function leave_environment(uid, alias)
+	local errcode, retval = userdriver.usercall(uid, "on_leave_environment", ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias)
+	if not retval then
+		errcode = (errcode ~= 0 and errcode) or ERRCODE.GAME_LEAVEENV_FAILED
+	end
+	return errcode
 end
 
 -----------------------------------------------------------
@@ -89,11 +95,9 @@ function Member.new(vdata)
 	member.stage      = vdata.stage			-- 角色段位
 	member.state      = 0					-- 角色状态（0 - 准备， 1 - 就绪）
 	member.online     = 1					-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
-	member.skin       = vdata.skin			-- 角色外观
 	-- 设置战场数据
 	member.game =
 	{
-		data          = nil,				-- 同步数据
 		rank          = 0,					-- 比赛排名
 		mark          = 0,					-- 比赛成绩
 		point         = 0,					-- 获得积分
@@ -136,14 +140,16 @@ Game.__index = Game
 -- 构造战场
 -- 1. 战场id
 -- 2. 成员列表
-function Game.new(id, users)
+function Game.new(alias, major, minor, users)
 	local game = {}
 	-- 注册成员方法
 	for k, v in pairs(Game) do
 		game[k] = v
 	end
 	-- 设置战场数据
-	game.id    = id				-- 战场id
+	game.alias    = alias				-- 战场id
+	game.major    = major				-- 战场主类型
+	game.minor    = minor				-- 战场子类型
 	game.state    = ESTATES.PREPARE		-- 战场状态
 	game.stime    = 0					-- 开始时间（滴答 = 10毫秒）
 	game.etime    = 0					-- 结束时间（滴答 = 10毫秒）
@@ -156,7 +162,7 @@ function Game.new(id, users)
 		end
 	end
 	
-	games[id] = game
+	games[alias] = game
 	return game
 end
 
@@ -300,32 +306,28 @@ function Game:snapshot()
 end
 
 -- 创建战场
-function COMMAND.on_create(users)
+function COMMAND.on_create(alias, major, minor, users)
   local result = {}
   -- 构造战场
-  local id = allocateId()
-  local game = Game.new(id, users)
+  local game = Game.new(alias, major, minor, users)
   if game == nil then
-    result.ret = ERRCODE.GAME_CREATE_FAILED
-    return result
+    return ERRCODE.GAME_CREATE_FAILED
   end
   
-  result.ret = 0
-  result.id = id
-  return game
+  return 0
 end
 
 -- 关闭战场（通过'game.close'间接调用）
 -- 1. 战场编号
-function COMMAND.on_close(id)  
+function COMMAND.on_close(alias)  
   return 0
 end
 
 -- 离开战场（成员强制离开）
 -- 1. 战场编号
 -- 2. 角色编号
-function COMMAND.on_leave(id, uid)
-  local game = games[id]
+function COMMAND.on_leave(alias, uid)
+  local game = games[alias]
   assert(game, "game.on_leave() : game not exists!!!")
   
   local member = game:quit(uid)
@@ -358,16 +360,14 @@ end
 -- 1. 战场编号
 -- 2. 角色编号
 -- 3. 战场数据
-function COMMAND.on_game_update(id, uid, data)
-  local game = games[id]
+function COMMAND.on_game_update(alias, uid, data)
+  local game = games[alias]
   assert(game, "on_game_update() : game not exists!!!")
   
   -- 成员检查
   local member = game:get(uid)
   if member == nil then
     return ERRCODE.GAME_NOT_MEMBER
-  else
-    member.game.data = data
   end
   
   game:broadcast("game_update_notify", data)
@@ -378,8 +378,8 @@ end
 -- 1. 战场编号
 -- 2. 数据名称
 -- 3. 数据内容
-function COMMAND.on_game_forward(id, name, data)
-  local game = games[id]
+function COMMAND.on_game_forward(alias, name, data)
+  local game = games[alias]
   assert(game, "on_game_update() : game not exists!!!")
   
   game:broadcast(name, data)
@@ -390,20 +390,10 @@ end
 --- 结算相关逻辑
 -----------------------------------------------------------
 
--- 确定完成结算
--- 1. 战场编号
-function COMMAND.on_finish_done(id, uid)
-  local game = games[id]
-  assert(game, "game_finish_complete() : game not exists!!!")
-  
-  game.state = ESTATES.FINISHED
-  return 0
-end
-
 -- 战场关闭（延时关闭，确保用户成功返回组队服务）
 -- 1. 战场编号
-function COMMAND.game_finish_complete(id)
-  local game = games[id]
+function COMMAND.game_finish_complete(alias)
+  local game = games[alias]
   assert(game, "game_finish_complete() : game not exists!!!")
   
   if game.state == ESTATES.FINISHED then
@@ -414,8 +404,8 @@ end
 
 -- 成员掉线通知
 -- 1. 战场编号
-function COMMAND.on_disconnect(id, uid)
-  local game = games[id]
+function COMMAND.on_disconnect(alias, uid)
+  local game = games[alias]
   assert(game, "on_disconnect() : game not exists!!!")
   
   game:disconnect(uid)
@@ -425,8 +415,8 @@ end
 
 -- 成员重连通知
 -- 1. 战场编号
-function COMMAND.on_reconnect(id, uid)
-  local game = games[id]
+function COMMAND.on_reconnect(alias, uid)
+  local game = games[alias]
   assert(game, "on_disconnect() : game not exists!!!")
   
   local member = game:reconnect(uid)

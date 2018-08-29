@@ -5,6 +5,7 @@ local service = require "service_factory.service"
 local skynet   = require "skynet_ex"
 local userdata = require "data.userdata"
 local configure = require "config.usermeta"
+local json    = require "cjson"
 
 local userdriver = skynet.userdriver()
 
@@ -22,7 +23,7 @@ local function save(uid, user)
     for name, c in pairs(user.configure) do
         local data = user:get(name)
         if data:update() then
-            userdriver.dc_set(c.mode,uid,skynet.packstring(data.__data))
+            userdriver.dc_set(c.mode,uid,json.encode(data.__data))
         end
     end
 end
@@ -63,7 +64,7 @@ function COMMAND.load(source, uid)
             ERROR("usercenterd : component[%s] load failed!!!", name)
         end
         -- 角色绑定组件数据
-        local object = skynet.unpack(retval)
+        local object = json.decode(retval)
         local objcpy = skynet.call(source, "lua", "data_set", name, object)
         if not objcpy then
             ERROR("usercenterd : component[%s] bind failed!!!", name)

@@ -6,7 +6,7 @@ local server = {}
 local CMD = {}
 
 local tokenMap = {}
-local generateId = 1
+local generateId = random.Get(100000)
 
 local function fetch_token()
   local token = generateId
@@ -20,6 +20,7 @@ function CMD.sign(account)
     skynet.error("dcs--"..account)
     local token = fetch_token()
     tokenMap[account] = token
+    return token
 end
 
 function CMD.check(account, token)
@@ -35,19 +36,16 @@ function CMD.check(account, token)
 end
 
 function server.init_handler()
-    generateId = random.Get(100000)
 end
 
 function server.exit_handler()
 end
 
 function server.start_handler()
-
     return 0
 end
 
 function server.stop_handler()
-
     return 0
 end
 
