@@ -3,6 +3,20 @@
 ---------------------------------------------------------------------
 local skynet   = require "skynet"
 
+local dbname = "test"
+
+---------------------------------------------------------------------
+--- 内部函数
+---------------------------------------------------------------------
+
+local function check_account(account)
+	local sql = string.format("SELECT uid, state FROM account WHERE account = '%s'", account)
+	local ret = userdriver.select(dbname, sql)
+end
+
+local function add_account(account)
+end
+
 ---------------------------------------------------------------------
 --- 服务回调接口
 ---------------------------------------------------------------------
@@ -27,7 +41,7 @@ local REQUEST = {}
 function REQUEST:account_login()
 	local account = self.proto.account
 	local passwd = "12345678"
-	skynet.error("dcs--account--"..account..","..passwd)
+	skynet.error("dcs--account--"..account)
 	local ok,token = skynet.call(GLOBAL.SERVICE_NAME.HANDSHAKE,"lua","sign",account)
 	
 	local ret_msg = {ret = ok, token = token}

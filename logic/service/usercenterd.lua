@@ -59,7 +59,7 @@ function COMMAND.load(source, uid)
         -- 加载角色组件数据
         -- name : 组件名称
         -- c    : 组件描述        
-        local retval = userdriver.dc_get(c.mode,"1001")
+        local retval = userdriver.dc_get(c.mode, uid)
         if not retval then
             ERROR("usercenterd : component[%s] load failed!!!", name)
         end
