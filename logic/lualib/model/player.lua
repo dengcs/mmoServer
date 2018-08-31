@@ -6,12 +6,12 @@ local tremove = table.remove
 local Player = {}
 
 function Player:on_init()
-  self.uid      = self.uid or ""
+  self.uid      = self.uid or 0
   self.nickname = self.nickname or ""
   self.portrait = self.portrait or ""
   self.sex      = self.sex or 1
   self.level    = self.level or 1
-  self.experience = self.experience or 0
+  self.score 	= self.score or 0
 end
 
 -- 角色创建操作

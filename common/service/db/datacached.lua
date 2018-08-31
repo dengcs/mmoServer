@@ -73,16 +73,6 @@ function CMD.call(source, db, cmd, ...)
     end
 end
 
--- 数据查询操作(指定数据源)
--- 1. 命令来源
--- 2. 数据源
--- 3. 关键字
-function CMD.query(source, db, key)
-    -- 获取'redis'连接池对象
-    local pool = assert(connection_pools[db], "db is nil")
-    return pool:do_query("get", key)
-end
-
 -- 数据集查询操作（仅仅访问'redis'数据源）
 -- 1. 命令来源
 -- 2. 数据源
@@ -97,7 +87,7 @@ end
 -- 2. 数据源
 -- 3. 关键字
 -- 4. 数据内容
-function CMD.set(source, db, key, value, cached)
+function CMD.set(source, db, key, value)
     -- 更新数据到'redis'数据库
     local pool = assert(connection_pools[db], "db is nil")
     return pool:do_update("set", key, value)

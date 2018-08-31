@@ -6,8 +6,7 @@ local skynet   = require "skynet_ex"
 local userdata = require "data.userdata"
 local configure = require "config.usermeta"
 local json    = require "cjson"
-
-local userdriver = skynet.userdriver()
+local dbproxy = require "dbproxy"
 
 ---------------------------------------------------------------------
 --- 内部变量/内部逻辑
@@ -23,7 +22,7 @@ local function save(uid, user)
     for name, c in pairs(user.configure) do
         local data = user:get(name)
         if data:update() then
-            userdriver.dc_set(c.mode,uid,json.encode(data.__data))
+            dbproxy.set(c.mode,uid,json.encode(data.__data))
         end
     end
 end
@@ -59,7 +58,7 @@ function COMMAND.load(source, uid)
         -- 加载角色组件数据
         -- name : 组件名称
         -- c    : 组件描述        
-        local retval = userdriver.dc_get(c.mode, uid)
+        local retval = dbproxy.get(c.mode, uid)
         if not retval then
             ERROR("usercenterd : component[%s] load failed!!!", name)
         end

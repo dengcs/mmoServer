@@ -58,29 +58,24 @@ end
 
 local CMD = {}
 
-function CMD.get(_, db, key)
+function CMD.get(source, db, key)
     local pool = assert(connection_pools[db], "db is nil")
     return pool:do_query("get", key)
 end
 
-function CMD.set(_, db, key, value)
+function CMD.set(source, db, key, value)
     local pool = assert(connection_pools[db], "db is nil")
     return pool:do_update("set", key, value)
 end
 
-function CMD.del(_, db, key)
+function CMD.del(source, db, key)
     local pool = assert(connection_pools[db], "db is nil")
     return pool:do_update("del", key)
 end
 
-function CMD.exists(_, db, key)
+function CMD.exists(source, db, key)
     local pool = assert(connection_pools[db], "db is nil")
     return pool:do_query("exists", key)
-end
-
-function CMD.keys(_, db, key)
-    local pool = assert(connection_pools[db], "db is nil")
-    return pool:do_query("keys", key)
 end
 
 function server.init_handler(conf)

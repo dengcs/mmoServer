@@ -2,6 +2,7 @@
 --- 游戏服登录逻辑
 -----------------------------------------------------------
 local skynet     = require "skynet_ex"
+local json    = require "cjson"
 local userdriver = skynet.userdriver()
 
 
@@ -30,6 +31,7 @@ function REQUEST:query_players()
 	local result = userdriver.db_select(dbname, sql)
 	
 	if result then
+		print("dcs---"..table.tostring(result))
 		ret = 0
 		login_acount = account
 		player_uid = 10000001
@@ -45,14 +47,17 @@ function REQUEST:create_player()
 	local ret = 1
 	
 	if login_acount then
-		local sex 		= self.proto.sex
-		local nickname  = self.proto.nickname
-		local portrait  = self.proto.portrait
+		local vdata = {
+			sex 		= self.proto.sex,
+			nickname  = self.proto.nickname,
+			portrait  = self.proto.portrait,
+		}
 		
-		local sql = string.format("INSERT %s(sex, nickname, portrait) VALUES(%s,'%s','%s')", tblname, sex, nickname, portrait)
+		local sql = string.format("INSERT %s(account,vdata) VALUES('%s','%s')", tblname, login_acount, json.encode(vdata))
 		local result = userdriver.db_insert(dbname, sql)
 		
 		if result then
+			print("dcs---"..table.tostring(result))
 			ret = 0
 			player_uid = 10000001
 		end
@@ -69,7 +74,10 @@ function REQUEST:player_login()
 	
 	if player_uid then
 		skynet.error("dcs---create_player")
-	    skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", player_uid)
+	    local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", player_uid)
+	    if ok == 0 then
+	    	ret = 0
+	    end
 	    skynet.error("dcs---data--"..table.tostring(self.user))
 	end
     
