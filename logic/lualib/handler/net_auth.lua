@@ -34,7 +34,7 @@ function REQUEST:query_players()
 		print("dcs---"..table.tostring(result))
 		ret = 0
 		login_acount = account
-		player_uid = 10000001
+		player_uid = "10000001"
 	end
 	
 	local ret_msg = {ret = ret}
@@ -59,7 +59,7 @@ function REQUEST:create_player()
 		if result then
 			print("dcs---"..table.tostring(result))
 			ret = 0
-			player_uid = 10000001
+			player_uid = "10000001"
 		end
 	end
     

@@ -72,9 +72,9 @@ skynet.start(function()
 	   skynet.error("dcs---cmd--"..cmd)
 		 local fn = CMD[cmd]
 		 if fn then
-       skynet.ret(skynet.pack(fn(...)))
+			skynet.ret(skynet.pack(fn(...)))
 		 else
-		   skynet.ret(skynet.pack(command_handler(cmd, ...)))
+			skynet.ret(skynet.pack(command_handler(cmd, ...)))
 		 end
 	end)
 end)

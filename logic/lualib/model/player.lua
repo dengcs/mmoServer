@@ -6,7 +6,7 @@ local tremove = table.remove
 local Player = {}
 
 function Player:on_init()
-  self.uid      = self.uid or 0
+  self.uid      = self.uid or ""
   self.nickname = self.nickname or ""
   self.portrait = self.portrait or ""
   self.sex      = self.sex or 1
