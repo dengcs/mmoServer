@@ -37,7 +37,6 @@ end
 -- 1. 协议信息
 function M.pb_decode(data)
 	local message = protobuf.decode("game.NetMessage", data)
-	print("dcs--"..table.tostring(message))
 	if message.header then
 		if message.header.proto then
 			return message, protobuf.decode("game." .. message.header.proto, message.payload)

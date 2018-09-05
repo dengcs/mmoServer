@@ -28,6 +28,7 @@ function REQUEST:query_players()
 	
 	local account = self.proto.account
 	local sql = string.format("SELECT uid FROM %s WHERE account = '%s'", tblname, account)
+	print("dcs---sql-"..sql)
 	local result = userdriver.db_select(dbname, sql)
 	
 	if result then
