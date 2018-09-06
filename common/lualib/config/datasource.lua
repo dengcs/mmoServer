@@ -6,12 +6,7 @@ local skynet = require "skynet"
 -- 数据库名称枚举
 local DB = 
 {
-	REDIS00 = 0,
-	REDIS01 = 1,
-	REDIS02 = 2,
-	REDIS03 = 3,
-	REDIS04 = 4,
-	REDIS_A = 10,
+	REDIS_A = GAME.META.PLAYER,
 	REDIS_B = 11,
 	MYSQLDB = skynet.getenv("db_name") or "test",
 }

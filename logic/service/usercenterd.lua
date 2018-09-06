@@ -62,8 +62,14 @@ function COMMAND.load(source, uid)
         if not retval then
             ERROR("usercenterd : component[%s] load failed!!!", name)
         end
+        
+        if IS_TABLE(retval) then
+        	retval = retval.vdata or "{}"
+        end
+                
         -- 角色绑定组件数据
         local object = json.decode(retval)
+        print("dcs---"..table.tostring(object))
         local objcpy = skynet.call(source, "lua", "data_set", name, object)
         if not objcpy then
             ERROR("usercenterd : component[%s] bind failed!!!", name)

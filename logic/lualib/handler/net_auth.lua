@@ -28,15 +28,15 @@ function REQUEST:query_players()
 	
 	local account = self.proto.account
 	local sql = string.format("SELECT uid FROM %s WHERE account = '%s'", tblname, account)
-	print("dcs---sql-"..sql)
 	local result = userdriver.db_select(dbname, sql)
 	
-	if result then
+	if next(result) then
 		print("dcs---"..table.tostring(result))
 		ret = 0
-		login_acount = account
-		player_uid = "10000001"
+		player_uid = tostring(result[1].uid)
 	end
+	
+	login_acount = account
 	
 	local ret_msg = {ret = ret}
 	self.response(resp, ret_msg)
@@ -60,7 +60,7 @@ function REQUEST:create_player()
 		if result then
 			print("dcs---"..table.tostring(result))
 			ret = 0
-			player_uid = "10000001"
+			player_uid = tostring(result.insert_id)
 		end
 	end
     
@@ -74,7 +74,6 @@ function REQUEST:player_login()
 	local ret = 1
 	
 	if player_uid then
-		skynet.error("dcs---create_player")
 	    local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", player_uid)
 	    if ok == 0 then
 	    	ret = 0

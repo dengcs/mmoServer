@@ -10,9 +10,9 @@ local Proxy = {}
 function Proxy.get(db, key)
     local ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATACACHED, "lua", "get", db, key)
     
-    if ok ~= 0 or result.errno then
+    if ok ~= 0 or not result then
     	ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATABASED, "lua", "get", dbname, key)
-    	if ok ~= 0 or result.errno then
+    	if ok ~= 0 or not result then
     		return nil
     	end
     end
@@ -27,7 +27,7 @@ end
 function Proxy.set(db, key, value)
     local ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATACACHED, "lua", "set", db, key)
     
-    if ok ~= 0 or result.errno then
+    if ok ~= 0 then
 		return nil
     end
     
@@ -48,9 +48,9 @@ end
 function Proxy.exists(source, db, key)
     local ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATACACHED, "lua", "exists", db, key)
     
-    if ok ~= 0 or result.errno then
+    if ok ~= 0 or not result then
     	ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATABASED, "lua", "exists", dbname, key)
-    	if ok ~= 0 or result.errno then
+    	if ok ~= 0 or not result then
     		return nil
     	end
     end
@@ -62,9 +62,9 @@ end
 function Proxy.keys(source, db, key)
     local ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATACACHED, "lua", "keys", db, key)
     
-    if ok ~= 0 or result.errno then
+    if ok ~= 0 or not result then
     	ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATABASED, "lua", "keys", dbname, key)
-    	if ok ~= 0 or result.errno then
+    	if ok ~= 0 or not result then
     		return nil
     	end
     end

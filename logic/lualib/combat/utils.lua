@@ -11,8 +11,8 @@ local skynet = require "skynet_ex"
 local SEQUENCE  = 0
 
 -- 生成编号(50位整数)
--- 1. 战场主类型
--- 2. 战场子类型
+-- 1. 主类型
+-- 2. 子类型
 local function allocid(major, minor)
 	SEQUENCE = SEQUENCE + 1
 	return string.format("%x", ((major & 0xF) << 46) + ((minor & 0xF) << 42) + SEQUENCE)
@@ -21,8 +21,8 @@ end
 local utils = 
 {
 	-- 开启战场服务
-	-- 1. 战场主类型
-	-- 2. 战场子类型
+	-- 1. 主类型
+	-- 2. 子类型
 	-- 3. 成员集合
 	start = function(major, minor, users)
 		local alias = allocid(major, minor)
