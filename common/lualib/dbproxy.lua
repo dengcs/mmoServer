@@ -4,11 +4,12 @@ local dbname = "test"
 
 local DBToSQL = 
 {
-	[GAME.META.PLAYER] = "SELECT uid FROM player_tbl WHERE uid='%s'"
+	[GAME.META.PLAYER] = "SELECT vdata FROM player_tbl WHERE uid=%s"
 }
 
 local function getSql(db, key)
 	local sql_statement = string.format(DBToSQL[db],key)
+	print("dcs--sql--"..sql_statement)
 	return sql_statement
 end
 
