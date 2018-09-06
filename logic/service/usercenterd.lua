@@ -61,7 +61,11 @@ function COMMAND.load(source, uid)
         local retval = dbproxy.get(c.mode, uid)
         if not retval then
             ERROR("usercenterd : component[%s] load failed!!!", name)
-        end        
+        end
+        
+        if next(retval) then
+        	retval = retval[1].vdata or "{}"
+        end
                 
         -- 角色绑定组件数据
         local object = json.decode(retval)
