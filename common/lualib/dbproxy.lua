@@ -2,6 +2,16 @@ local skynet  = require "skynet"
 
 local dbname = "test"
 
+local DBToSQL = 
+{
+	[GAME.META.PLAYER] = "SELECT uid FROM player_tbl WHERE uid='%s'"
+}
+
+local function getSql(db, key)
+	local sql_statement = string.format(DBToSQL[db],key)
+	return sql_statement
+end
+
 local Proxy = {}
 
 -- 数据集查询操作（仅仅访问'redis'数据源）
@@ -11,7 +21,7 @@ function Proxy.get(db, key)
     local ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATACACHED, "lua", "get", db, key)
     
     if ok ~= 0 or not result then
-    	ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATABASED, "lua", "get", dbname, key)
+    	ok,result = skynet.call(GLOBAL.SERVICE_NAME.DATABASED, "lua", "get", dbname, getSql(db, key))
     	if ok ~= 0 or not result then
     		return nil
     	end
