@@ -59,18 +59,12 @@ function COMMAND.load(source, uid)
         -- name : 组件名称
         -- c    : 组件描述        
         local retval = dbproxy.get(c.mode, uid)
-        if not retval then
-            ERROR("usercenterd : component[%s] load failed!!!", name)
+                
+        if retval then
+        	retval = json.decode(retval)
         end
         
-        if next(retval) then
-        	retval = retval[1].vdata or "{}"
-        end
-                
-        -- 角色绑定组件数据
-        local object = json.decode(retval)
-        print("dcs---"..table.tostring(object))
-        local objcpy = skynet.call(source, "lua", "data_set", name, object)
+        local objcpy = skynet.call(source, "lua", "data_set", name, retval)
         if not objcpy then
             ERROR("usercenterd : component[%s] bind failed!!!", name)
         end
