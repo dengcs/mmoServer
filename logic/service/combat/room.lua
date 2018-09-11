@@ -5,7 +5,7 @@ local service = require "service_factory.service"
 local skynet  = require "skynet"
 local model = require "combat.model"
 local utils = require "combat.utils"
-local ENUM    = require "gameenum"
+local ENUM    = require "config.gameenum"
 -- 底层驱动加载
 local userdriver = require "driver.userdriver"
 

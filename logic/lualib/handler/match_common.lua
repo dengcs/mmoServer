@@ -2,7 +2,7 @@
 -- 组队比赛公共部分代码
 --
 local skynet  = require "skynet"
-local ENUM    = require "gameenum"
+local ENUM    = require "config.gameenum"
 local HANDLER = {}
 local REQUEST = {}
 local COMMAND = {}
