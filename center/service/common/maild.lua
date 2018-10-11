@@ -465,8 +465,6 @@ function server.on_command(source, cmd, ...)
     local fn = command[cmd]
     if fn then
         return fn(...)
-    else
-        return dispatcher:command_dispatch({}, cmd, ...)
     end
 end
 

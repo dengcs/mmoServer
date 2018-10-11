@@ -95,12 +95,12 @@ function Channel:quit(uid)
 	self.onlines[uid] = nil
 end
 
--- 消息广播
-function Channel:broadcast(name, data)
-	for k, v in pairs(self.onlines) do
-		userdriver.usersend(k, "on_common_notify", name, data)
-	end
-end
+---- 消息广播
+--function Channel:broadcast(name, data)
+--	for k, v in pairs(self.onlines) do
+--		userdriver.usersend(k, "on_common_notify", name, data)
+--	end
+--end
 
 -- 获取队伍
 function Channel:get(tid)
@@ -196,8 +196,6 @@ function COMMAND.on_create(cid, vdata)
     local team = channel:create(vdata)
     
     if team ~= nil then
-        -- 频道广播
-        channel:broadcast("room_append_notify", {v = simple(cid, team)})
         return 0
     else
         return ERRCODE.ROOM_CREATE_FAILED
@@ -227,8 +225,6 @@ function COMMAND.on_join(cid, tid, vdata)
     -- 加入队伍
     local member = team:join(vdata)
     if member ~= nil then
-        -- 频道广播
-        channel:broadcast("room_modify_notify", {v = simple(cid, team)})
         return 0
     else
         return ERRCODE.ROOM_JOIN_FAILED
@@ -348,7 +344,6 @@ function COMMAND.on_game_finish(vdata, uid)
       -- 变更状态
       team:convert("PREPARE")
       team:synchronize(cid)
-      channel:broadcast("room_modify_notify", {v = simple(cid, team), m = team.minor})
       return 0
     end
 end
