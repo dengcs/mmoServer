@@ -45,19 +45,6 @@ message game_submit
 	string         uid             = 1;	// 成员编号
 }
 
-
-// 参赛者比赛完成通知
-message game_success
-{
-	string         uid             = 1;	// 成员编号
-}
-
-// 应答
-message game_success_resp
-{
-	uint32 ret       = 1;				// 操作结果（0 - 成功， 否则失败）
-}
-
 // 参赛者强制退出
 message game_leave
 {
@@ -67,79 +54,4 @@ message game_leave
 message game_leave_resp
 {
 	uint32 ret       = 1;				// 操作结果（0 - 成功， 否则失败）
-}
-
-///////////////////////////////////////////////////////////
-// 服务端通知
-///////////////////////////////////////////////////////////
-
-
-// 参赛者退出比赛通知（一般是断线或强退导致）
-message game_player_quit
-{
-	string uid       = 1;				// 参赛者编号
-}
-
-
-// 比赛数据同步（服务端仅仅负责转发）
-message game_update_notify
-{
-}
-
-// 参赛者完成比赛的通知
-message game_success_notify
-{
-	string uid       = 1;				// 参赛者编号
-	uint32 rank      = 2;				// 参赛者排名
-	float  time      = 3;				// 完成时间
-	uint32 score     = 4;				// 获得积分
-}
-
-
-///////////////////////////////////////////////////////////
-// 断线重连协议
-///////////////////////////////////////////////////////////
-
-// 断线重连请求
-message game_reconnect
-{
-}
-
-// 断线重连应答
-message game_reconnect_resp
-{
-	uint32 ret        = 1;				// 操作结果（0 - 成功， 否则失败）
-	/**
-	 * 当前比赛状态
-	 * 1. 赛前准备阶段 （随后有'game_prepare_start'  协议提供恢复数据）
-	 * 2. 场景加载阶段 （随后有'game_loading_notify' 协议提供恢复数据）
-	 * 3. 比赛预备阶段 （随后有'game_ready_notify'   协议提供恢复数据）
-	 * 4. 正式比赛阶段 （随后有'game_recovery_notify'协议提供恢复数据）
-	 * 5. 比赛倒计时阶段(随后有'game_recovery_notify'协议提供恢复数据)
-	 * 6. 比赛结束阶段 （随后有'game_finish_notify'  协议提供恢复数据）
-	 */
-	uint32 state      = 2;				// 仅在重连成功时存在
-}
-
-// 比赛断线重连数据恢复通知
-message game_recovery_notify
-{
-	// 参赛者同步数据信息
-	message member
-	{
-		string   uid  = 1;				// 参赛者编号
-	}
-	repeated member members    = 1;				// 参赛者信息
-}
-
-// 角色重连通知
-message game_reconnect_notify
-{
-	string uid       = 1;				// 参赛者编号
-}
-
-// 角色掉线通知
-message game_disconnect_notify
-{
-	string uid       = 1;				// 参赛者编号
 }
