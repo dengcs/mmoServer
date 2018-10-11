@@ -1,25 +1,13 @@
 ---------------------------------------------------------------------
---- 邮件管理服务
+--- 邮件服务
 ---------------------------------------------------------------------
-local service  = require "service"
-local skynet   = require "skynet.manager"
-local mysqlaux = require "skynet.mysqlaux.c"
-local timer    = require "utils.timer"
+local skynet  = require "skynet"
+local service = require "service"
+local json    = require "cjson"
 local database = require "common.database"
+local mysqlaux = require "skynet.mysqlaux.c"
 
----------------------------------------------------------------------
---- 邮箱模型
----------------------------------------------------------------------
-local MailBox = {}
-MailBox.__index = MailBox
-
--- 邮件类型枚举
-local ECATEGORY = 
-{
-	NORMAL   = 1,		-- 普通邮件
-	SYSTEM   = 2,		-- 系统邮件
-	FACTION  = 3,		-- 车队邮件
-}
+local onlines  = {}		-- 在线邮箱
 
 -- 邮件状态枚举
 local ESTATUS = 
@@ -32,16 +20,19 @@ local ESTATUS =
 -- 通知类型枚举
 local ENOTICE = 
 {
-	APPEND   = 1,		-- 新增邮件
+	NEW   	 = 1,		-- 新增邮件
 	DELETE   = 2,		-- 删除邮件
 	UPDATE   = 3,		-- 邮件更新
 }
 
--- 通知客户端操作类型
-local MAIL_EVENT = {
-    NEW = 1, -- 新邮件
-    DEL = 2, -- 删除
-}
+-- gm邮件
+local gm_mailbox = nil
+---------------------------------------------------------------------
+--- 数据对象
+---------------------------------------------------------------------
+
+local MailBox = {}
+MailBox.__index = MailBox
 
 -- 构建邮箱
 -- 1. 角色编号
@@ -51,6 +42,7 @@ function MailBox.new()
 	{
 		mid = 0, -- 最大邮件id
 		mails = {},
+		reg_time = 0, -- 玩家注册时间
 	}
 	return setmetatable(mailbox, MailBox)
 end
@@ -65,14 +57,12 @@ end
 -- 7. 创建时间
 -- 8. 到期时间
 -- 9. 邮件状态
-function MailBox:insert(sid, category, from, title, content, attachments, timestamp, deadline, state)
+function MailBox:insert(sid, category, from, title, content, attachments, timestamp, deadline, state, gm)
 	-- 记录最大邮件ID
-	local cpsid = tonumber(sid)
-	if cpsid > self.mid then
-		self.mid = cpsid
+	if gm == 1 and sid > self.mid then
+		self.mid = sid
 	end
 
-	sid = tostring(sid)
 	assert(not self.mails[sid])
 	self.mails[sid] = 
 	{
@@ -85,6 +75,7 @@ function MailBox:insert(sid, category, from, title, content, attachments, timest
 		attachments = attachments,
 		timestamp    = timestamp,
 		deadline    = deadline,
+		gm 			= gm,
 	}
 	return self.mails[sid]
 end
@@ -111,9 +102,9 @@ function MailBox:change(sid, state)
 end
 
 ---------------------------------------------------------------------
---- 直接数据操作
+--- 数据库操作
 ---------------------------------------------------------------------
-local dbname = assert(skynet.getenv("database"))
+local dbname = "db.mysql"
 local tbname = "mail"
 
 -- 邮件数据操作集合
@@ -128,19 +119,20 @@ local db =
 	-- 6. 附件信息
 	-- 7. 创建时间
 	-- 8. 到期时间
-	insert = function(uid, category, from, title, content, attachments, timestamp, deadline)
-		local sql = string.format("INSERT INTO %s(`uid`, `category`, `from`, `title`, `content`, `attachments`, `timestamp`, `deadline`, `state`) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+	insert = function(pid, category, from, title, content, attachments, timestamp, deadline, gm)
+		local sql = string.format("INSERT INTO %s(`pid`, `category`, `from`, `title`, `content`, `attachments`, `timestamp`, `deadline`, `state`, `gm`) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
 								   tbname,
-								   uid,
+								   pid,
 								   category,
-								   mysqlaux.quote_sql_str(skynet.packstring(from)),
+								   mysqlaux.quote_sql_str(json.encode(from)),
 								   mysqlaux.quote_sql_str(title),
 								   mysqlaux.quote_sql_str(content),
-								   mysqlaux.quote_sql_str(skynet.packstring(attachments)),
+								   mysqlaux.quote_sql_str(json.encode(attachments)),
 								   timestamp,
 								   deadline,
-								   ESTATUS.UNREAD)
-		local ret = database.insert(dbname, sql)
+								   ESTATUS.UNREAD,
+								   gm)
+		local ret = database.set(dbname, sql)
 		if not ret then
 			return nil
 		else
@@ -153,269 +145,230 @@ local db =
 	-- 2. 邮件状态
 	update = function(sid, state)
 		local sql = string.format("UPDATE %s SET state = %s WHERE sid = %s", tbname, state, sid)
-		return database.update(dbname, sql)
+		return database.exec(dbname, sql)
 	end,
 
 	-- 删除邮件记录
 	-- 1. 邮件编号
 	delete = function(sid)
 		local sql = string.format("UPDATE %s SET removed = 1 WHERE sid = %s", tbname, sid)
-		return database.update(dbname, sql)
+		return database.del(dbname, sql)
 	end,
 
 	-- 查询角色邮件
 	-- 1. 角色编号
-	select = function(uid)
+	select = function(pid)
 		-- 1. 不加载已删除邮件
 		-- 2. 不加载已超时邮件
-		local sql = string.format("SELECT * FROM %s WHERE uid = '%s' AND removed = 0 AND (deadline = 0 OR deadline > %s)",
+		local sql = string.format("SELECT * FROM %s WHERE pid = %s AND removed = 0 AND (deadline = 0 OR deadline > %s)",
 								   tbname,
-								   uid,
-								   os.time())
-		return database.select(dbname, sql)
-	end,
-
-	-- 查询角色最大邮件id
-	-- 1. 角色编号
-	select_maxid = function(uid)
-		-- 1. 不加载已删除邮件
-		-- 2. 不加载已超时邮件
-		local sql = string.format("SELECT max(sid) as sid FROM %s WHERE uid = '%s'",
-								   tbname,
-								   uid)
-		return database.select(dbname, sql)
+								   pid,
+								   this.time())
+		return database.get(dbname, sql)
 	end,
 }
 
 ---------------------------------------------------------------------
---- 内部变量/内部逻辑
+--- 内部逻辑
 ---------------------------------------------------------------------
-local madmin   = nil	-- 系统邮箱
-local onlines  = {}		-- 在线邮箱
 
--- 邮件有效时长（默认7天）
-local duration = 7 * 24 * 3600
-
--- 发送邮件（返回邮件编号）
--- 1. 角色编号
--- 2. 邮件类型
--- 3. 邮件来源
--- 4. 邮件标题
--- 5. 邮件正文
--- 6. 附件信息({{id, count}, ...})
--- 7. 创建时间
--- 8. 到期时间
-local function deliver(uid, mail)
-	-- 选择邮箱
-	local mailbox = madmin
-	if uid ~= "0" then
-		mailbox = onlines[uid]
-	end
+local function insert(pid, mail, gm)
+    -- 选择邮箱
+    local mailbox = onlines[pid]
 	-- 插入邮件
-	local sid = assert(db.insert(uid, mail.category, mail.from, mail.title, mail.content, mail.attachments, mail.timestamp, mail.deadline))
+	local sid = assert(db.insert(pid, mail.category, mail.from, mail.title, mail.content, mail.attachments, mail.timestamp, mail.deadline, gm))
 	if mailbox then
-		mailbox:insert(sid, mail.category, mail.from, mail.title, mail.content, mail.attachments, mail.timestamp, mail.deadline, ESTATUS.UNREAD)
+		mailbox:insert(sid, mail.category, mail.from, mail.title, mail.content, mail.attachments, mail.timestamp, mail.deadline, ESTATUS.UNREAD, gm)
 	end
-	return tostring(sid)
+	return sid
 end
 
--- 更新邮件（仅仅更新状态）
--- 1. 角色编号
--- 2. 邮件编号
--- 3. 邮件状态
-local function change(uid, mid, state)
-	local mailbox = assert(("0" == uid) and madmin or onlines[uid])
-	db.update(mid, state)
-	return mailbox:change(mid, state)
+local function delete(pid, sid)
+    local mailbox = assert(onlines[pid])
+	db.delete(sid)
+	return mailbox:delete(sid)
 end
 
--- 删除邮件（仅仅设置标志）
--- 1. 角色编号
--- 2. 邮件编号
-local function delete(uid, mid)
-	local mailbox = assert(("0" == uid) and madmin or onlines[uid])
-	db.delete(mid)
-	return mailbox:delete(mid)
+local function change(pid, sid, state)
+    local mailbox = assert(onlines[pid])
+	db.update(sid, state)
+	return mailbox:change(sid, state)
 end
 
 -- 邮件变动通知（使用旧有协议）
 -- 1. 通知类型
 -- 2. 角色编号
 -- 2. 邮件内容
-local function notice(mode, uid, mail)
+local function notice(type, pid, mail)
 	-- 按类型选择通知逻辑
 	local operations = 
 	{
 		-- 新增邮件通知
-		[ENOTICE.APPEND] = function()
+		[ENOTICE.NEW] = function()
 			local name = "mail_event_notify"
 			local data = 
 			{
-				operate  = MAIL_EVENT.NEW,
+				operate  = ENOTICE.NEW,
 				sid      = mail.sid,
-				category = mail.category,
-			}
-			skynet.send(GAME.SERVICE.ONLINED, "lua", "usersend", uid, "response", name, data)
+            }
+            this.usersend(pid, "response_message", name, data)
 		end,
 		-- 删除邮件通知
 		[ENOTICE.DELETE] = function()
 			local name = "mail_event_notify"
 			local data = 
 			{
-				operate  = MAIL_EVENT.DEL,
+				operate  = ENOTICE.DELETE,
 				sid      = mail.sid,
-				category = mail.category,
 			}
-			skynet.send(GAME.SERVICE.ONLINED, "lua", "usersend", uid, "response", name, data)
+			this.usersend(pid, "response_message", name, data)
 		end,
 	}
 	-- 执行邮件变动通知
 	if mail ~= nil then
-		local fn = operations[mode]
+		local fn = operations[type]
 		if fn then
 			fn()
 		end
 	end
 end
 
----------------------------------------------------------------------
---- 服务导出接口
----------------------------------------------------------------------
-local COMMAND = {}
+local function schedule()
+	-- 逻辑
+	local function fn()
+		-- 删除过期邮件
+		local now = this.time()
+		for pid,mailbox in pairs(onlines) do
+			for _,mail in pairs(mailbox.mails or {}) do
+				-- 删除已超时系统邮件
+				if (mail.deadline < now) and (mail.deadline ~= 0) then
+					delete(pid, mail.sid)
+					if pid ~= 0 then
+						notice(ENOTICE.DELETE, pid, mail)
+					end
+				end
+			end
+		end
 
--- 服务启动通知
-function COMMAND.setup()
-	assert(madmin == nil, "mail : repeated initialization!!!")
-	-- 加载系统邮件
-	madmin = MailBox.new()
-	for _, v in pairs(db.select(0) or {}) do
-		madmin:insert(v.sid, v.category, skynet.unpack(v.from), v.title, v.content, skynet.unpack(v.attachments), v.timestamp, v.deadline, ESTATUS.UNREAD)
-	end
+		-- 递送系统邮件
+		if gm_mailbox then
+			for _,gm_mail in pairs(gm_mailbox.mails or {}) do
+				for pid,mailbox in pairs(onlines) do
+					local mid = mailbox.mid
 
-	-- 群发邮件
-	local function broadcast_mail(mail)
-		local ret,data = skynet.call(GAME.SERVICE.ONLINED, "lua", "onlines")
-		if ret == 0 then
-			for _,uid in pairs(data) do
-				local sid = deliver(uid, mail)
-				mail.sid = sid
-				notice(ENOTICE.APPEND, uid, mail)
+					repeat
+						if pid == 0 then
+							break
+						end
+						-- 过滤已加载系统邮件
+						if (gm_mail.sid <= mid) then
+							break
+						end
+						-- 过滤未激活系统邮件
+						if (gm_mail.timestamp > now) then
+							break
+						end
+						-- 角色已经注册
+						if (gm_mail.timestamp < mailbox.reg_time) then
+							break
+						end
+
+						-- 递送系统邮件
+						local mail = table.deepclone(gm_mail, true)
+						local duration = mail.deadline - mail.timestamp
+						mail.timestamp = now
+						mail.deadline = now + duration
+						local sid = insert(pid, mail, 1)
+						mail.sid = sid
+        				notice(ENOTICE.NEW, pid, mail)
+					until(true)
+				end
 			end
 		end
 	end
-
-	-- 计算任务间隔(间隔单位 : 10ms)
-	-- 1. 任务间距
-	local function interval()
-		return 60 * 100
+	
+    -- 异常处理
+    local function catch(message)
+        LOG_ERROR(message)
 	end
-
-	-- 定时任务逻辑
-	local function schedule()
-		-- 邮件激活检查
-		for k, v in pairs(madmin.mails) do
-			repeat
-				-- 移除无效系统邮件
-				if (v.deadline < os.time()) and (v.deadline ~= 0) then
-					madmin.mails[k] = nil
-					break
-				end
-				-- 过滤不可激活邮件
-				if (v.timestamp > os.time()) then
-					break
-				end
-				-- 过滤已经激活邮件
-				if (v.state ~= ESTATUS.UNREAD) then
-					break
-				end
-
-				local cpMail = table.deep_clone(v,true)
-				-- 群发邮件
-				broadcast_mail(cpMail)
-
-				change("0", k, ESTATUS.READ)
-			until(true)
-		end
-
-		-- 重置定时任务
-		skynet.timeout(interval(), schedule)
+	
+	-- 间隔时间
+	local function interval()	
+		return 300
 	end
-	-- 启动定时任务
+    
+    -- 任务处理
+	xpcall(fn, catch)
 	skynet.timeout(interval(), schedule)
 end
 
--- 服务停止通知
-function COMMAND.on_exit()
+---------------------------------------------------------------------
+--- 服务业务接口
+---------------------------------------------------------------------
+local command = {}
+
+-- 新增条目
+function command.new(pid)
+    local mailbox = onlines[pid]
+    if not mailbox then
+        mailbox = MailBox.new()
+        onlines[pid] = mailbox
+    end
 end
 
--- 添加用户
-function COMMAND.new_user(uid)
-    -- 获取用户邮箱
-	local mailbox = onlines[uid]
-	if not mailbox then
-		-- 构建邮箱
-		mailbox = MailBox.new()
-		for _, v in pairs(db.select(uid) or {}) do
-			mailbox:insert(v.sid, v.category, skynet.unpack(v.from), v.title, v.content, skynet.unpack(v.attachments), v.timestamp, v.deadline, v.state)
-		end
-
-		onlines[uid] = mailbox
-	end
+-- 删除条目
+function command.drop(pid)
+    onlines[pid] = nil
 end
 
--- 请求用户邮件（加载系统邮件）
--- 1. 角色编号
--- 2. 角色注册时间
-function COMMAND.query(uid, register_time)
-	-- 获取用户邮箱
-	local mailbox = onlines[uid]
-	if not mailbox then
-		-- 构建邮箱
-		mailbox = MailBox.new()
-		for _, v in pairs(db.select(uid) or {}) do
-			mailbox:insert(v.sid, v.category, skynet.unpack(v.from), v.title, v.content, skynet.unpack(v.attachments), v.timestamp, v.deadline, v.state)
-		end
+-- 发邮件
+function command.send(pid, mail)
+	assert(mail)
+    local pids = IS_TABLE(pid) and pid or {pid}
+    for _,id in pairs(pids) do
+		local sid = insert(id, mail, 0)
+		mail.sid = sid
+        notice(ENOTICE.NEW, id, mail)
+    end
+end
 
-		onlines[uid] = mailbox
+-- 加载邮件
+function command.load(pid, reg_time)
+    local mailbox = onlines[pid]
+    if not mailbox then
+        mailbox = MailBox.new()
+        onlines[pid] = mailbox
+
+        local dbdata = db.select(pid)
+		for _,v in pairs(dbdata or {}) do
+			local attachments = (v.attachments and v.attachments ~= "null") and json.decode(v.attachments) or nil
+			mailbox:insert(v.sid, v.category, json.decode(v.from), v.title, v.content, attachments, v.timestamp, v.deadline, v.state, v.gm)
+        end
 	end
 
-	-- 计算最大邮件id
-	local sid = 0
+	mailbox.reg_time = reg_time
+	
 	local mid = mailbox.mid
-	if mid == 0 then
-		local selectobj = db.select_maxid(uid)
-		for _, v in pairs(selectobj or {}) do
-			if v.sid then
-				mid = v.sid
-				mailbox.mid = mid
-			end
-		end
-	end
-
 	-- 递送系统邮件
-	local ctime = os.time()
+	local now = this.time()
 	local mails = {}
 
-	for _, v in pairs(madmin.mails) do
+	for _, v in pairs(gm_mailbox.mails) do
 		repeat
-			sid =  tonumber(v.sid)
 			-- 过滤已加载系统邮件
-			if (sid <= mid) then
-				break
-			end
-			if (v.state ~= ESTATUS.READ) then
+			if (v.sid <= mid) then
 				break
 			end
 			-- 过滤未激活系统邮件
-			if (v.timestamp > ctime) then
+			if (v.timestamp > now) then
 				break
 			end
 			-- 过滤已超时系统邮件
-			if (v.deadline < ctime) and (v.deadline ~= 0) then
+			if (v.deadline < now) and (v.deadline ~= 0) then
 				break
 			end
 			-- 角色已经注册
-			if (v.timestamp < register_time) then
+			if (v.timestamp < reg_time) then
 				break
 			end
 			-- 记录可递送系统邮件
@@ -425,132 +378,97 @@ function COMMAND.query(uid, register_time)
 
 	for _, v in pairs(mails) do
 		-- 递送系统邮件
-		v.timestamp = ctime
-		v.deadline = ctime + duration
-		local mid = deliver(uid, v)
-		-- if mark ~= nil then
-		-- 	notice(ENOTICE.APPEND, uid, mailbox.mails[mid])
-		-- end
+		local duration = v.deadline - v.timestamp
+		v.timestamp = now
+		v.deadline = now + duration
+		insert(pid, v, 1)
 	end
+	
+	local loadmails = table.deepclone(mailbox.mails, true)
+	print("dcs---"..table.tostring(loadmails))
 
-	return mailbox.mails
+	return loadmails
 end
 
--- 递送用户邮件（允许邮件群发）
--- 1. 角色编号
--- 2. 邮件信息
-function COMMAND.deliver_mail(uids, mail)
-	local ctime = os.time()
-	for _, uid in pairs((type(uids) == "table") and uids or {uids}) do
-		repeat
-			-- 防止递送到系统邮箱
-			if "0" == uid then
-				break
-			end
-			-- 递送邮件并通知用户
-			local mailbox = onlines[uid]
-			mail.timestamp = ctime
-			mail.deadline = ctime + duration
-			local mid     = deliver(uid, mail)
+-- 获取固定邮件
+function command.get(pid, sid)
+	local mails = {}
 
-			if mailbox ~= nil then
-				notice(ENOTICE.APPEND, uid, mailbox.mails[mid])
+	local mailbox = onlines[pid]
+	if mailbox then
+		local sids = IS_TABLE(sid) and sid or {sid}
+		for _,id in pairs(sids) do
+			for _,v in pairs(mailbox.mails) do
+				if id == v.sid then
+					local mail = table.deepclone(v, true)
+					table.insert(mails, mail)
+					break
+				end
 			end
-		until(true)
-	end
-	return 0
-end
-
--- 删除用户邮件（允许批量删除）
--- 1. 角色编号
--- 2. 邮件编号
-function COMMAND.delete(uid, mids)
-	for _, mid in pairs((type(mids) == "table") and mids or {mids}) do
-		local mail = delete(uid, mid)
-		if mail ~= nil then
-			notice(ENOTICE.DELETE, uid, mail)
 		end
 	end
-	return 0
+	
+	return mails
 end
 
--- 更新邮件状态（标记为已读/已领）
--- 1. 角色编号
--- 2. 邮件编号
--- 3. 邮件状态
-function COMMAND.change(uid, mid, state)
-	-- 获取用户邮箱
-	local mailbox = onlines[uid]
-	if mailbox == nil then
-		return ERRCODE.MAIL_COMMON_ERROR
-	end
-	-- 获取指定邮件
-	local mail = mailbox.mails[mid]
-	if mail == nil then
-		return ERRCODE.MAIL_NOT_EXISTS
-	end
-	-- 更新邮件状态
-	if table.empty(mail.attachments) or (state == ESTATUS.RECEIVED) then
-		-- 删除邮件
-		delete(uid, mid)
-		notice(ENOTICE.DELETE, uid, mail)
-	else
-		-- 更新状态
-		change(uid, mid, state)
-	end
-	return 0
-end
-
--- 改变邮件状态
-function COMMAND.update_state(uid, mail_states)
-    for _, v in pairs(mail_states) do
-        this.call("change", uid, v.sid, v.state)
+-- 删除邮件
+function command.del(pid, sid)
+    local sids = IS_TABLE(sid) and sid or {sid}
+    for _,id in pairs(sids) do
+        local mail = delete(pid, id)
+        notice(ENOTICE.DELETE, pid, mail)
     end
 end
 
--- 根据sids加载邮件
--- @param uid - 角色id
--- @param sids - 读取sids列表
--- @return {*mail}
-function COMMAND.load_mails(uid, category, sids)
-
-	local mailbox = onlines[uid]
-    if not mailbox then
-        LOG_ERROR("uid[%s] mailbox is nil", uid)
-        return
+-- 更新状态
+function command.change(pid, sid, state)
+    local sids = IS_TABLE(sid) and sid or {sid}
+    for _,id in pairs(sids) do
+        change(pid, id, state)
+        this.usersend(pid, "response_message", "mail_state_notify", {sid = id, state = state})
     end
-
-    local kv_sids = {}
-    for _, sid in pairs(sids) do
-        kv_sids[sid] = 1
-    end
-
-    local mails = {}
-
-    for _,v in pairs(mailbox.mails) do
-        if kv_sids[v.sid] and v.category == category then
-            table.insert(mails, v)
-        end
-    end
-
-    return mails
 end
 
--- 递送系统邮件（返回邮件编号）
--- 1. 邮件内容
-function COMMAND.gm_deliver(mail)	
-	return deliver("0", mail)
+-- 发全体邮件
+function command.gm_send(mail)
+	assert(mail)
+	insert(0, mail, 1)
 end
 
--- 删除系统邮件
--- 1. 邮件编号
-function COMMAND.gm_delete(mid)
-	return delete("0", mid)
+function command.gm_del(sid)
+	delete(0, sid)
 end
 
 ---------------------------------------------------------------------
---- 注册邮件管理服务
+--- 服务回调接口
 ---------------------------------------------------------------------
-service.register({
-	CMD = COMMAND,
-})
+local server = {}
+
+function server.on_init(config)
+	gm_mailbox = MailBox.new()
+	onlines[0] = gm_mailbox
+
+	local dbdata = db.select(0)
+	for _,v in pairs(dbdata or {}) do
+		local attachments = (v.attachments and v.attachments ~= "null") and json.decode(v.attachments) or nil
+		gm_mailbox:insert(v.sid, v.category, json.decode(v.from), v.title, v.content, attachments, v.timestamp, v.deadline, v.state)
+	end
+
+	schedule()
+end
+
+-- 内部指令通知
+-- 1. 指令来源
+-- 2. 指令名称
+-- 3. 执行参数
+function server.on_command(source, cmd, ...)
+    local fn = command[cmd]
+    if fn then
+        return fn(...)
+    else
+        return dispatcher:command_dispatch({}, cmd, ...)
+    end
+end
+
+-- 启动网关服务
+service.simple.start(server)
