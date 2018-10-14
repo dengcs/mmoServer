@@ -4,7 +4,6 @@
 local skynet  = require "skynet"
 local handler = {}
 local REQUEST = {}
-local COMMAND = {}
 
 -----------------------------------------------------------
 -- 请求服务接口
@@ -13,25 +12,39 @@ local COMMAND = {}
 
 -- 创建房间
 function REQUEST:room_create()
-	return 0
+    local resp = "room_create_resp"
+    local ret = 0
+    local ret_msg = {ret = ret}
+    self.response(resp, ret_msg)
 end
 
 -- 快速加入
 function REQUEST:room_qkjoin()
-	return 0
+	local resp = "room_qkjoin_resp"
+    local ret = 0
+    
+    local ret_msg = {ret = ret}
+    self.response(resp, ret_msg)
 end
 
 -- 离开房间
 function REQUEST:room_quit()
-	return 0
+	local resp = "room_quit_resp"
+    local ret = 0
+    
+    local ret_msg = {ret = ret}
+    self.response(resp, ret_msg)
 end
 
 -- 邀请好友
 function REQUEST:room_invite()
-	return 0
+	local resp = "room_invite_resp"
+    local ret = 0
+    
+    local ret_msg = {ret = ret}
+    self.response(resp, ret_msg)
 end
 
 -- '请求/命令' - 注册
 handler.REQUEST = REQUEST
-handler.CMD     = COMMAND
 return handler

@@ -19,7 +19,7 @@ local M =
 		-------------------------------
 		databased = {
 			category  = GLOBAL.DB.MYSQL,
-			host      = skynet.getenv("db_host") or "192.168.188.82",
+			host      = skynet.getenv("db_host") or "192.168.3.128",
 			port      = skynet.getenv("db_port") or "3306",
 			auth      = skynet.getenv("db_auth") or "test",
 			password  = skynet.getenv("db_pass") or "123456",
@@ -34,8 +34,8 @@ local M =
         datacached = {
               {
                 category  = GLOBAL.DB.REDIS,
-                host      = skynet.getenv("dc_host") or "192.168.188.82",
-                port      = skynet.getenv("dc_port") or "10002",
+                host      = skynet.getenv("dc_host") or "192.168.3.128",
+                port      = skynet.getenv("dc_port") or "6379",
                 auth      = skynet.getenv("dc_auth") or "888888",
                 password  = "",
                 database  = DB.REDIS_A,
@@ -43,8 +43,8 @@ local M =
               },
               {
                 category  = GLOBAL.DB.REDIS,
-                host      = skynet.getenv("dc_host") or "192.168.188.82",
-                port      = skynet.getenv("dc_port") or "10002",
+                host      = skynet.getenv("dc_host") or "192.168.3.128",
+                port      = skynet.getenv("dc_port") or "6379",
                 auth      = skynet.getenv("dc_auth") or "888888",
                 password  = "",
                 database  = DB.REDIS_B,
