@@ -15,24 +15,6 @@ skynet.start(function()
   summdriver.start()
   summdriver.autoload(services.summ)
 
-  local userdriver = skynet.userdriver()
---  local sql = string.format("INSERT %s(uid, data) VALUES(%s,'%s') ON DUPLICATE KEY UPDATE data = '%s'", "account", 1001, "dcs---test", "dcs---test-new")
---  userdriver.db_insert("test", sql)
---
-  local udata = {
-    uid      = "1001",
-    nickname = "dcstest",
-    portrait = "1",
-    sex      = 1,
-    experience = 1000,
-    level    = 1
-  }
-  userdriver.dc_set(10,"1001",skynet.packstring(udata))
---  userdriver.dc_set(11,"1001","dcs---redis11")
---  
---  userdriver.dc_del(10,"1001")
---  userdriver.dc_del(11,"1001")
-
   local gated = skynet.newservice("client/gated", "0.0.0.0", 51001)
   skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
   
