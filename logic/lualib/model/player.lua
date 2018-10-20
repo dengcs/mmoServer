@@ -6,7 +6,6 @@ local tremove = table.remove
 local Player = {}
 
 function Player:on_init()
-  self.uid      = self.uid or ""
   self.nickname = self.nickname or ""
   self.portrait = self.portrait or ""
   self.sex      = self.sex or 1
@@ -15,15 +14,16 @@ function Player:on_init()
 end
 
 -- 角色创建操作
-function Player:on_create(user, name, sex, portrait)
-end
-
--- 角色快照
-function Player:get_snapshot()
+function Player:on_create()
+	
 end
 
 -- 角色登录操作
-function Player:on_login(user)
+function Player:on_login(uid)
+	if not self.uid then
+		self.uid = uid
+		self:commit()
+	end
 end
 
 -- 唤醒处理
@@ -39,6 +39,10 @@ end
 
 -- 获取玩家基础信息
 function Player:get_player_info()
+end
+
+-- 角色快照
+function Player:get_snapshot()
 end
 
 return Player

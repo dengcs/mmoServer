@@ -31,9 +31,8 @@ function REQUEST:query_players()
 	local result = userdriver.db_select(dbname, sql)
 	
 	if next(result) then
-		print("dcs---"..table.tostring(result))
 		ret = 0
-		player_uid = tostring(result[1].uid)
+		player_uid = result[1].uid
 	end
 	
 	login_acount = account
@@ -58,9 +57,8 @@ function REQUEST:create_player()
 		local result = userdriver.db_insert(dbname, sql)
 		
 		if result then
-			print("dcs---"..table.tostring(result))
-			ret = 0
-			player_uid = tostring(result.insert_id)
+			player_uid = result.insert_id		
+	    	ret = 0
 		end
 	end
     
@@ -77,6 +75,7 @@ function REQUEST:player_login()
 	    local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", player_uid)
 	    if ok == 0 then
 	    	ret = 0
+	    	self.user:call("Player", "on_login", player_uid)
 	    end
 	    skynet.error("dcs---data--"..table.tostring(self.user))
 	end

@@ -3,7 +3,7 @@ local dispatcher = require "net.dispatcher"
 local userdata = require "data.userdata"
 local usermeta = require "config.usermeta"
 
-local csession
+local session
 -- 网络消息分发器
 local net_dispatcher
 local datameta      -- 用户数据
@@ -12,26 +12,30 @@ local CMD = {}
 local Handle = {}
 
 function CMD.connect(c)
-  csession = c
+  session = c
   net_dispatcher = dispatcher.new()
   net_dispatcher:register_handle()
   
   datameta = userdata.new("w")
   datameta:register(usermeta)
   
-  csession.data = datameta
+  session.data = datameta
 end
 
 function CMD.disconnect()
+	local player = datameta:get("Player")
+	if player then
+		skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "unload", player.uid)
+	end
 	skynet.exit()
 end
 
 function CMD.message(msg)
-  if csession then
+  if session then
 --      local code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","decode",msg)
 --      code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","encode",1001,"AwesomeMessage",result.data,0)
 --      skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",csession.fd,result)
-        net_dispatcher:message_dispatch(csession, msg)
+        net_dispatcher:message_dispatch(session, msg)
   end
 end
 
@@ -69,7 +73,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, ...)
-	   skynet.error("dcs---cmd--"..cmd)
+	   	 skynet.error("dcs---cmd--"..cmd)
 		 local fn = CMD[cmd]
 		 if fn then
 			skynet.ret(skynet.pack(fn(...)))

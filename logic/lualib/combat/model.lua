@@ -63,7 +63,6 @@ function Member.new(vdata)
 		member[k] = v
 	end
 	-- 设置成员数据
-	member.teamid          = vdata.teamid			-- 分组编号
 	member.uid             = vdata.uid				-- 角色编号
 	member.sex             = vdata.sex				-- 角色性别
 	member.nickname        = vdata.nickname			-- 角色昵称
@@ -71,9 +70,8 @@ function Member.new(vdata)
 	member.portrait_box_id = vdata.portrait_box_id	-- 角色像框
 	member.ulevel          = vdata.ulevel			-- 角色等级
 	member.vlevel          = vdata.vlevel			-- 贵族等级
-	member.stage           = vdata.stage			-- 角色段位
+	member.score           = vdata.score			-- 角色积分
 	member.state           = ESTATES.PREPARE		-- 角色状态
-	member.exvalues        = {}						-- 扩展信息
 	return member
 end
 
@@ -108,14 +106,13 @@ end
 function Member:snapshot()
 	local snapshot = 
 	{
-		teamid     = self.teamid,
 		uid        = self.uid,
 		sex        = self.sex,
 		nickname   = self.nickname,
 		portrait   = self.portrait,
 		ulevel     = self.ulevel,
 		vlevel     = self.vlevel,
-		stage      = self.stage,
+		score      = self.score,
 	}
 	return snapshot
 end

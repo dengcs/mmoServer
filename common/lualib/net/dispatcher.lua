@@ -87,45 +87,45 @@ end
 -- 2. 消息名称
 -- 3. 消息内容
 -- 4. 错误编号
-function M:message_response(user, name, message, errno)
-	local fd = user.fd or 0
+function M:message_response(session, name, message, errno)
+	local fd = session.fd or 0
 	if fd == 0 then
 		return ENONET
 	end
-	local data = net_encode(user.uid, name, message, errno)
-	skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",user.fd,data)
+	local data = net_encode(session.uid, name, message, errno)
+	skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",session.fd,data)
 	return 0
 end
 
 -- 构造消息分发用户上下文
 -- 1. 用户信息
 -- 2. 扩展信息
-function M:user_context(user, extra)
+function M:user_context(session, extra)
 	-- 消息下行接口
 	-- 1. 消息名称
 	-- 2. 消息内容
 	-- 3. 错误编号
 	local function __message_response(name, message, errno)
-		return self.message_response(self, user, name, message, errno)
+		return self.message_response(self, session, name, message, errno)
 	end
 	-- 内部命令分发
 	-- 1. 命令名称
 	-- 2. 执行参数
 	local function __command_execute(cmd, ...)
-		return command_execute(self.COMMAND, cmd, self:user_context(user), ...)
+		return command_execute(self.COMMAND, cmd, self:user_context(session), ...)
 	end
 	-- 事件触发通知
 	-- 1. 事件类型
 	-- 2. 事件内容
 	local function __event_trigger(category, arguments)
 		for _, v in pairs(self.TRIGGER) do
-			v(self:user_context(user), category, arguments)
+			v(self:user_context(session), category, arguments)
 		end
 	end
 	-- 构造用户上下文
 	local context = 
 	{
-		user     = user.data,
+		user     = session.data,
 		response = __message_response,
 		call     = __command_execute,
 		trigger  = __event_trigger,
@@ -141,7 +141,7 @@ end
 -- 2. 用户信息
 -- 3. 请求内容
 -- 4. 方法集合
-local function message_request(this, user, message, commands)
+local function message_request(this, session, message, commands)
 	-- 异常捕捉
 	local function traceback()
 		LOG_ERROR(debug.traceback())
@@ -152,13 +152,13 @@ local function message_request(this, user, message, commands)
 		ERROR("request : message unpack error!!!")
 	end
 	-- 请求转发
-	local ok, retval = xpcall(command_execute, traceback, commands, head.header.proto, this:user_context(user, {proto = proto}))
+	local ok, retval = xpcall(command_execute, traceback, commands, head.header.proto, this:user_context(session, {proto = proto}))
 	if not ok then
 		retval = ENOEXEC
 	end
 	retval = retval or 0
 	if retval > 0 then
-		this:message_response(user, head.header.proto, nil, retval)
+		this:message_response(session, head.header.proto, nil, retval)
 	end
 	return retval
 end
@@ -166,22 +166,22 @@ end
 -- 握手相关请求分发
 -- 1. 用户信息
 -- 2. 请求内容
-function M:handshake_dispatch(user, message)
-	return message_request(self, user, message, self.HANDSHAKE)
+function M:handshake_dispatch(session, message)
+	return message_request(self, session, message, self.HANDSHAKE)
 end
 
 -- 选角相关请求分发
 -- 1. 用户信息
 -- 2. 请求内容
-function M:prepare_dispatch(user, message)
-	return message_request(self, user, message, self.PREPARE)
+function M:prepare_dispatch(session, message)
+	return message_request(self, session, message, self.PREPARE)
 end
 
 -- 普通请求分发逻辑
 -- 1. 用户信息
 -- 2. 请求内容
-function M:message_dispatch(user, message)
-	return message_request(self, user, message, self.REQUEST)
+function M:message_dispatch(session, message)
+	return message_request(self, session, message, self.REQUEST)
 end
 
 -- 内部命令分发逻辑
@@ -189,8 +189,8 @@ end
 -- 2. 命令来源
 -- 3. 命令名称
 -- 4. 命令参数
-function M:command_dispatch(user, source, cmd, ...)
-	return command_execute(self.COMMAND, cmd, self:user_context(user), ...)
+function M:command_dispatch(session, source, cmd, ...)
+	return command_execute(self.COMMAND, cmd, self:user_context(session), ...)
 end
 
 -- 返回消息分发中间件模型

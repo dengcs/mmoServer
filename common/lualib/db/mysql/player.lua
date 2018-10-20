@@ -12,7 +12,7 @@ function M.get(key)
 	local sql = string.format("SELECT vdata FROM player_tbl WHERE uid = %s", key)
 	local ok,data = skynet.call(GLOBAL.SERVICE_NAME.DATABASED, "lua", "get", "test", sql)
 	
-    if not ok then
+    if ok ~= 0 then
         ERROR("'%s[%s]' execute failed['%s']!!!", "test", key, data)
     end
     if data and data.errno then
@@ -29,10 +29,9 @@ end
 -- 2. 数据内容
 function M.set(key, value)
 	local vdata = mysqlaux.quote_sql_str(value)
-	local sql = string.format("UPDATE player_tbl SET vdata = %s WHERE uid = %s", value, key)
+	local sql = string.format("UPDATE player_tbl SET vdata = %s WHERE uid = %s", vdata, key)
 	local ok,data = skynet.call(GLOBAL.SERVICE_NAME.DATABASED, "lua", "set", "test", sql)
-	
-    if not ok then
+    if ok ~= 0 then
         ERROR("'%s[%s]' execute failed['%s']!!!", "test", key, data)
     end
     if data and data.errno then

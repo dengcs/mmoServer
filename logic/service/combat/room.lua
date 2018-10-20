@@ -163,21 +163,6 @@ local function leave_environment(uid, cid, tid)
 	return errcode
 end
 
--- 构造队伍简单快照
--- 1. 频道编号
--- 2. 队伍信息
-local function simple(cid, team)
-  local snapshot = 
-  {
-    channel = cid,
-    roomid  = team.id,
-    state   = team.state,
-    mcount  = team:size(),
-    number  = team:capacity(),
-  }
-  return snapshot
-end
-
 -----------------------------------------------------------
 --- 房间组队服务接口
 -----------------------------------------------------------

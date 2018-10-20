@@ -17,7 +17,7 @@ local Proxy = {}
 -- 2. 关键字
 function Proxy.get(db, key)
     local cacheStatement = require(DB_MAP.cache[db])
-    local result = cacheStatement.get(db, key)
+    local result = cacheStatement.get(key)
     if not result then
     	local baseStatement = require(DB_MAP.base[db])
     	result = baseStatement.get(key)    	
@@ -32,8 +32,7 @@ end
 -- 3. 数据内容
 function Proxy.set(db, key, value)
     local cacheStatement = require(DB_MAP.cache[db])
-    local result = cacheStatement.set(db, key)
-    
+    local result = cacheStatement.set(key, value)
     if not result then
 		return nil
     end
