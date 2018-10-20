@@ -76,9 +76,8 @@ Channel.__index = Channel
 function Channel.new()
 	local channel = {}
 	-- 注册成员方法
-	for k, v in pairs(Channel) do
-		channel[k] = v
-	end
+	setmetatable(channel, Channel)
+	
 	-- 设置频道数据
 	channel.onlines = {}	-- 在线角色列表（不包括房间内角色）
 	channel.teams   = {}	-- 频道房间列表

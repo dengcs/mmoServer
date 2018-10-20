@@ -43,6 +43,17 @@ end
 
 -- 角色快照
 function Player:get_snapshot()
+	local snapshot = 
+	{
+		uid = self.uid,
+		nickname = self.nickname,
+		portrait = self.portrait,
+		level = self.level,
+		sex = self.sex,
+		score = self.score
+	}
+	
+	return snapshot
 end
 
 return Player

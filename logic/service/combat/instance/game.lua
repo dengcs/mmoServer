@@ -78,10 +78,8 @@ Member.__index = Member
 -- 1. 参赛者信息
 function Member.new(vdata)
 	local member = {}
-	-- 注册成员方法
-	for k, v in pairs(Member) do
-		member[k] = v
-	end
+	setmetatable(member, Member)
+	
 	-- 设置基础数据
 	member.portrait_box_id = vdata.portrait_box_id
 	member.teamid     = vdata.teamid		-- 队伍编号
@@ -142,10 +140,8 @@ Game.__index = Game
 -- 2. 成员列表
 function Game.new(alias, major, minor, users)
 	local game = {}
-	-- 注册成员方法
-	for k, v in pairs(Game) do
-		game[k] = v
-	end
+	setmetatable(game, Game)
+	
 	-- 设置战场数据
 	game.alias    = alias				-- 战场id
 	game.major    = major				-- 战场主类型

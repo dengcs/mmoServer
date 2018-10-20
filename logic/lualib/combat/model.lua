@@ -58,10 +58,7 @@ Member.__index = Member
 -- 构造成员对象
 function Member.new(vdata)
 	local member = {}
-	-- 注册成员方法
-	for k, v in pairs(Member) do
-		member[k] = v
-	end
+	setmetatable(member, Member)
 	-- 设置成员数据
 	member.uid             = vdata.uid				-- 角色编号
 	member.sex             = vdata.sex				-- 角色性别
@@ -144,10 +141,9 @@ Team.__index = Team
 -- 1. 创建者信息
 function Team.new(vdata)
 	local team = {}
-	-- 注册成员方法
-	for k, v in pairs(Team) do
-		team[k] = v
-	end
+	
+	setmetatable(team, Team)
+	
 	-- 设置队伍数据
 	team.id      = allocid()					-- 队伍编号（顺序递增）
 	team.owner   = vdata.uid					-- 领队编号
