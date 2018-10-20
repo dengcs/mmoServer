@@ -90,27 +90,20 @@ function Member.new(vdata)
 	member.portrait   = vdata.portrait		-- 角色头像
 	member.ulevel     = vdata.ulevel		-- 角色等级
 	member.vlevel     = vdata.vlevel		-- 贵族等级
-	member.stage      = vdata.stage			-- 角色段位
+	member.score      = vdata.score			-- 角色积分
 	member.state      = 0					-- 角色状态（0 - 准备， 1 - 就绪）
 	member.online     = 1					-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
 	-- 设置战场数据
 	member.game =
 	{
-		rank          = 0,					-- 比赛排名
-		mark          = 0,					-- 比赛成绩
-		point         = 0,					-- 获得积分
-		duration      = 0,					-- 完成时间
-		addition      = {},					-- 加成信息
-		kvdata        = {},					-- 战场统计
+		score          = 0,					-- 比赛得分
 	}
 	return member
 end
 
 -- 战场统计更新
 function Member:submit(values)
-	for k, v in pairs(values or {}) do
-		self.game.kvdata[k] = math.max(v, (self.game.kvdata[k] or 0))
-	end
+	
 end
 
 -- 战场消息通知
@@ -138,14 +131,12 @@ Game.__index = Game
 -- 构造战场
 -- 1. 战场id
 -- 2. 成员列表
-function Game.new(alias, major, minor, users)
+function Game.new(alias, users)
 	local game = {}
 	setmetatable(game, Game)
 	
 	-- 设置战场数据
 	game.alias    = alias				-- 战场id
-	game.major    = major				-- 战场主类型
-	game.minor    = minor				-- 战场子类型
 	game.state    = ESTATES.PREPARE		-- 战场状态
 	game.stime    = 0					-- 开始时间（滴答 = 10毫秒）
 	game.etime    = 0					-- 结束时间（滴答 = 10毫秒）
@@ -332,12 +323,7 @@ function COMMAND.on_leave(alias, uid)
     if game.state ~= ESTATES.FINISHED then
       local vdata =
       {
-        quit       = true,                          -- 强退标志
-        teamid     = member.teamid,                     -- 队伍编号
-        point      = 0,                           -- 获得积分
-        addition   = {},                          -- 奖励加成
-        success    = false,                         -- 胜利标志
-        complete   = false,                         -- 完成标志
+        	score      = 0,                           -- 获得积分
       }
       member:notify("on_game_complete", vdata)
     end
