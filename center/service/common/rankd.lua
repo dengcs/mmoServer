@@ -365,11 +365,22 @@ end
 -------------------------------------------------
 --- 服务注册
 -------------------------------------------------
-service.register({
-	-- 消息广播类型
-	theme = GLOBAL.PROTO_TYPE.TERMINAL,
-	-- 垃圾收集标记
-	collect = "false",
-	-- 服务接口注册
-	CMD = COMMAND,
-})
+local handler = {}
+
+-- 消息分发逻辑
+-- 1. 消息来源
+-- 2. 消息类型
+-- 3. 消息内容
+function handler.command_handler(source, cmd, ...)
+	local fn = COMMAND[cmd]
+	if fn then
+		return fn(source, ...)
+	else
+		ERROR("svcmanager : command[%s] can't find!!!", cmd)
+	end
+end
+
+handler.init_handler = init_handler
+handler.exit_handler = exit_handler
+
+service.start(handler)

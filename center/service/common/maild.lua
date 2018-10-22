@@ -442,9 +442,9 @@ end
 ---------------------------------------------------------------------
 --- 服务回调接口
 ---------------------------------------------------------------------
-local server = {}
+local handler = {}
 
-function server.on_init(config)
+function handler.init_handler(config)
 	gm_mailbox = MailBox.new()
 	onlines[0] = gm_mailbox
 
@@ -457,16 +457,18 @@ function server.on_init(config)
 	schedule()
 end
 
--- 内部指令通知
--- 1. 指令来源
--- 2. 指令名称
--- 3. 执行参数
-function server.on_command(source, cmd, ...)
-    local fn = command[cmd]
-    if fn then
-        return fn(...)
-    end
+-- 消息分发逻辑
+-- 1. 消息来源
+-- 2. 消息类型
+-- 3. 消息内容
+function handler.command_handler(source, cmd, ...)
+	local fn = command[cmd]
+	if fn then
+		return fn(source, ...)
+	else
+		ERROR("svcmanager : command[%s] can't find!!!", cmd)
+	end
 end
 
 -- 启动网关服务
-service.simple.start(server)
+service.start(handler)

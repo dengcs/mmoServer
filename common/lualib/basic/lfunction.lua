@@ -63,68 +63,6 @@ function ERROR(fmt, ...)
     end
 end
 
-local function __CATCH_ERROR(message)
-    if not message then
-        return ENORET, "call failed"
-    end
-
-    local sp, ep = string.find(message, "%[%d+%]")
-    if sp == 1 and sp + 1 < ep then
-        local errno, text
-        errno = string.sub(message, sp + 1, ep - 1)
-        text = string.sub(message, ep + 1)
-        return errno, text
-    end
-
-    return ENORET, message
-end
-
-local function __DO_COMMAND(f, ...)
-    local ok, result = xpcall(f, function (message)
-        skynet.error(debug.traceback())
-        return message
-    end, ...)
-    if not ok then
-        return table.pack(ok, result)
-    end
-
-    return table.pack(0, result)
-end
-
-local function __SAFE_SEND(f, ...)
-    local ok, result = xpcall(f, function (message)
-        skynet.error(debug.traceback())
-        return message
-    end, ...)
-    if not ok then
-        LOG_ERROR(result)
-    end
-end
-
-local function __SAFE_CALL(f, ...)
-    local ok, result = xpcall(f, function (message)
-        LOG_ERROR(message)
-        skynet.error(debug.traceback())
-        return message
-    end, ...)
-    if not ok then
-        local errno, text = __CATCH_ERROR(result)
-        return skynet.ret(skynet.pack(errno, text))
-    end
-
-    return skynet.ret(skynet.pack(0, result))
-end
-
-function SAFE_HANDLER(session)
-    if not session then
-        return __DO_COMMAND
-    elseif session > 0 then
-        return __SAFE_CALL
-    else
-        return __SAFE_SEND
-    end
-end
-
 local function __BLANK_CALL(...)
     return ...
 end

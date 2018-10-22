@@ -46,17 +46,29 @@ end
 ---------------------------------------------------------------------
 --- 注册日志记录服务
 ---------------------------------------------------------------------
-service.register({
-    -- 服务导出接口
-    CMD = COMMAND,
-    -- 服务启动处理
-    init_handler = function()
-        roll()
-    end,
-    -- 服务退出处理
-    exit_handler = function()
-        if vhandler then
-            vhandler:close()
-        end
-    end,
-})
+local handler = {}
+
+-- 消息分发逻辑
+-- 1. 消息来源
+-- 2. 消息类型
+-- 3. 消息内容
+function handler.command_handler(source, cmd, ...)
+	local fn = COMMAND[cmd]
+	if fn then
+		return fn(source, ...)
+	else
+		ERROR("svcmanager : command[%s] can't find!!!", cmd)
+	end
+end
+
+function handler.init_handler()
+	roll()
+end
+
+function handler.exit_handler()
+	if vhandler then
+        vhandler:close()
+    end
+end
+
+service.start(handler)

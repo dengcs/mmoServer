@@ -55,14 +55,23 @@ end
 
 
 -- 注册服务
-nova.register_service {
-	-- 广播类型
-	theme = GLOBAL.PROTO_TYPE.TERMINAL,
-	-- 依赖的服务
-	require = {},
-	-- 垃圾回收
-	collect = "true",
-	-- 命令集合
-	CMD = CMD,
-    init_handler = init_handler,
-}
+
+local handler = {}
+
+-- 消息分发逻辑
+-- 1. 消息来源
+-- 2. 消息类型
+-- 3. 消息内容
+function handler.command_handler(source, cmd, ...)
+	local fn = CMD[cmd]
+	if fn then
+		return fn(source, ...)
+	else
+		ERROR("svcmanager : command[%s] can't find!!!", cmd)
+	end
+end
+
+handler.init_handler = init_handler
+handler.exit_handler = exit_handler
+
+service.start(handler)

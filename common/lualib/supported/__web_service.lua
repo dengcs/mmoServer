@@ -1,24 +1,12 @@
 local skynet = require "skynet_ex"
-
 local socket = require "skynet.socket"
 local sockethelper = require "http.sockethelper"
 local httpd = require "http.httpd"
-local sharedata = require "skynet.sharedata"
-
-local scheduler = require "scheduler"
+require "supported.common.assembly"
 
 local table = table
 local string = string
 local assert = assert
-
-setmetatable(_G, {
-    __newindex = function (_, k)
-        error("Attempt to write undeclared variable " .. k)
-    end,
-    __index = function (_, k)
-        error("Attempt to read undeclared variable " .. k)
-    end,
-})
 
 --[[
 
@@ -113,27 +101,15 @@ local function launch_slave(conf)
         do_request(fd, handler.message_handler)
     end
 
-    function CMD.schedule(_, func, interval, loop, args)
-        return scheduler.schedule(func, interval, loop, args)
-    end
-
-    function CMD.unschedule(_, session)
-        scheduler.unschedule(session)
-    end
-    
-    function CMD.unschedule_all()
-        scheduler.unschedule_all()
-    end
-
-    COMMAND_REGISTER("lua", function(session, source, cmd, ...)
-        local safe_handler = SAFE_HANDLER(session)
-        local f = CMD[cmd]
-        if f then
-            return safe_handler(f, source, ...)
-        else
-            return safe_handler(handler.command_handler, source, cmd, ...)
-        end
-    end)
+	SERVICE_COMMAND_REGISTER("lua", function(session, source, cmd, ...)
+	    local safe_handler = SAFE_HANDLER(session)
+	    local f = CMD[cmd]
+	    if f then
+	        return safe_handler(f, source, ...)
+	    else
+	        return safe_handler(conf.command_handler, source, cmd, ...)
+	    end
+	end)
 end
 
 local function launch_master(conf)
@@ -177,7 +153,7 @@ local function launch_master(conf)
             local s = slave[i]
             skynet.call(s, "lua", "init", conf)
         end
-
+		DO_READY()
         -- 启动服务逻辑
         if IS_TRUE(conf.auto) then
             this.start(conf)
@@ -229,7 +205,7 @@ local function launch_master(conf)
             skynet.send(s, "lua", "start", ...)
         end
 
-        DO_STARTUP()
+        DO_START()
 
         return 0
     end
@@ -265,22 +241,10 @@ local function launch_master(conf)
             skynet.send(s, "lua", "collect")
         end
 
-        AUTO_GC()
+        collectgarbage("collect")
     end
 
-    function CMD.schedule(_, func, interval, loop, args)
-        return scheduler.schedule(func, interval, loop, args)
-    end
-
-    function CMD.unschedule(_, session)
-        scheduler.unschedule(session)
-    end
-    
-    function CMD.unschedule_all()
-        scheduler.unschedule_all()
-    end
-
-    COMMAND_REGISTER("lua", function(session, source, cmd, ...)
+    SERVICE_COMMAND_REGISTER("lua", function(session, source, cmd, ...)
         local safe_handler = SAFE_HANDLER(session)
         local f = CMD[cmd]
         if f then

@@ -148,14 +148,23 @@ local function exit_handler()
 end
 
 -- 服务注册
-service.register({
-	-- 消息广播类型
-	theme = GLOBAL.PROTO_TYPE.USERINTER,
-	-- 垃圾收集
-	collect = "false",
-	-- 服务接口注册
-	CMD = CMD,
-	-- 服务通知接口（注册到底层框架并由底层框架触发）
-    init_handler = init_handler,
-    exit_handler = exit_handler
-})
+
+local handler = {}
+
+-- 消息分发逻辑
+-- 1. 消息来源
+-- 2. 消息类型
+-- 3. 消息内容
+function handler.command_handler(source, cmd, ...)
+	local fn = CMD[cmd]
+	if fn then
+		return fn(source, ...)
+	else
+		ERROR("svcmanager : command[%s] can't find!!!", cmd)
+	end
+end
+
+handler.init_handler = init_handler
+handler.exit_handler = exit_handler
+
+service.start(handler)

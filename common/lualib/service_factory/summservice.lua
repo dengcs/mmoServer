@@ -4,27 +4,15 @@ require "skynet.manager"
 local service = require "service_factory.service"
 local method = require "method"
 
-setmetatable(_G, {
-    __newindex = function (_, k)
-        error("Attempt to write undeclared variable " .. k)
-    end,
-    __index = function (_, k)
-        error("Attempt to read undeclared variable " .. k)
-    end,
-})
-
 --[[
 
 摘要管理器相关属性记录格式：
     {
         module: 启动目标服务所需的模块路径
         name: 供任务管理器调度所用的服务别名
-        master: 服务部署类型，参考‘GLOBAL.MASTER_TYPE’宏定义
-        proto: 服务协议类型，参考‘GLOBAL.PROTO_TYPE’宏定义
         unique: 服务启动模式类型，可设置全局唯一或多实例类型
         auto：服务启动管理类型，可设为自动/手动进行启动指令触发
         collect: 服务内存回收类型，可设为自动/手动方式进行回收管理
-        delegate: 服务外部提供支持的回调模块路径
     }
 
 ]]
@@ -34,11 +22,6 @@ local server = {}
 local service_mapping = {}
 local service_open_order_list = {} -- 服务实例的启动顺序
 local service_gclist = {}
-
--- 外部委托接口自动配置的映射列表
--- 若用户已设置委托代理，则忽略该配置
--- 若用户未设置委托代理，且配置中存在对应服务名称的委托接口配置参数，则自动设置到该服务的初始配置中
-local delegate_mapping = {}
 
 -- 通过名称获取服务句柄？？
 function server.do_query(name)
@@ -87,23 +70,11 @@ function server.start(conf)
         service_gclist[name]  = collect
         table.insert(service_open_order_list, name)
 
-        -- ？？
-        if not conf.master then
-            conf.master = GLOBAL.MASTER_TYPE.SUMMD
-        end
-
-        -- ？？
-        if not conf.delegate then
-            conf.delegate = delegate_mapping[name]
-        end
-
         -- 服务初始化调用
         local err
         local ok, result = skynet.call(service, "lua", "init", conf)
         if ok > 0 then
             err = result
-        elseif result > 0 then
-            err = EXCEPTION_MESSAGE(ECOMM, "call: %s: function caused service abort", name)
         end
 
         if err then
@@ -177,15 +148,6 @@ function server.start(conf)
     -- 'summd'服务初始化通知
     -- 1. 初始化配置
     function handler.init_handler(conf)
-        if conf.agent_list then
-            delegate_mapping = {}
-
-            for _, v in pairs(conf.agent_list) do
-                assert(v.name and v.file, "invalid arguments")
-
-                delegate_mapping[v.name] = v.file
-            end
-        end
     end
 
     function handler.exit_handler()
@@ -196,8 +158,6 @@ function server.start(conf)
 
         service_mapping = {}
         service_gclist = {}
-
-        delegate_mapping = {}
 
         if conf.exit_handler then
             conf.exit_handler()

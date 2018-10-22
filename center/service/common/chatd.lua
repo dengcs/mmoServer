@@ -77,11 +77,23 @@ function CMD.ban_user(uids, end_time, forever)
 end
 
 -- 服务注册
-service.register({
-	-- 垃圾收集
-	collect = "false",
-	-- 服务接口注册
-    CMD = CMD,
-    init_handler = init_handler,
-    exit_handler = exit_handler,
-})
+
+local handler = {}
+
+-- 消息分发逻辑
+-- 1. 消息来源
+-- 2. 消息类型
+-- 3. 消息内容
+function handler.command_handler(source, cmd, ...)
+	local fn = CMD[cmd]
+	if fn then
+		return fn(source, ...)
+	else
+		ERROR("svcmanager : command[%s] can't find!!!", cmd)
+	end
+end
+
+handler.init_handler = init_handler
+handler.exit_handler = exit_handler
+
+service.start(handler)

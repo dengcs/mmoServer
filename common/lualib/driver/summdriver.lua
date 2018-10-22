@@ -47,23 +47,19 @@ function summdriver.autoload(t)
     return __call("autoload", t)
 end
 
-function summdriver.newservice(module, name, proto)
+function summdriver.newservice(module, name)
     return __call("open", {
         module = module,
         name = name,
-        master = GLOBAL.MASTER_TYPE.SUMMD,
-        proto = proto,
         unique = false,
         proxy = false,
     })
 end
 
-function summdriver.uniqueservice(module, name, proto)
+function summdriver.uniqueservice(module, name)
     return __call("open", {
         module = module,
         name = name,
-        master = GLOBAL.MASTER_TYPE.SUMMD,
-        proto = proto,
         unique = true,
         proxy = false,
     })
@@ -92,15 +88,5 @@ end
 -- function summdriver.unschedule(name)
 --     skynet.send(GLOBAL.SERVICE_NAME.SCHEDULED, "lua", "unschedule", name)
 -- end
-
--- 加入服务
-function summdriver.join(name, uid, cb)
-    return __call("join", name, uid, skynet.self(), cb)
-end
-
--- 离开服务
-function summdriver.leave(name, uid)
-    return __call("leave", name, uid)
-end
 
 return summdriver
