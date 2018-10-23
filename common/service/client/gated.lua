@@ -1,52 +1,72 @@
 local skynet = require "skynet"
 local wsservice = require "service_factory.wsservice"
 
-local connection = {}
+local sessions = {}
 
 local ip,port = ...
 
 local CMD = {}
 local handler = {}
 
-function handler.on_open(fd)
-    local agent = skynet.newservice("agentd")
-    
-    local c = {
-      fd = fd,
-      agent = agent
-    }
-    
-    connection[fd] = c    
+local open_number = 0
+
+function handler.on_connect(fd)
+	local session = sessions[fd]
+	if not session then
+	    local agent = skynet.newservice("agentd")
+	    
+	    local session = {
+	      fd = fd,
+	      agent = agent
+	    }
+	    
+	    sessions[fd] = session
+	    
+	    skynet.send(agent, "lua", "connect", session) 
+	end
+	
+	print("open_number:"..open_number)
 end
 
-function handler.on_close(fd)
-    local c = connection[fd]
-    if c then
-        skynet.send(c.agent, "lua", "disconnect")
-        connection[fd] = nil
+function handler.on_disconnect(fd)
+    print(string.format("%d disconnect", fd))
+    
+    local session = sessions[fd]
+    if session then
+        skynet.send(session.agent, "lua", "disconnect")        
+        sessions[fd] = nil
     end
 end
 
-function handler.on_connect(ws)
-    local c = connection[ws.id]
+function handler.on_open(ws)
+    print(string.format("%d::open", ws.id))
     
-    if c then
-        skynet.call(c.agent, "lua", "connect", c)
-    end
+    local session = sessions[ws.id]
+    
+    if session then
+        skynet.call(session.agent, "lua", "open")
+	    session.ws = ws
+	    open_number = open_number + 1
+    end    
 end
 
 function handler.on_message(ws, message)
-    local c = connection[ws.id]
-    if c then
-        skynet.send(c.agent, "lua", "message", message)
+    print(string.format("%d receive:%s", ws.id, message))
+    
+    local session = sessions[ws.id]
+    if session then
+        skynet.send(session.agent, "lua", "message", message)
     end
 end
 
-function handler.on_disconnect(ws)
-    local c = connection[ws.id]
-    if c then
-        skynet.send(c.agent, "lua", "disconnect")
-        connection[ws.id] = nil
+function handler.on_close(ws, code, reason)
+    print(string.format("%d close:%s  %s", ws.id, code, reason))
+    
+    local session = sessions[ws.id]
+    if session then
+        skynet.send(session.agent, "lua", "close")        
+        sessions[ws.id] = nil
+        open_number = open_number - 1
     end
 end
 
@@ -54,15 +74,33 @@ function handler.configure()
     return {ip=ip,port=port}
 end
 
+-- 关闭客户端
+function CMD.logout(fd)
+  local session = sessions[fd]
+  if session then
+  	  local ws = session.ws
+  	  if ws then
+	      ws:close()
+  	  end
+  end
+end
+
+-- 返回消息到客户端
+function CMD.response(fd,msg)
+	local session = sessions[fd]
+	if session then
+  	  	local ws = session.ws
+  	  	if ws then
+	      ws:send_binary(msg)
+  	  	end
+	end
+end
+
 function handler.command(cmd,...)
     local fn = CMD[cmd]
     if fn then
       fn(...)
     end
-end
-
-function CMD.test()
-  
 end
 
 wsservice.start(handler)

@@ -273,7 +273,6 @@ function service.start(conf)
             launch_master = nil
             launch_slave(conf)
         else
-            print("http master is failed "..name)
             launch_slave = nil
             skynet.register(name)
             launch_master(conf)

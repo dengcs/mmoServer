@@ -11,22 +11,37 @@ local datameta      -- 用户数据
 local CMD = {}
 local Handle = {}
 
+local function unload()
+	if datameta then
+		local player = datameta:get("Player")
+		if player then
+			skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "unload", player.uid)
+		end
+	end
+end
+
 function CMD.connect(c)
-  session = c
-  net_dispatcher = dispatcher.new()
-  net_dispatcher:register_handle()
-  
-  datameta = userdata.new("w")
-  datameta:register(usermeta)
-  
-  session.data = datameta
+	session = c
+	net_dispatcher = dispatcher.new()
+	net_dispatcher:register_handle()
 end
 
 function CMD.disconnect()
-	local player = datameta:get("Player")
-	if player then
-		skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "unload", player.uid)
+	unload()
+	skynet.exit()
+end
+
+function CMD.open(c)
+	if session then
+	  datameta = userdata.new("w")
+	  datameta:register(usermeta)
+	  
+	  session.data = datameta
 	end
+end
+
+function CMD.close()
+	unload()
 	skynet.exit()
 end
 

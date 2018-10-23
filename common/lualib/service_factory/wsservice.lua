@@ -7,81 +7,32 @@ local sockethelper = require "http.sockethelper"
 
 local wsService = {}
 
-function wsService.start(processor)
-    assert(processor)
+function wsService.start(handler)
+    assert(handler)
+    
     local maxclient = 5000 -- max client
-    local client_number = 0
-    local connection = {}
+	local client_number = 0
     
     local CMD = {}
-    local handler = {}
-    function handler.on_open(ws)
-        print(string.format("%d::open", ws.id))
-        
-        if processor.on_connect then
-            processor.on_connect(ws)
+    
+    local function on_connect(socket_id)
+        if handler.on_connect then
+            handler.on_connect(socket_id)
         end
-        
-        connection[ws.id] = ws
         client_number = client_number + 1
+        print("on_connect client_number:"..client_number)
     end
     
-    function handler.on_message(ws, message)
-        print(string.format("%d receive:%s", ws.id, message))
-        
-        local c = connection[ws.id]
-        if c then
-            if processor.on_message then
-                processor.on_message(ws, message)
-            end
+    local function on_disconnect(socket_id)
+        if handler.on_disconnect then
+            handler.on_disconnect(socket_id)
         end
-    end
-    
-    function handler.on_close(ws, code, reason)
-        print(string.format("%d close:%s  %s", ws.id, code, reason))
-        
-        local c = connection[ws.id]
-        if c then
-            if processor.on_disconnect then
-                processor.on_disconnect(ws, code, reason)
-            end
-            
-            connection[ws.id] = nil
-            client_number = client_number - 1
-        end
-    end
-    
-    -- 关闭客户端
-    function CMD.logout(fd)
-      local ws = connection[fd]
-      if ws then
-          ws:close()
-      end
-    end
-    
-    -- 返回消息到客户端
-    function CMD.response(fd,msg)
-        local ws = connection[fd]
-        if ws then
-            ws:send_binary(msg)
-        end
-    end
-    
-    local function handle_open(socket_id)
-        if processor.on_open then
-            processor.on_open(socket_id)
-        end
-    end
-    
-    local function handle_close(socket_id)
-        socket.close(socket_id)
-        if processor.on_close then
-            processor.on_close(socket_id)
-        end
+        client_number = client_number - 1
+        print("on_disconnect client_number:"..client_number)
     end
     
     
-    local function handle_socket(id, addr)
+    local function accept(id, addr)
         -- limit request body size to 8192 (you can pass nil to unlimit)
         local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(id), 8192)
         if code then
@@ -90,16 +41,14 @@ function wsService.start(processor)
                 local ws = websocket.new(id, header, handler, conf)
                 if ws then
                     ws:start()
-                else
-                    handle_close(id)
+                    return true
                 end
-            else
-                handle_close(id)
             end
-        end  
+        end
+        return false
     end
     
-    local conf = processor.configure()
+    local conf = handler.configure()
     
     skynet.start(function()
         assert(conf.ip, "配置缺少ip项")
@@ -112,9 +61,12 @@ function wsService.start(processor)
             if client_number > maxclient then
                 socket.close(socket_id)
             else
-                handle_open(socket_id)
+                on_connect(socket_id)
                 socket.start(socket_id)
-                pcall(handle_socket, socket_id, addr)
+                local ok = pcall(accept, socket_id, addr)
+                if not ok then
+                	on_disconnect(socket_id)
+                end
             end
         end)
         
@@ -123,7 +75,7 @@ function wsService.start(processor)
           if f then
             skynet.ret(skynet.pack(f(...)))
           else
-            skynet.ret(skynet.pack(processor.command(cmd,...)))
+            skynet.ret(skynet.pack(handler.command(cmd,...)))
           end
         end)
     end)
