@@ -25,18 +25,6 @@ local ESTATES =
 	FINISHED	= 5,		-- 比赛结束阶段
 }
 
--- 赛前准备时间（秒）
-local GAME_PREPARE_DURATION = 60
-
--- 比赛预备时长（秒）
-local GAME_READY_DURATION   = 30
-
--- 默认比赛时长（秒）
-local GAME_MATCH_DURATION   = 600
-
--- 比赛结算时长（秒）
-local GAME_FINISH_DURATION  = 150
-
 -----------------------------------------------------------
 --- 赛道选择
 -----------------------------------------------------------
@@ -115,6 +103,10 @@ function Member:notify(name, data)
 	if self.online ~= 1 then
 		return
 	end
+	-- 过滤机器人
+	if self.robot then
+		return
+	end
 	-- 战场消息通知
 	if self.agent ~= nil then
 		skynet.send(self.agent, "lua", "on_common_notify", name, data)
@@ -166,16 +158,18 @@ function Game:close()
 		end		
 	end
 	
-	games[self.id] = nil
+	games[self.alias] = nil
 end
 
 -- 加入战场
 function Game:join(member)
 	if member ~= nil then
 		-- 加入服务
-		local errcode = enter_environment()
-		if errcode ~= 0 then
-			return nil
+		if not member.robot then
+			local errcode = enter_environment(member.uid, self.alias)
+			if errcode ~= 0 then
+				return nil
+			end
 		end
 		table.insert(self.members, member)
 	end
@@ -191,7 +185,9 @@ function Game:quit(uid)
   			v.online = 3
 			-- 记录退出成员
 			member = v
-			leave_environment()
+			if not v.robot then
+				leave_environment(uid, self.alias)
+			end
 			break
 		end
 	end
@@ -279,13 +275,14 @@ function Game:snapshot()
 		snapshot.portrait = member.portrait
 		snapshot.ulevel   = member.ulevel
 		snapshot.vlevel   = member.vlevel
-		snapshot.robot	  = member.robot
+		snapshot.state	  = member.state
 		snapshot.portrait_box_id = member.portrait_box_id
 		return snapshot
 	end
 	-- 构造信息
 	local data =
 	{
+		state = self.state,
 		members  = {},
 	}
 	for _, v in pairs(self.members) do
@@ -294,14 +291,20 @@ function Game:snapshot()
 	return data
 end
 
+-- 开始游戏
+function Game:start()
+	self:broadcast("game_start_notify", self:snapshot())
+end
+
 -- 创建战场
 function COMMAND.on_create(alias, users)
-	local result = {}
 	-- 构造战场
 	local game = Game.new(alias, users)
 	if game == nil then
 		return ERRCODE.GAME_CREATE_FAILED
 	end
+
+	game:start()
 
 	return 0
 end
@@ -327,13 +330,13 @@ function COMMAND.on_leave(alias, uid)
 			{
 				score      = 0,                           -- 获得积分
 			}
-			member:notify("on_game_complete", vdata)
+			member:notify("game_complete_notify", vdata)
 		end
 		-- 清理战场
 		if game:empty() then
 			game:close()
 		else
-			game:broadcast("game_player_quit", {uid = member.uid})
+			game:broadcast("game_quit__notify", {uid = member.uid})
 		end
 	end
 	return 0
@@ -354,7 +357,7 @@ function COMMAND.on_game_update(alias, uid, data)
 		return ERRCODE.GAME_NOT_MEMBER
 	end
 
-	game:broadcast("game_update_notify", data)
+	game:broadcast("game_update_notify", {data = data})
 	return 0
 end
 

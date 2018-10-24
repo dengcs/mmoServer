@@ -189,7 +189,7 @@ end
 -- 2. 命令来源
 -- 3. 命令名称
 -- 4. 命令参数
-function M:command_dispatch(session, source, cmd, ...)
+function M:command_dispatch(session, cmd, ...)
 	return command_execute(self.COMMAND, cmd, self:user_context(session), ...)
 end
 

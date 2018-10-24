@@ -174,6 +174,7 @@ local function schedule()
 			for _, team in pairs(channel.teams) do
 				if team:prepare() then
 					if team:full() then
+						team:start()
 						utils.start(1,1,team:snapshot())
 					else
 						local member = robot.generate_robot()
@@ -203,7 +204,7 @@ function COMMAND.on_create(cid, vdata)
     -- 获取频道
     local channel = channels[cid]
 	if channel == nil then
-		return ERRCODE.ROOM_UNKNOWN_CHANNEL
+		return ERRCODE.COMMON_PARAMS_ERROR
 	end
 
     -- 创建房间
@@ -223,16 +224,16 @@ function COMMAND.on_join(cid, tid, vdata)
     -- 获取频道
     local channel = channels[cid]
     if channel == nil then
-        return ERRCODE.ROOM_UNKNOWN_CHANNEL
+        return ERRCODE.COMMON_PARAMS_ERROR
     end
     
     -- 队伍检查
     local team = channel:get(tid)
     if team == nil then
-        return ERRCODE.ROOM_NOT_EXISTS
+        return ERRCODE.COMMON_CLIENT_ERROR
     end
     if not team:prepare() then
-        return ERRCODE.ROOM_NOT_PERPARE
+        return ERRCODE.COMMON_CLIENT_ERROR
     end
     
     -- 加入队伍
@@ -240,7 +241,7 @@ function COMMAND.on_join(cid, tid, vdata)
     if member ~= nil then
         return 0
     else
-        return ERRCODE.ROOM_JOIN_FAILED
+        return ERRCODE.COMMON_SYSTEM_ERROR
     end
 end
 
@@ -253,7 +254,7 @@ function COMMAND.on_invite(cid, tid, source, target)
 	-- 获取频道
 	local channel = channels[cid]
 	if channel == nil then
-		return ERRCODE.ROOM_UNKNOWN_CHANNEL
+		return ERRCODE.COMMON_PARAMS_ERROR
 	end
 	-- 队伍检查
 	local team = channel:get(tid)
@@ -289,7 +290,7 @@ function COMMAND.on_chat(cid, tid, name, data)
     -- 获取频道
     local channel = channels[cid]
     if channel == nil then
-		return ERRCODE.ROOM_UNKNOWN_CHANNEL
+		return ERRCODE.COMMON_PARAMS_ERROR
     end
     -- 队伍检查
     local team = channel:get(tid)
@@ -310,7 +311,7 @@ function COMMAND.on_stop(cid, tid, uid)
 	-- 获取频道
 	local channel = channels[cid]
 	if channel == nil then
-		return ERRCODE.ROOM_UNKNOWN_CHANNEL
+		return ERRCODE.COMMON_PARAMS_ERROR
 	end
 	-- 队伍检查
 	local team = channel:get(tid)
@@ -340,7 +341,7 @@ function COMMAND.on_game_finish(vdata, uid)
     -- 获取频道
     local channel = channels[cid]
     if channel == nil then
-      return ERRCODE.ROOM_UNKNOWN_CHANNEL
+      return ERRCODE.COMMON_PARAMS_ERROR
     end
     -- 队伍检查
     local team = channel:get(tid)

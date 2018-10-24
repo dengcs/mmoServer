@@ -7,23 +7,6 @@ local sharedata = require "skynet.sharedata"
 ---------------------------------------------------------------------
 --- 服务框架调用方法
 ---------------------------------------------------------------------
-
-local function __CATCH_ERROR(message)
-    if not message then
-        return ENORET, "call failed"
-    end
-
-    local sp, ep = string.find(message, "%[%d+%]")
-    if sp == 1 and sp + 1 < ep then
-        local errno, text
-        errno = string.sub(message, sp + 1, ep - 1)
-        text = string.sub(message, ep + 1)
-        return errno, text
-    end
-
-    return ENORET, message
-end
-
 local function __DO_COMMAND(f, ...)
     local ok, result = xpcall(f, function (message)
         skynet.error(debug.traceback())
@@ -53,8 +36,7 @@ local function __SAFE_CALL(f, ...)
         return message
     end, ...)
     if not ok then
-        local errno, text = __CATCH_ERROR(result)
-        return skynet.ret(skynet.pack(errno, text))
+        return skynet.ret(skynet.pack(ok, result))
     end
 
     return skynet.ret(skynet.pack(0, result))

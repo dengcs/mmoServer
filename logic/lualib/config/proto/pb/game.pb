@@ -1,6 +1,6 @@
 
-Ð
-src/game.protogame"‚
+Ü
+src/game.protogame"î
 
 GameMember
 teamid (Rteamid
@@ -12,15 +12,21 @@ GameMember
 state (Rstate
 ulevel	 (Rulevel
 vlevel
- (Rvlevel
-skin (Rskin"H
-Game
-state (Rstate*
-members (2.game.GameMemberRmembers"
-game_update"
+ (Rvlevel"!
+game_update
+data (	Rdata"
 game_submit
 uid (	Ruid"
 
 game_leave"#
 game_leave_resp
-ret (Rretbproto3
+ret (Rret"(
+game_update_notify
+data (	Rdata"%
+game_quit__notify
+uid (	Ruid",
+game_complete_notify
+score (Rscore"U
+game_start_notify
+state (Rstate*
+members (2.game.GameMemberRmembersbproto3

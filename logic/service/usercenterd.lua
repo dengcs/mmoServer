@@ -64,8 +64,8 @@ function COMMAND.load(source, uid)
         	retval = json.decode(retval)
         end
         
-        local objcpy = skynet.call(source, "lua", "data_set", name, retval)
-        if not objcpy then
+        local ok, objcpy = skynet.call(source, "lua", "data_set", name, retval)
+        if ok ~= 0 and not objcpy then
             ERROR("usercenterd : component[%s] bind failed!!!", name)
         end
         user:init(name, objcpy)

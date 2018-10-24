@@ -9,7 +9,7 @@
 ---------------------------------------------------------------------
 local skynet = require "skynet"
 local scheduler = require "scheduler"
-require "supported.common.assembly"
+require "assembly"
 
 -- 系统服务框架
 local service = {}

@@ -29,11 +29,11 @@ function COMMAND:on_enter_environment(state, param, force)
 	{
 		-- 角色加入战场
 		[ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME] = function(player, param, force)
-			if ENUM.inspect_player_idle(player) or ENUM.inspect_player_game(player) then
-				return false
-			else                
+			if ENUM.inspect_player_idle(player) or force then
 				change_player_state(player, ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME, param)
 				return true
+			else
+				return false
 			end
 		end,
 		-- 角色加入房间

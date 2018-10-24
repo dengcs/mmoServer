@@ -19,6 +19,9 @@ function REQUEST:room_create()
     
     local vdata = player:call("get_snapshot")
     local ok = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", 1, vdata)
+    if ok ~= 0 then
+        ret = ERRCODE.ROOM_CREATE_FAILED
+    end
 
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)

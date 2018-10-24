@@ -54,7 +54,6 @@ function server.start(conf)
 
         -- 绑定服务名称
         if name then
-            print("dcs--name--"..name)
             skynet.name(name, service)
         end
 

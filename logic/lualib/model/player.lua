@@ -24,6 +24,8 @@ function Player:on_login(uid)
 		self.uid = uid
 		self:commit()
 	end
+
+	self.state = 1
 end
 
 -- 唤醒处理

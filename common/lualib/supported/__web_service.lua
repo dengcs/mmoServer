@@ -2,7 +2,7 @@ local skynet = require "skynet_ex"
 local socket = require "skynet.socket"
 local sockethelper = require "http.sockethelper"
 local httpd = require "http.httpd"
-require "supported.common.assembly"
+require "assembly"
 
 local table = table
 local string = string

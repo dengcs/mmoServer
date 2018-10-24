@@ -2,8 +2,8 @@ local skynet = require "skynet"
 local socket = require "skynet.socket"
 local websocket = require "websocket"
 local httpd = require "http.httpd"
-local urllib = require "http.url"
 local sockethelper = require "http.sockethelper"
+require "assembly"
 
 local wsService = {}
 
@@ -70,13 +70,14 @@ function wsService.start(handler)
             end
         end)
         
-        skynet.dispatch("lua", function (_, address, cmd, ...)
-          local f = CMD[cmd]
-          if f then
-            skynet.ret(skynet.pack(f(...)))
-          else
-            skynet.ret(skynet.pack(handler.command(cmd,...)))
-          end
+        skynet.dispatch("lua", function (session, source, cmd, ...)
+            local safe_handler = SAFE_HANDLER(session)
+            local f = CMD[cmd]
+            if f then
+                return safe_handler(f, source, ...)
+            else
+                return safe_handler(handler.command, cmd, ...)
+            end
         end)
     end)
 end

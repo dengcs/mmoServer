@@ -8,7 +8,8 @@ local robot = {}
 local SEQUENCE  = 9000000
 local function allocid()
 	SEQUENCE = SEQUENCE + 1
-	return SEQUENCE
+	local robotId = string.format("Rt.%s", SEQUENCE)
+	return robotId
 end
 
 function robot.generate_robot()

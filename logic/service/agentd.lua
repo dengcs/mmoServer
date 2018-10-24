@@ -2,6 +2,7 @@ local skynet = require "skynet"
 local dispatcher = require "net.dispatcher"
 local userdata = require "data.userdata"
 local usermeta = require "config.usermeta"
+require "assembly"
 
 local session
 -- 网络消息分发器
@@ -9,7 +10,6 @@ local net_dispatcher
 local datameta      -- 用户数据
 
 local CMD = {}
-local Handle = {}
 
 local function unload()
 	if datameta then
@@ -20,7 +20,7 @@ local function unload()
 	end
 end
 
-function CMD.connect(c)
+function CMD.connect(source, c)
 	session = c
 	net_dispatcher = dispatcher.new()
 	net_dispatcher:register_handle()
@@ -31,7 +31,7 @@ function CMD.disconnect()
 	skynet.exit()
 end
 
-function CMD.open(c)
+function CMD.open()
 	if session then
 	  datameta = userdata.new("w")
 	  datameta:register(usermeta)
@@ -45,55 +45,42 @@ function CMD.close()
 	skynet.exit()
 end
 
-function CMD.message(msg)
+function CMD.message(source, msg)
   if session then
---      local code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","decode",msg)
---      code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","encode",1001,"AwesomeMessage",result.data,0)
---      skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",csession.fd,result)
         net_dispatcher:message_dispatch(session, msg)
   end
 end
 
-function Handle.login()
-    
-end
+function CMD.data_set(source, name, data)
+	local retval = datameta:init(name, data)
+	if not retval then
+		ERROR("usermeta:init(name = %s) failed!!!", name)
+	end
 
-function Handle.logout()
+	local result = retval:copy()
 
-end
-
-function Handle.data_set(name, data)    
-    local retval = datameta:init(name, data)
-    if not retval then
-      ERROR("usermeta:init(name = %s) failed!!!", name)
-    end
-    
-    local result = retval:copy()
-    
-    return result
+	return result
 end
 
 -- 内部命令转发
 -- 1. 命令来源
 -- 2. 命令名称
 -- 3. 命令参数
-local function command_handler(command, ...)
-    local fn = assert(Handle[command])
-    if fn then
-       return fn(...)
-    else   
-       skynet.error("This function is not implemented.")
-    end
+local function command_handler(source, command, ...)
+	if session then
+		return net_dispatcher:command_dispatch(session, command, ...)
+	end
 end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, ...)
-	   	 skynet.error("dcs---cmd--"..cmd)
-		 local fn = CMD[cmd]
-		 if fn then
-			skynet.ret(skynet.pack(fn(...)))
-		 else
-			skynet.ret(skynet.pack(command_handler(cmd, ...)))
-		 end
+		skynet.error("dcs---cmd--"..cmd)
+		local safe_handler = SAFE_HANDLER(session)
+		local fn = CMD[cmd]
+		if fn then
+			return safe_handler(fn, source, ...)
+		else
+			return safe_handler(command_handler, source, cmd, ...)
+		end
 	end)
 end)
