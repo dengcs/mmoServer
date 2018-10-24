@@ -63,24 +63,6 @@ function COMMAND:on_enter_environment(state, param, force)
 				return false
 			end
 		end,
-		-- 角色加入限时活动
-		[ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_ACTIVITY] = function(player, param, force)
-			if ENUM.inspect_player_idle(player) or force then
-				change_player_state(player, ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_ACTIVITY, param)
-				return true
-			else
-				return false
-			end
-		end,
-		-- 角色加入车队赛
-		[ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_FACTION] = function(player, param, force)
-			if ENUM.inspect_player_idle(player) or force then
-				change_player_state(player, ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_FACTION, param)
-				return true
-			else
-				return false
-			end
-		end,
 	}
 	local fn = switch[state]
 	if fn ~= nil then

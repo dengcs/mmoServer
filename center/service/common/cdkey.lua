@@ -232,7 +232,7 @@ local handler = {}
 function handler.command_handler(source, cmd, ...)
 	local fn = COMMAND[cmd]
 	if fn then
-		return fn(source, ...)
+		return fn(...)
 	else
 		ERROR("svcmanager : command[%s] can't find!!!", cmd)
 	end

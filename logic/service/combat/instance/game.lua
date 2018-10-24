@@ -93,6 +93,7 @@ function Member.new(vdata)
 	member.score      = vdata.score			-- 角色积分
 	member.state      = 0					-- 角色状态（0 - 准备， 1 - 就绪）
 	member.online     = 1					-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
+	member.robot      = vdata.robot			-- 是否是机器人
 	-- 设置战场数据
 	member.game =
 	{
@@ -187,7 +188,7 @@ function Game:quit(uid)
 	for _, v in pairs(self.members) do		
 		-- 成员离线处理
 		if v.uid == uid then
-  		v.online = 3
+  			v.online = 3
 			-- 记录退出成员
 			member = v
 			leave_environment()
@@ -278,6 +279,7 @@ function Game:snapshot()
 		snapshot.portrait = member.portrait
 		snapshot.ulevel   = member.ulevel
 		snapshot.vlevel   = member.vlevel
+		snapshot.robot	  = member.robot
 		snapshot.portrait_box_id = member.portrait_box_id
 		return snapshot
 	end
@@ -293,48 +295,48 @@ function Game:snapshot()
 end
 
 -- 创建战场
-function COMMAND.on_create(alias, major, minor, users)
-  local result = {}
-  -- 构造战场
-  local game = Game.new(alias, major, minor, users)
-  if game == nil then
-    return ERRCODE.GAME_CREATE_FAILED
-  end
-  
-  return 0
+function COMMAND.on_create(alias, users)
+	local result = {}
+	-- 构造战场
+	local game = Game.new(alias, users)
+	if game == nil then
+		return ERRCODE.GAME_CREATE_FAILED
+	end
+
+	return 0
 end
 
 -- 关闭战场（通过'game.close'间接调用）
 -- 1. 战场编号
 function COMMAND.on_close(alias)  
-  return 0
+  	return 0
 end
 
 -- 离开战场（成员强制离开）
 -- 1. 战场编号
 -- 2. 角色编号
 function COMMAND.on_leave(alias, uid)
-  local game = games[alias]
-  assert(game, "game.on_leave() : game not exists!!!")
-  
-  local member = game:quit(uid)
-  if member ~= nil then
-    -- 战斗结算（战场未完成状态）
-    if game.state ~= ESTATES.FINISHED then
-      local vdata =
-      {
-        	score      = 0,                           -- 获得积分
-      }
-      member:notify("on_game_complete", vdata)
-    end
-    -- 清理战场
-    if game:empty() then
-      game:close()
-    else
-      game:broadcast("game_player_quit", {uid = member.uid})
-    end
-  end
-  return 0
+	local game = games[alias]
+	assert(game, "game.on_leave() : game not exists!!!")
+
+	local member = game:quit(uid)
+	if member ~= nil then
+		-- 战斗结算（战场未完成状态）
+		if game.state ~= ESTATES.FINISHED then
+			local vdata =
+			{
+				score      = 0,                           -- 获得积分
+			}
+			member:notify("on_game_complete", vdata)
+		end
+		-- 清理战场
+		if game:empty() then
+			game:close()
+		else
+			game:broadcast("game_player_quit", {uid = member.uid})
+		end
+	end
+	return 0
 end
 
 
@@ -343,17 +345,17 @@ end
 -- 2. 角色编号
 -- 3. 战场数据
 function COMMAND.on_game_update(alias, uid, data)
-  local game = games[alias]
-  assert(game, "on_game_update() : game not exists!!!")
-  
-  -- 成员检查
-  local member = game:get(uid)
-  if member == nil then
-    return ERRCODE.GAME_NOT_MEMBER
-  end
-  
-  game:broadcast("game_update_notify", data)
-  return 0
+	local game = games[alias]
+	assert(game, "on_game_update() : game not exists!!!")
+
+	-- 成员检查
+	local member = game:get(uid)
+	if member == nil then
+		return ERRCODE.GAME_NOT_MEMBER
+	end
+
+	game:broadcast("game_update_notify", data)
+	return 0
 end
 
 -- 战场数据转发
@@ -361,11 +363,11 @@ end
 -- 2. 数据名称
 -- 3. 数据内容
 function COMMAND.on_game_forward(alias, name, data)
-  local game = games[alias]
-  assert(game, "on_game_update() : game not exists!!!")
-  
-  game:broadcast(name, data)
-  return 0
+	local game = games[alias]
+	assert(game, "on_game_update() : game not exists!!!")
+
+	game:broadcast(name, data)
+	return 0
 end
 
 -----------------------------------------------------------
@@ -375,38 +377,38 @@ end
 -- 战场关闭（延时关闭，确保用户成功返回组队服务）
 -- 1. 战场编号
 function COMMAND.game_finish_complete(alias)
-  local game = games[alias]
-  assert(game, "game_finish_complete() : game not exists!!!")
-  
-  if game.state == ESTATES.FINISHED then
-    -- 关闭战场
-    game:close()
-  end  
+	local game = games[alias]
+	assert(game, "game_finish_complete() : game not exists!!!")
+
+	if game.state == ESTATES.FINISHED then
+		-- 关闭战场
+		game:close()
+	end
 end
 
 -- 成员掉线通知
 -- 1. 战场编号
 function COMMAND.on_disconnect(alias, uid)
-  local game = games[alias]
-  assert(game, "on_disconnect() : game not exists!!!")
-  
-  game:disconnect(uid)
-  game:broadcast("game_disconnect_notify", {uid = uid})
-  return 0
+	local game = games[alias]
+	assert(game, "on_disconnect() : game not exists!!!")
+
+	game:disconnect(uid)
+	game:broadcast("game_disconnect_notify", {uid = uid})
+	return 0
 end
 
 -- 成员重连通知
 -- 1. 战场编号
 function COMMAND.on_reconnect(alias, uid)
-  local game = games[alias]
-  assert(game, "on_disconnect() : game not exists!!!")
-  
-  local member = game:reconnect(uid)
-  
-  if not member then
-    return ERRCODE.GAME_NOT_MEMBER
-  end
-  return 0
+	local game = games[alias]
+	assert(game, "on_disconnect() : game not exists!!!")
+
+	local member = game:reconnect(uid)
+
+	if not member then
+		return ERRCODE.GAME_NOT_MEMBER
+	end
+	return 0
 end
 
 -----------------------------------------------------------
@@ -422,7 +424,7 @@ local handler = {}
 function handler.command_handler(source, cmd, ...)
 	local fn = COMMAND[cmd]
 	if fn then
-		return fn(source, ...)
+		return fn(...)
 	else
 		ERROR("svcmanager : command[%s] can't find!!!", cmd)
 	end

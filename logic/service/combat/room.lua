@@ -1,10 +1,11 @@
 --
 -- 房间赛组队服务
 --
-local service = require "service_factory.service"
 local skynet  = require "skynet"
+local service = require "service_factory.service"
 local model = require "combat.model"
 local utils = require "combat.utils"
+local robot = require "combat.robot"
 local ENUM    = require "config.gameenum"
 -- 底层驱动加载
 local userdriver = require "driver.userdriver"
@@ -22,48 +23,48 @@ local Team = model.Team
 -- 1. 频道编号
 -- 2. 返回标志
 function Team:synchronize(channel, revert)
-  -- 座位快照构造逻辑
-  -- 1. 座位信息
-  local function snapshot(place)
-    local snapshot  = {}
-    snapshot.id     = place.id
-    if place.member ~= nil then
-      snapshot.member = 
-      {
-        player = 
-        {
-          uid      = place.member.uid,
-          nickname = place.member.nickname,
-          ulevel   = place.member.ulevel,
-          vlevel   = place.member.vlevel,
-          score    = place.member.score,
-        },
-        teamid  = place.member.teamid,
-        state   = place.member.state,
-      }
-    end
-    return snapshot
-  end
-  -- 房间同步逻辑
-  local name = "room_synchronize_notify"
-  local data = {}
-  data.channel = channel
-  data.roomid  = self.id
-  data.owner   = self.owner
-  data.state   = self.state
-  data.places  = {}
-  for _, place in pairs(self.places) do
-    table.insert(data.places, snapshot(place))
-  end
-  if not revert then
-    self:broadcast(name, { v = data })
-  else
-    for _, v in pairs(self.members) do
-      if not v:running() then
-        v:notify(name, { v = data })
-      end
-    end
-  end
+	-- 座位快照构造逻辑
+	-- 1. 座位信息
+	local function snapshot(place)
+		local snapshot  = {}
+		snapshot.id     = place.id
+		if place.member ~= nil then
+			snapshot.member =
+			{
+				player =
+				{
+					uid      = place.member.uid,
+					nickname = place.member.nickname,
+					ulevel   = place.member.ulevel,
+					vlevel   = place.member.vlevel,
+					score    = place.member.score,
+				},
+				teamid  = place.member.teamid,
+				state   = place.member.state,
+			}
+		end
+		return snapshot
+	end
+	-- 房间同步逻辑
+	local name = "room_synchronize_notify"
+	local data = {}
+	data.channel = channel
+	data.roomid  = self.id
+	data.owner   = self.owner
+	data.state   = self.state
+	data.places  = {}
+	for _, place in pairs(self.places) do
+		table.insert(data.places, snapshot(place))
+	end
+	if not revert then
+		self:broadcast(name, { v = data })
+	else
+		for _, v in pairs(self.members) do
+			if not v:running() then
+				v:notify(name, { v = data })
+			end
+		end
+	end
 end
 -----------------------------------------------------------
 --- 房间赛频道模型
@@ -161,6 +162,36 @@ local function leave_environment(uid, cid, tid)
 	return errcode
 end
 
+-- 间隔时间
+local function interval()
+	return 100
+end
+
+local function schedule()
+	-- 逻辑
+	local function fn()
+		for id, channel in pairs(channels) do
+			for _, team in pairs(channel.teams) do
+				if team:prepare() then
+					if team:full() then
+						utils.start(1,1,team:snapshot())
+					else
+						local member = robot.generate_robot()
+						team:join(member)
+					end
+				end
+			end
+		end
+	end
+	-- 异常处理
+	local function catch(message)
+		LOG_ERROR(message)
+	end
+	-- 任务处理
+	xpcall(fn, catch)
+	skynet.timeout(interval(), schedule)
+end
+
 -----------------------------------------------------------
 --- 房间组队服务接口
 -----------------------------------------------------------
@@ -171,13 +202,12 @@ end
 function COMMAND.on_create(cid, vdata)
     -- 获取频道
     local channel = channels[cid]
-    if channel == nil then
-        return ERRCODE.ROOM_UNKNOWN_CHANNEL
-    end
-    
+	if channel == nil then
+		return ERRCODE.ROOM_UNKNOWN_CHANNEL
+	end
+
     -- 创建房间
     local team = channel:create(vdata)
-    
     if team ~= nil then
         return 0
     else
@@ -220,34 +250,34 @@ end
 -- 3. 角色编号
 -- 4. 目标编号
 function COMMAND.on_invite(cid, tid, source, target)
-  -- 获取频道
-  local channel = channels[cid]
-  if channel == nil then
-    return ERRCODE.ROOM_UNKNOWN_CHANNEL
-  end
-  -- 队伍检查
-  local team = channel:get(tid)
-  if team == nil then
-    return ERRCODE.ROOM_NOT_EXISTS
-  end
-  if not team:prepare() then
-    return ERRCODE.ROOM_NOT_PERPARE
-  end
-  -- 成员检查
-  local member = team:get(source)
-  if member == nil then
-    return ERRCODE.ROOM_PERMISSION_DINIED
-  end
-  -- 发出邀请
-  local name = "room_invite_notify"
-  local data = 
-  {
-    channel  = cid,
-    roomid   = team.id,
-    uid      = member.uid,
-    nickname = member.nickname,
-  }
-  userdriver.usersend(target, "on_common_invite", name, data)
+	-- 获取频道
+	local channel = channels[cid]
+	if channel == nil then
+		return ERRCODE.ROOM_UNKNOWN_CHANNEL
+	end
+	-- 队伍检查
+	local team = channel:get(tid)
+	if team == nil then
+		return ERRCODE.ROOM_NOT_EXISTS
+	end
+	if not team:prepare() then
+		return ERRCODE.ROOM_NOT_PERPARE
+	end
+	-- 成员检查
+	local member = team:get(source)
+	if member == nil then
+		return ERRCODE.ROOM_PERMISSION_DINIED
+	end
+	-- 发出邀请
+	local name = "room_invite_notify"
+	local data =
+	{
+		channel  = cid,
+		roomid   = team.id,
+		uid      = member.uid,
+		nickname = member.nickname,
+	}
+	userdriver.usersend(target, "on_common_invite", name, data)
 	return 0
 end
 
@@ -259,16 +289,16 @@ function COMMAND.on_chat(cid, tid, name, data)
     -- 获取频道
     local channel = channels[cid]
     if channel == nil then
-      return ERRCODE.ROOM_UNKNOWN_CHANNEL
+		return ERRCODE.ROOM_UNKNOWN_CHANNEL
     end
     -- 队伍检查
     local team = channel:get(tid)
     if team ~= nil then
-      -- 消息转发
-      team:broadcast(name, data)
-      return 0
+		-- 消息转发
+		team:broadcast(name, data)
+		return 0
     else
-      return ERRCODE.ROOM_NOT_EXISTS
+		return ERRCODE.ROOM_NOT_EXISTS
     end
 end
 
@@ -277,28 +307,28 @@ end
 -- 2. 房间编号
 -- 3. 角色编号
 function COMMAND.on_stop(cid, tid, uid)
-  -- 获取频道
-  local channel = channels[cid]
-  if channel == nil then
-    return ERRCODE.ROOM_UNKNOWN_CHANNEL
-  end
-  -- 队伍检查
-  local team = channel:get(tid)
-  if team == nil then
-    return ERRCODE.ROOM_NOT_EXISTS
-  end
-  if not team:prepare() then
-    return ERRCODE.ROOM_NOT_PERPARE
-  end
-  -- 成员检查
-  local member = team:get(uid)
-  if member == nil then
-    return ERRCODE.ROOM_PERMISSION_DINIED
-  end
-  -- 状态转换
-  member:convert("PREPARE")
-  team:synchronize(cid)
-  return 0
+	-- 获取频道
+	local channel = channels[cid]
+	if channel == nil then
+		return ERRCODE.ROOM_UNKNOWN_CHANNEL
+	end
+	-- 队伍检查
+	local team = channel:get(tid)
+	if team == nil then
+		return ERRCODE.ROOM_NOT_EXISTS
+	end
+	if not team:prepare() then
+		return ERRCODE.ROOM_NOT_PERPARE
+	end
+	-- 成员检查
+	local member = team:get(uid)
+	if member == nil then
+		return ERRCODE.ROOM_PERMISSION_DINIED
+	end
+	-- 状态转换
+	member:convert("PREPARE")
+	team:synchronize(cid)
+	return 0
 end
 
 -- 战场通知战斗结束
@@ -337,6 +367,10 @@ end
 
 local handler = {}
 
+function handler.init_handler()
+	skynet.timeout(interval(), schedule)
+end
+
 -- 消息分发逻辑
 -- 1. 消息来源
 -- 2. 消息类型
@@ -344,7 +378,7 @@ local handler = {}
 function handler.command_handler(source, cmd, ...)
 	local fn = COMMAND[cmd]
 	if fn then
-		return fn(source, ...)
+		return fn(...)
 	else
 		ERROR("svcmanager : command[%s] can't find!!!", cmd)
 	end

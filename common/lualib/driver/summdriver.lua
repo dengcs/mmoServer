@@ -2,8 +2,6 @@ local skynet = require "skynet.manager"
 
 local summdriver = {}
 
-local handler_mapping = {}
-
 local function __send(command, ...)
     skynet.send(GLOBAL.SERVICE_NAME.SUMMD, "lua", command, ...)
 end
@@ -12,29 +10,15 @@ local function __call(command, ...)
     return skynet.call(GLOBAL.SERVICE_NAME.SUMMD, "lua", command, ...)
 end
 
-local function configure(conf)
-    if not conf then
-        handler_mapping = {}
-    end
-
-    for k, v in pairs(conf) do
-        assert(v.name and v.file, "invalid arguments")
-
-        handler_mapping[v.name] = v.file
-    end
-end
-
 -- 启动'summd'服务
 -- 1. 启动配置（关联服务列表）
 function summdriver.start()
     local summd = skynet.uniqueservice("summd")
     skynet.name(GLOBAL.SERVICE_NAME.SUMMD, summd)
 
-    -- configure(conf)
     skynet.call(summd, "lua", "init", {
         name = GLOBAL.SERVICE_NAME.SUMMD,
         unique = true,
-        proxy = true,
         auto = true,
     })
 end
@@ -52,7 +36,7 @@ function summdriver.newservice(module, name)
         module = module,
         name = name,
         unique = false,
-        proxy = false,
+        auto = true,
     })
 end
 
@@ -61,7 +45,7 @@ function summdriver.uniqueservice(module, name)
         module = module,
         name = name,
         unique = true,
-        proxy = false,
+        auto = true,
     })
 end
 

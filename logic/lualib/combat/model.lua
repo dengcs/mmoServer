@@ -1,9 +1,9 @@
 --
 -- 对战组队模型
 --
-local skynet   = require "skynet_ex"
-
-local userdriver = skynet.userdriver()
+local skynet   		= require "skynet_ex"
+local tinsert 		= table.insert
+local userdriver 	= skynet.userdriver()
 
 -----------------------------------------------------------
 --- 内部常量/内部逻辑
@@ -36,15 +36,15 @@ local function convertible(ostate, nstate)
   -- 状态转换表
   local map = 
   {
-    [ESTATES.PREPARE] = { ESTATES.READY   },
-    [ESTATES.READY  ] = { ESTATES.RUNNING },
-    [ESTATES.RUNNING] = { ESTATES.PREPARE , ESTATES.READY},
+	[ESTATES.PREPARE] = { ESTATES.READY   },
+	[ESTATES.READY  ] = { ESTATES.RUNNING },
+	[ESTATES.RUNNING] = { ESTATES.PREPARE , ESTATES.READY},
   }
   -- 状态转换判断
   for _, v in pairs(map[ostate] or {}) do
-    if v == nstate then
-      return true
-    end
+	if v == nstate then
+	  return true
+	end
   end
   return false
 end
@@ -69,6 +69,7 @@ function Member.new(vdata)
 	member.vlevel          = vdata.vlevel			-- 贵族等级
 	member.score           = vdata.score			-- 角色积分
 	member.state           = ESTATES.PREPARE		-- 角色状态
+	member.robot		   = vdata.robot			-- 机器人标识
 	return member
 end
 
@@ -101,7 +102,7 @@ end
 
 -- 成员快照（用于推送到战场）
 function Member:snapshot()
-	local snapshot = 
+	local snapshot =
 	{
 		uid        = self.uid,
 		sex        = self.sex,
@@ -110,6 +111,8 @@ function Member:snapshot()
 		ulevel     = self.ulevel,
 		vlevel     = self.vlevel,
 		score      = self.score,
+		robot	   = self.robot,
+		portrait_box_id = self.portrait_box_id,
 	}
 	return snapshot
 end
@@ -123,11 +126,11 @@ end
 function Member:convert(alias)
   local state = assert(ESTATES[alias])
   if (self.state ~= state) then
-    if convertible(self.state, state) then
-      self.state = state
-    else
-      assert(nil, string.format("member.convert(%s) failed!!!", alias))
-    end
+	if convertible(self.state, state) then
+	  self.state = state
+	else
+	  assert(nil, string.format("member.convert(%s) failed!!!", alias))
+	end
   end
 end
 
@@ -141,9 +144,9 @@ Team.__index = Team
 -- 1. 创建者信息
 function Team.new(vdata)
 	local team = {}
-	
+
 	setmetatable(team, Team)
-	
+
 	-- 设置队伍数据
 	team.id      = allocid()					-- 队伍编号（顺序递增）
 	team.owner   = vdata.uid					-- 领队编号
@@ -200,6 +203,27 @@ function Team:capacity()
 		end
 	end
 	return capacity
+end
+
+-- 队伍是否满员
+function Team:full()
+	for _, v in pairs(self.places) do
+		if not v.member then
+			return false
+		end
+	end
+	return true
+end
+
+-- 队伍快照（用于推送到战场）
+function Team:snapshot()
+	local snapshot = {}
+
+	for _, v in pairs(self.members or {}) do
+		tinsert(snapshot, v:snapshot())
+	end
+
+	return snapshot
 end
 
 -- 成员数量
@@ -271,11 +295,11 @@ function Team:quit(uid)
 		-- 转移队长权限
 		if (member ~= nil) and (member.uid == self.owner) then
 			for _, v in pairs(self.members) do
-					self.owner = v.uid
-					if v:ready() then
-						v:convert("PREPARE")
-					end
-					break
+				self.owner = v.uid
+				if v:ready() then
+					v:convert("PREPARE")
+				end
+				break
 			end
 		end
 	end
@@ -292,7 +316,7 @@ end
 -- 开始匹配（快速状态转换）
 function Team:start()
 	self.state = ESTATES.READY
-	self.xtime = os.time()
+	self.xtime = this.time()
 	return true
 end
 
@@ -306,7 +330,7 @@ end
 -- 等待时长（匹配等待时长）
 function Team:duration()
 	assert(self:ready())
-	return math.max(0, os.time() - self.xtime)
+	return math.max(0, this.time() - self.xtime)
 end
 
 -- 状态转换

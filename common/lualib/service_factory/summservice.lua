@@ -1,8 +1,5 @@
-local skynet = require "skynet"
-require "skynet.manager"
-
+local skynet = require "skynet_ex"
 local service = require "service_factory.service"
-local method = require "method"
 
 --[[
 
@@ -57,6 +54,7 @@ function server.start(conf)
 
         -- 绑定服务名称
         if name then
+            print("dcs--name--"..name)
             skynet.name(name, service)
         end
 
@@ -107,23 +105,23 @@ function server.start(conf)
         return 0
     end
 
-    function CMD.open(_, conf)
+    function CMD.open(conf)
         return do_open(conf)
     end
 
-    function CMD.close(_, name)
+    function CMD.close(name)
         return do_close(name)
     end
 
 
-    function CMD.autoload(_, conf)
+    function CMD.autoload(conf)
         if not conf then
             ERROR(EINVAL, "autoload: taskserver: unknown service configure")
         end
         -- 遍历配置项，
         for _, v in pairs(conf) do
             v.auto = true
-            local s = do_open(v)
+            do_open(v)
         end
 
         return 0
@@ -133,7 +131,6 @@ function server.start(conf)
         for k, v in pairs(service_gclist) do
             if IS_TRUE(v) then
                 local s = service_mapping[k]
-
                 skynet.send(s, "lua", "collect")
             end
         end
@@ -141,7 +138,7 @@ function server.start(conf)
         this.send("collect")
     end
 
-    function CMD.query(_, name)
+    function CMD.query(name)
         return do_query(name)
     end
 
@@ -177,7 +174,7 @@ function server.start(conf)
     function handler.command_handler(source, cmd, ...)
         local f = CMD[cmd]
         if f then
-            return f(source, ...)
+            return f(...)
         else
             return conf.command_handler(source, cmd, ...)
         end

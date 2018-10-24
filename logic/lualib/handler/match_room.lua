@@ -18,8 +18,8 @@ function REQUEST:room_create()
     local player = self.user:get("Player")
     
     local vdata = player:call("get_snapshot")
-    local ok = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", 1, vdata)    
-    
+    local ok = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", 1, vdata)
+
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)
 end
