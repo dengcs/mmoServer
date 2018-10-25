@@ -70,6 +70,7 @@ function Member.new(vdata)
 	member.score           = vdata.score			-- 角色积分
 	member.state           = ESTATES.PREPARE		-- 角色状态
 	member.robot		   = vdata.robot			-- 机器人标识
+	member.teamid		   = vdata.teamid			-- 角色队伍ID
 	return member
 end
 
@@ -112,6 +113,7 @@ function Member:snapshot()
 		vlevel     = self.vlevel,
 		score      = self.score,
 		robot	   = self.robot,
+		teamid	   = self.teamid,
 		portrait_box_id = self.portrait_box_id,
 	}
 	return snapshot
@@ -258,6 +260,7 @@ function Team:join(vdata)
 	if place == nil then
 		return nil
 	end
+	vdata.teamid = self.id
 	-- 成员加入队伍
 	local member = Member.new(vdata)
 	if member ~= nil then

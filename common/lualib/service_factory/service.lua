@@ -1,5 +1,3 @@
-local table = table
-local string = string
 local assert = assert
 
 setmetatable(_G, {

@@ -367,7 +367,7 @@ end
 -- 3. 数据内容
 function COMMAND.on_game_forward(alias, name, data)
 	local game = games[alias]
-	assert(game, "on_game_update() : game not exists!!!")
+	assert(game, "on_game_forward() : game not exists!!!")
 
 	game:broadcast(name, data)
 	return 0

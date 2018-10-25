@@ -31,16 +31,16 @@ function Team:synchronize(channel, revert)
 		if place.member ~= nil then
 			snapshot.member =
 			{
-				player =
-				{
-					uid      = place.member.uid,
-					nickname = place.member.nickname,
-					ulevel   = place.member.ulevel,
-					vlevel   = place.member.vlevel,
-					score    = place.member.score,
-				},
-				teamid  = place.member.teamid,
+				teamid   = place.member.teamid,
+				uid      = place.member.uid,
+				sex      = place.member.sex,
+				nickname = place.member.nickname,
+				ulevel   = place.member.ulevel,
+				vlevel   = place.member.vlevel,
+				score    = place.member.score,
 				state   = place.member.state,
+				portrait = place.member.portrait,
+				portrait_box_id = place.member.portrait_box_id
 			}
 		end
 		return snapshot
@@ -49,7 +49,7 @@ function Team:synchronize(channel, revert)
 	local name = "room_synchronize_notify"
 	local data = {}
 	data.channel = channel
-	data.roomid  = self.id
+	data.teamid  = self.id
 	data.owner   = self.owner
 	data.state   = self.state
 	data.places  = {}

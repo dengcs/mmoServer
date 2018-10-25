@@ -1,8 +1,7 @@
 ---------------------------------------------------------------------
 --- 服务框架配件模块
 ---------------------------------------------------------------------
-local skynet    = require "skynet.manager"
-local sharedata = require "skynet.sharedata"
+local skynet    = require "skynet"
 
 ---------------------------------------------------------------------
 --- 服务框架调用方法
@@ -220,11 +219,6 @@ end
 
 function this.time()
     return math.floor(skynet.time())
-end
-
-function this.sheetdata(name, key, ...)
-    local t = sharedata.query(name)
-    return table.extract(t, key, ...)
 end
 
 this.schedule = function (...)

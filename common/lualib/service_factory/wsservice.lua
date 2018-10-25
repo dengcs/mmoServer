@@ -3,7 +3,6 @@ local socket = require "skynet.socket"
 local websocket = require "websocket"
 local httpd = require "http.httpd"
 local sockethelper = require "http.sockethelper"
-require "assembly"
 
 local wsService = {}
 
