@@ -62,37 +62,3 @@ function ERROR(fmt, ...)
         error(msg)
     end
 end
-
-local function __BLANK_CALL(...)
-    return ...
-end
-
-local function __PACK_CALL(...)
-    return skynet.ret(skynet.pack(...))
-end
-
-function SAFE_RESPONSE(session, ...)
-    if not session then
-        return __BLANK_CALL(...)
-    elseif session > 0 then
-        return __PACK_CALL(...)
-    else
-        return nil
-    end
-end
-
-function INTERRUPT_SERVICE_RESPONSE(session)
-    return SAFE_RESPONSE(session, ECHILD, "The service has been closed.")
-end
-
-function RESPONSE_SERVICE_RESULT(session, msg)
-    if not session then
-        return table.unpack(msg)
-    else
-        return msg
-    end
-end
-
-function AUTO_GC()
-    collectgarbage("collect")
-end

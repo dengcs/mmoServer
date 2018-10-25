@@ -2,8 +2,8 @@
 -- 房间赛组队服务
 --
 local skynet  = require "skynet"
-local service = require "service_factory.service"
-local model = require "combat.model"
+local service = require "factory.service"
+local model = require "combat.roommodel"
 local utils = require "combat.utils"
 local robot = require "combat.robot"
 local ENUM    = require "config.gameenum"
@@ -18,6 +18,8 @@ local COMMAND = {}
 
 -- 加载队伍模型
 local Team = model.Team
+-- 加载频道模型
+local Channel = model.Channel
 
 -- 队伍同步通知
 -- 1. 频道编号
@@ -65,63 +67,6 @@ function Team:synchronize(channel, revert)
 			end
 		end
 	end
-end
------------------------------------------------------------
---- 房间赛频道模型
------------------------------------------------------------
-local Channel = {}
-Channel.__index = Channel
-
--- 构建频道
-function Channel.new()
-	local channel = {}
-	-- 注册成员方法
-	setmetatable(channel, Channel)
-	
-	-- 设置频道数据
-	channel.onlines = {}	-- 在线角色列表（不包括房间内角色）
-	channel.teams   = {}	-- 频道房间列表
-	return channel
-end
-
--- 加入频道
-function Channel:join(uid)
-	self.onlines[uid] = 0
-end
-
--- 离开频道
-function Channel:quit(uid)
-	self.onlines[uid] = nil
-end
-
----- 消息广播
---function Channel:broadcast(name, data)
---	for k, v in pairs(self.onlines) do
---		userdriver.usersend(k, "on_common_notify", name, data)
---	end
---end
-
--- 获取队伍
-function Channel:get(tid)
-	return self.teams[tid]
-end
-
--- 创建队伍
-function Channel:create(vdata)
-	local team = Team.new(vdata)
-	if team ~= nil then
-		self.teams[team.id] = team
-	end
-	return team
-end
-
--- 移除队伍
-function Channel:remove(tid)
-	local team = self.teams[tid]
-	if team ~= nil then
-		self.teams[tid] = nil
-	end
-	return team
 end
 
 -----------------------------------------------------------

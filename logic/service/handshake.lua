@@ -1,5 +1,5 @@
 local skynet  = require "skynet"
-local service = require "service_factory.service"
+local service = require "factory.service"
 local random = require "util.random"
 
 local server = {}

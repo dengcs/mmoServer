@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------
 --- 用户管理服务（因为共享内存的关系，仅能管理所在节点用户）
 ---------------------------------------------------------------------
-local service = require "service_factory.service"
+local service = require "factory.service"
 local skynet   = require "skynet_ex"
 local userdata = require "data.userdata"
 local configure = require "config.usermeta"

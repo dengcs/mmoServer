@@ -1,5 +1,5 @@
 local skynet = require "skynet_ex"
-local service = require "service_factory.service"
+local service = require "factory.service"
 
 --[[
 

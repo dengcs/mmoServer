@@ -2,7 +2,6 @@ local skynet = require "skynet"
 local dispatcher = require "net.dispatcher"
 local userdata = require "data.userdata"
 local usermeta = require "config.usermeta"
-require "assembly"
 
 local session
 -- 网络消息分发器

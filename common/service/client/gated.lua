@@ -1,5 +1,5 @@
 local skynet = require "skynet"
-local wsservice = require "service_factory.wsservice"
+local wsservice = require "factory.wsservice"
 
 local sessions = {}
 

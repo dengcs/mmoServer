@@ -1,4 +1,4 @@
-local summservice = require "service_factory.summservice"
+local summservice = require "factory.summservice"
 
 local skynet = require "skynet"
 

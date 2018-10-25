@@ -1,7 +1,7 @@
 -----------------------------------------------------------
 --- 服务管理器
 -----------------------------------------------------------
-local service = require "service_factory.service"
+local service = require "factory.service"
 local method  = require "method"
 local skynet  = require "skynet.manager"
 local cluster = require "skynet.cluster"

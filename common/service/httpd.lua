@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------
 --- 简单'web'服务
 ---------------------------------------------------------------------
-local service = require "service_factory.service"
+local service = require "factory.service"
 local skynet  = require "skynet"
 local json    = require "cjson"
 local url     = require "http.url"

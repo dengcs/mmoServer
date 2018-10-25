@@ -1,5 +1,5 @@
 local skynet  = require "skynet"
-local service = require "service_factory.service"
+local service = require "factory.service"
 local pbhelper = require "net.pbhelper"
 local pbs = require "config.pbs"
 
