@@ -44,21 +44,19 @@ Member.__index = Member
 function Member.new(vdata)
 	local member = {}
 	setmetatable(member, Member)
-
 	-- 设置基础数据
+	member.agent      	= vdata.agent					-- 角色句柄
+	member.uid        	= vdata.uid						-- 角色编号
+	member.sex        	= vdata.sex						-- 角色性别
+	member.nickname   	= vdata.nickname				-- 角色昵称
+	member.portrait   	= vdata.portrait				-- 角色头像
+	member.ulevel     	= vdata.ulevel					-- 角色等级
+	member.vlevel     	= vdata.vlevel					-- 贵族等级
+	member.score      	= vdata.score					-- 角色积分
+	member.state     	= ENUM.GAME_MEMBER_STATE.ONLINE	-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
+	member.robot      	= vdata.robot					-- 是否是机器人
+	member.place		= vdata.place					-- 角色座位
 	member.portrait_box_id = vdata.portrait_box_id
-	member.teamid     = vdata.teamid		-- 队伍编号
-	member.agent      = vdata.agent			-- 角色句柄
-	member.uid        = vdata.uid			-- 角色编号
-	member.sex        = vdata.sex			-- 角色性别
-	member.nickname   = vdata.nickname		-- 角色昵称
-	member.portrait   = vdata.portrait		-- 角色头像
-	member.ulevel     = vdata.ulevel		-- 角色等级
-	member.vlevel     = vdata.vlevel		-- 贵族等级
-	member.score      = vdata.score			-- 角色积分
-	member.state      = 0					-- 角色状态（0 - 准备， 1 - 就绪）
-	member.online     = 1					-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
-	member.robot      = vdata.robot			-- 是否是机器人
 	-- 设置战场数据
 	member.game =
 	{
@@ -72,7 +70,7 @@ end
 -- 2. 消息内容
 function Member:notify(name, data)
 	-- 过滤掉线成员
-	if self.online ~= 1 then
+	if self.state ~= ENUM.GAME_MEMBER_STATE.ONLINE then
 		return
 	end
 	-- 过滤机器人
@@ -87,6 +85,21 @@ function Member:notify(name, data)
 	end
 end
 
+-- 成员快照
+function Member:snapshot()
+	local snapshot = {}
+	snapshot.uid      	= self.uid
+	snapshot.sex      	= self.sex
+	snapshot.nickname 	= self.nickname
+	snapshot.portrait 	= self.portrait
+	snapshot.ulevel   	= self.ulevel
+	snapshot.vlevel   	= self.vlevel
+	snapshot.place		= self.place
+	snapshot.state	  	= self.state
+	snapshot.portrait_box_id = self.portrait_box_id
+	return snapshot
+end
+
 -----------------------------------------------------------
 --- 战场模型
 -----------------------------------------------------------
@@ -96,17 +109,20 @@ Game.__index = Game
 -- 构造战场
 -- 1. 战场id
 -- 2. 成员列表
-function Game.new(alias, users)
+function Game.new(alias, data)
 	local game = {}
 	setmetatable(game, Game)
 
 	-- 设置战场数据
-	game.alias    = alias						-- 战场id
-	game.state    = ENUM.GAME_STATE.PREPARE		-- 战场状态
-	game.stime    = 0							-- 开始时间（滴答 = 10毫秒）
-	game.etime    = 0							-- 结束时间（滴答 = 10毫秒）
-	game.members  = {}							-- 成员列表
-	for _, user in pairs(users) do
+	game.alias    	= alias							-- 战场id
+	game.state    	= ENUM.GAME_STATE.PREPARE		-- 战场状态
+	game.stime    	= 0								-- 开始时间（滴答 = 10毫秒）
+	game.etime    	= 0								-- 结束时间（滴答 = 10毫秒）
+	game.members  	= {}							-- 成员列表
+	game.channel	= data.channel
+	game.teamid		= data.teamid
+	game.owner		= data.owner
+	for _, user in pairs(data.members) do
 		-- 加入战场
 		local member = game:join(Member.new(user))
 		if member == nil then
@@ -129,7 +145,7 @@ function Game:close(source)
 		end
 	end
 
-	skynet.call(source, "lua", "on_close", self.alias)
+	skynet.send(source, "lua", "on_close", self.alias)
 end
 
 -- 加入战场
@@ -153,7 +169,7 @@ function Game:quit(uid)
 	for _, v in pairs(self.members) do
 		-- 成员离线处理
 		if v.uid == uid then
-			v.online = 3
+			v.state = ENUM.GAME_MEMBER_STATE.QUIT
 			-- 记录退出成员
 			member = v
 			if not v.robot then
@@ -189,7 +205,7 @@ end
 -- 判断是否空战场
 function Game:empty()
 	for _, member in pairs(self.members) do
-		if member.online ~= 3 then
+		if member.state ~= ENUM.GAME_MEMBER_STATE.QUIT then
 			return false
 		end
 	end
@@ -201,12 +217,12 @@ function Game:disconnect(uid)
 	local member = nil
 	for _, v in pairs(self.members) do
 		repeat
-			if v.online == 3 then
+			if v.state == ENUM.GAME_MEMBER_STATE.QUIT then
 				break
 			end
 			if v.uid == uid then
 				member   = v
-				v.online = 2
+				v.state = ENUM.GAME_MEMBER_STATE.OFFLINE
 			end
 		until(true)
 	end
@@ -217,11 +233,11 @@ end
 function Game:reconnect(uid)
 	local member = nil
 	for _, v in pairs(self.members) do
-		if v.online ~= 3 then
+		if v.state ~= ENUM.GAME_MEMBER_STATE.QUIT then
 			if v.uid == uid then
 				member = v
 			end
-			v.online = 1
+			v.state = ENUM.GAME_MEMBER_STATE.ONLINE
 		end
 	end
 	return member
@@ -236,28 +252,17 @@ end
 
 -- 构造赛前信息
 function Game:snapshot()
-	-- 成员快照
-	local function snapshot(member)
-		local snapshot = {}
-		snapshot.teamid   = member.teamid
-		snapshot.uid      = member.uid
-		snapshot.sex      = member.sex
-		snapshot.nickname = member.nickname
-		snapshot.portrait = member.portrait
-		snapshot.ulevel   = member.ulevel
-		snapshot.vlevel   = member.vlevel
-		snapshot.state	  = member.state
-		snapshot.portrait_box_id = member.portrait_box_id
-		return snapshot
-	end
 	-- 构造信息
 	local data =
 	{
-		state = self.state,
-		members  = {},
+		owner	= self.owner,
+		state 	= self.state,
+		channel	= self.channel,
+		teamid	= self.teamid,
+		members = {},
 	}
 	for _, v in pairs(self.members) do
-		tinsert(data.members, snapshot(v))
+		tinsert(data.members, v:snapshot())
 	end
 	return data
 end

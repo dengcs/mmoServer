@@ -9,15 +9,15 @@ package game;
 // 参赛者信息
 message GameMember
 {
-	uint32     teamid		    = 1;	// 队伍编号（个人赛则每个参赛者自己组成一个队伍）
-	string     uid			    = 2;	// 参赛者编号
-	uint32     sex             = 4;	// 参赛者性别
-	string     nickname	    = 5;	// 参赛者昵称
-	string     portrait	    = 6;	// 参赛者头像
-	uint32 	   portrait_box_id	= 7;	// 头像像框
-	uint32     state           = 8;	// 参赛者状态(0 - 未准备就绪， 1 - 已准备就绪)
-	uint32     ulevel		    = 9;	// 参赛者角色等级
-	uint32     vlevel          = 10;	// 参赛者贵族等级
+	string     uid			        = 1;	// 参赛者编号
+	uint32     place			    = 2;	// 参赛者座位
+	uint32     sex                  = 3;	// 参赛者性别
+	string     nickname	            = 4;	// 参赛者昵称
+	string     portrait	            = 5;	// 参赛者头像
+	uint32 	   portrait_box_id	    = 6;	// 头像像框
+	uint32     state                = 7;	// 参赛者状态(0 - 未准备就绪， 1 - 已准备就绪)
+	uint32     ulevel		        = 8;	// 参赛者角色等级
+	uint32     vlevel               = 9;	// 参赛者贵族等级
 }
 
 
@@ -66,6 +66,18 @@ message game_complete_notify
 
 message game_start_notify
 {
-    uint32     state                    = 1;	// 赛场状态
-    repeated GameMember members		    = 2;	// 参赛者信息
+    uint32      teamid                      = 1;    // 房间ID
+    uint32      channel                     = 2;    // 房间类型
+    string      owner                       = 3;    // 房主或地主
+    uint32      state                       = 4;	// 赛场状态
+    repeated    GameMember members		    = 5;	// 参赛者信息
+}
+
+message room_synchronize_notify
+{
+    uint32      teamid                      = 1;    // 房间ID
+    uint32      channel                     = 2;    // 房间类型
+    string      owner                       = 3;    // 房主或地主
+    uint32      state                       = 4;	// 赛场状态
+    repeated    GameMember members		    = 5;	// 参赛者信息
 }

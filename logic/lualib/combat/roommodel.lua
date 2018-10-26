@@ -60,17 +60,18 @@ function Member.new(vdata)
 	local member = {}
 	setmetatable(member, Member)
 	-- 设置成员数据
-	member.uid             = vdata.uid				-- 角色编号
-	member.sex             = vdata.sex				-- 角色性别
-	member.nickname        = vdata.nickname			-- 角色昵称
-	member.portrait        = vdata.portrait			-- 角色头像
-	member.portrait_box_id = vdata.portrait_box_id	-- 角色像框
-	member.ulevel          = vdata.ulevel			-- 角色等级
-	member.vlevel          = vdata.vlevel			-- 贵族等级
-	member.score           = vdata.score			-- 角色积分
-	member.state           = ESTATES.PREPARE		-- 角色状态
-	member.robot		   = vdata.robot			-- 机器人标识
-	member.teamid		   = vdata.teamid			-- 角色队伍ID
+	member.agent			= vdata.agent			-- 角色句柄
+	member.uid             	= vdata.uid				-- 角色编号
+	member.sex             	= vdata.sex				-- 角色性别
+	member.nickname        	= vdata.nickname		-- 角色昵称
+	member.portrait        	= vdata.portrait		-- 角色头像
+	member.portrait_box_id 	= vdata.portrait_box_id	-- 角色像框
+	member.ulevel          	= vdata.ulevel			-- 角色等级
+	member.vlevel          	= vdata.vlevel			-- 贵族等级
+	member.score           	= vdata.score			-- 角色积分
+	member.state           	= ESTATES.PREPARE		-- 角色状态
+	member.robot		   	= vdata.robot			-- 机器人标识
+	member.place		   	= vdata.place			-- 角色座次
 	return member
 end
 
@@ -105,23 +106,32 @@ end
 function Member:snapshot()
 	local snapshot =
 	{
-		uid        = self.uid,
-		sex        = self.sex,
-		nickname   = self.nickname,
-		portrait   = self.portrait,
-		ulevel     = self.ulevel,
-		vlevel     = self.vlevel,
-		score      = self.score,
-		robot	   = self.robot,
-		teamid	   = self.teamid,
+		uid        		= self.uid,
+		sex        		= self.sex,
+		nickname   		= self.nickname,
+		portrait   		= self.portrait,
+		ulevel     		= self.ulevel,
+		vlevel     		= self.vlevel,
+		place			= self.place,
+		state			= self.state,
+		robot			= self.robot,
 		portrait_box_id = self.portrait_box_id,
+		agent			= self.agent,
 	}
 	return snapshot
 end
 
 -- 消息通知
-function Member:notify(name, data)	
-	userdriver.usersend(self.uid, "on_common_notify", name, data)
+function Member:notify(name, data)
+	-- 过滤机器人
+	if self.robot then
+		return
+	end
+	if self.agent ~= nil then
+		skynet.send(self.agent, "lua", "on_common_notify", name, data)
+	else
+		userdriver.usersend(self.uid, "on_common_notify", name, data)
+	end
 end
 
 -- 状态转换
@@ -156,6 +166,7 @@ function Team.new(vdata)
 	team.xtime   = 0							-- 匹配时间
 	team.weight  = 0							-- 匹配权重
 	team.places  = {}							-- 座位信息
+	team.channel = 0							-- 频道
 	team.members = {}							-- 成员列表
 	for i = 1, ROOM_MAX_MEMBERS do
 		table.insert(team.places, {id = i})
@@ -220,9 +231,13 @@ end
 -- 队伍快照（用于推送到战场）
 function Team:snapshot()
 	local snapshot = {}
-
+	snapshot.teamid 	= self.id
+	snapshot.channel 	= self.channel
+	snapshot.owner 		= self.owner
+	snapshot.state		= self.state
+	snapshot.members	= {}
 	for _, v in pairs(self.members or {}) do
-		tinsert(snapshot, v:snapshot())
+		tinsert(snapshot.members, v:snapshot())
 	end
 
 	return snapshot
@@ -260,7 +275,7 @@ function Team:join(vdata)
 	if place == nil then
 		return nil
 	end
-	vdata.teamid = self.id
+	vdata.place	 = place.id
 	-- 成员加入队伍
 	local member = Member.new(vdata)
 	if member ~= nil then
@@ -359,6 +374,14 @@ function Team:level()
 	return maxlv
 end
 
+-- 队伍同步通知
+function Team:synchronize()
+	-- 房间同步逻辑
+	local name = "room_synchronize_notify"
+	local data = self:snapshot()
+	self:broadcast(name, { data = data })
+end
+
 -----------------------------------------------------------
 --- 房间赛频道模型
 -----------------------------------------------------------
@@ -366,12 +389,13 @@ local Channel = {}
 Channel.__index = Channel
 
 -- 构建频道
-function Channel.new()
+function Channel.new(id)
 	local channel = {}
 	-- 注册成员方法
 	setmetatable(channel, Channel)
 
 	-- 设置频道数据
+	channel.id		= id
 	channel.teams   = {}	-- 频道房间列表
 	return channel
 end
@@ -392,6 +416,7 @@ end
 function Channel:create(vdata)
 	local team = Team.new(vdata)
 	if team ~= nil then
+		team.channel		= self.id
 		self.teams[team.id] = team
 	end
 	return team

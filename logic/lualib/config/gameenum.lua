@@ -89,6 +89,15 @@ local GAME_STATE =
 
 ENUM.GAME_STATE = GAME_STATE
 
+local GAME_MEMBER_STATE =
+{
+	ONLINE		= 1,		-- 在线
+	OFFLINE		= 2,		-- 离线
+	QUIT		= 3,		-- 退出
+}
+
+ENUM.GAME_MEMBER_STATE = GAME_MEMBER_STATE
+
 function ENUM.get(name, key)
 	return ENUM[name][key]
 end

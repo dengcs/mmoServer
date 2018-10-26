@@ -13,11 +13,11 @@ local utils =
 	-- 1. 主类型
 	-- 2. 子类型
 	-- 3. 成员集合
-	start = function(major, minor, users)
+	start = function(major, minor, data)
 		-- 启动战场服务
-		local ok, ret = skynet.call(GLOBAL.SERVICE_NAME.GAME, "lua", "on_create", major, minor, users)
+		local ok, ret = skynet.call(GLOBAL.SERVICE_NAME.GAME, "lua", "on_create", major, minor, data)
 		if ok ~= 0 then
-			return nil
+			return ok
 		else
 			return ret
 		end

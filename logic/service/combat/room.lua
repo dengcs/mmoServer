@@ -16,58 +16,8 @@ local COMMAND = {}
 --- 房间赛队伍模型
 -----------------------------------------------------------
 
--- 加载队伍模型
-local Team = model.Team
 -- 加载频道模型
 local Channel = model.Channel
-
--- 队伍同步通知
--- 1. 频道编号
--- 2. 返回标志
-function Team:synchronize(channel, revert)
-	-- 座位快照构造逻辑
-	-- 1. 座位信息
-	local function snapshot(place)
-		local snapshot  = {}
-		snapshot.id     = place.id
-		if place.member ~= nil then
-			snapshot.member =
-			{
-				teamid   = place.member.teamid,
-				uid      = place.member.uid,
-				sex      = place.member.sex,
-				nickname = place.member.nickname,
-				ulevel   = place.member.ulevel,
-				vlevel   = place.member.vlevel,
-				score    = place.member.score,
-				state   = place.member.state,
-				portrait = place.member.portrait,
-				portrait_box_id = place.member.portrait_box_id
-			}
-		end
-		return snapshot
-	end
-	-- 房间同步逻辑
-	local name = "room_synchronize_notify"
-	local data = {}
-	data.channel = channel
-	data.teamid  = self.id
-	data.owner   = self.owner
-	data.state   = self.state
-	data.places  = {}
-	for _, place in pairs(self.places) do
-		table.insert(data.places, snapshot(place))
-	end
-	if not revert then
-		self:broadcast(name, { v = data })
-	else
-		for _, v in pairs(self.members) do
-			if not v:running() then
-				v:notify(name, { v = data })
-			end
-		end
-	end
-end
 
 -----------------------------------------------------------
 --- 内部变量/内部逻辑
@@ -76,10 +26,10 @@ end
 -- 频道集合
 local channels = 
 {
-	[1] = Channel.new(),	-- 自由频道
-	[2] = Channel.new(),	-- 初级频道
-	[3] = Channel.new(),	-- 中级频道
-	[4] = Channel.new(),	-- 高级频道
+	[1] = Channel.new(1),	-- 自由频道
+	[2] = Channel.new(2),	-- 初级频道
+	[3] = Channel.new(3),	-- 中级频道
+	[4] = Channel.new(4),	-- 高级频道
 }
 
 -- 加入组队服务
@@ -119,8 +69,8 @@ local function schedule()
 			for _, team in pairs(channel.teams) do
 				if team:prepare() then
 					if team:full() then
-						team:start()
 						utils.start(1,1,team:snapshot())
+						team:start()
 					else
 						local member = robot.generate_robot()
 						team:join(member)
@@ -252,7 +202,7 @@ end
 -- 1. 频道编号
 -- 2. 房间编号
 -- 3. 角色编号
-function COMMAND.on_stop(cid, tid, uid)
+function COMMAND.on_cancel(cid, tid, uid)
 	-- 获取频道
 	local channel = channels[cid]
 	if channel == nil then

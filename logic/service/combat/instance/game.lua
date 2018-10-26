@@ -20,7 +20,6 @@ local games = {}
 
 local Game = model.Game
 
-
 -- 步进序号
 local SEQUENCE  = 0
 
@@ -36,12 +35,11 @@ end
 --- 游戏服务接口
 -----------------------------------------------------------
 -- 创建战场
-function COMMAND.on_create(major, minor, users)
-
+function COMMAND.on_create(major, minor, data)
+	-- 构造别名
 	local alias = allocid(major, minor)
-
 	-- 构造战场
-	local game = Game.new(alias, users)
+	local game = Game.new(alias, data)
 	if game == nil then
 		return ERRCODE.GAME_CREATE_FAILED
 	end
