@@ -3,7 +3,8 @@
 --- Created by Dengcs.
 --- DateTime: 2018/11/1 10:01
 ---
-local random = require("utils.random")
+local random 		= require("utils.random")
+local poker_type	= require("pdk.poker_type")
 
 local tb_insert = table.insert
 
@@ -74,6 +75,16 @@ function poker_manager:get_cards(idx)
 	if place then
 		return place.cards
 	end
+end
+
+-- 验证棋牌类型
+function poker_manager:check_type(type, cards)
+	return poker_type.check_type(type, cards)
+end
+
+-- 获取出牌类型
+function poker_manager:test_type(cards)
+	return poker_type.test_type(cards)
 end
 
 return poker_manager
