@@ -191,8 +191,8 @@ function poker_type.check_2straight(cards)
 
 		local temp_card = mh_ceil(cards[1]/4) - 1
 		for i = 1, child_len do
-			local card1 = mh_ceil(cards[i]/4)
-			local card2 = mh_ceil(cards[i+1]/4)
+			local card1 = mh_ceil(cards[i*2 - 1]/4)
+			local card2 = mh_ceil(cards[i*2]/4)
 			if card1 ~= card2 then
 				return 0
 			end
@@ -219,9 +219,9 @@ function poker_type.check_3straight(cards)
 
 		local temp_card = mh_ceil(cards[1]/4) - 1
 		for i = 1, child_len do
-			local card1 = mh_ceil(cards[i]/4)
-			local card2 = mh_ceil(cards[i+1]/4)
-			local card3 = mh_ceil(cards[i+2]/4)
+			local card1 = mh_ceil(cards[i*3 - 2]/4)
+			local card2 = mh_ceil(cards[i*3 - 1]/4)
+			local card3 = mh_ceil(cards[i*3]/4)
 			if card1 ~= card2 or card2 ~= card3 then
 				return 0
 			end
