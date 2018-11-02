@@ -33,7 +33,7 @@ function poker_type.check_type(type, cards)
 		return fn(cards)
 	end
 
-	return false
+	return 0
 end
 
 -- 检测牌的类型
@@ -41,42 +41,42 @@ function poker_type.test_type(cards)
 	local len = #cards
 
 	if len == 1 then
-		if poker_type.check_one(cards) then
+		if poker_type.check_one(cards) > 0 then
 			return POKER_TYPE_ONE
 		end
 	elseif len == 2 then
-		if poker_type.check_king(cards) then
+		if poker_type.check_king(cards) > 0 then
 			return POKER_TYPE_KING
-		elseif poker_type.check_two(cards) then
+		elseif poker_type.check_two(cards) > 0 then
 			return POKER_TYPE_TWO
 		end
 	elseif len ==3 then
-		if poker_type.check_three(cards) then
+		if poker_type.check_three(cards) > 0 then
 			return POKER_TYPE_THREE
 		end
 	elseif len == 4 then
-		if poker_type.check_bomb(cards) then
+		if poker_type.check_bomb(cards) > 0 then
 			return POKER_TYPE_BOMB
-		elseif poker_type.check_3with1(cards) then
+		elseif poker_type.check_3with1(cards) > 0 then
 			return POKER_TYPE_3WITH1
 		end
 	elseif len > 4 then
-		if poker_type.check_1straight(cards) then
+		if poker_type.check_1straight(cards) > 0 then
 			return POKER_TYPE_1STRAIGHT
-		elseif poker_type.check_2straight(cards) then
+		elseif poker_type.check_2straight(cards) > 0 then
 			return POKER_TYPE_2STRAIGHT
-		elseif poker_type.check_3straight(cards) then
+		elseif poker_type.check_3straight(cards) > 0 then
 			return POKER_TYPE_3STRAIGHT
-		elseif poker_type.check_3with1(cards) then
-			return POKER_TYPE_3WITH1
-		elseif poker_type.check_3with2(cards) then
-			return POKER_TYPE_3WITH2
-		elseif poker_type.check_4with1(cards) then
+		elseif poker_type.check_4with1(cards) > 0 then
 			return POKER_TYPE_4WITH1
-		elseif poker_type.check_4with21(cards) then
+		elseif poker_type.check_4with21(cards) > 0 then
 			return POKER_TYPE_4WITH21
-		elseif poker_type.check_4with22(cards) then
+		elseif poker_type.check_4with22(cards) > 0 then
 			return POKER_TYPE_4WITH22
+		elseif poker_type.check_3with1(cards) > 0 then
+			return POKER_TYPE_3WITH1
+		elseif poker_type.check_3with2(cards) > 0 then
+			return POKER_TYPE_3WITH20
 		end
 	end
 
@@ -99,9 +99,9 @@ end
 function poker_type.check_one(cards)
 	local len = #cards
 	if len == 1 then
-		return true
+		return mh_ceil(cards[1]/4)
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否对子
@@ -111,10 +111,10 @@ function poker_type.check_two(cards)
 		local card1 = mh_ceil(cards[1]/4)
 		local card2 = mh_ceil(cards[2]/4)
 		if card1 == card2 then
-			return true
+			return card1
 		end
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否3张
@@ -125,10 +125,10 @@ function poker_type.check_three(cards)
 		local card2 = mh_ceil(cards[2]/4)
 		local card3 = mh_ceil(cards[3]/4)
 		if card1 == card2 and card2 == card3 then
-			return true
+			return card1
 		end
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否炸弹
@@ -140,10 +140,10 @@ function poker_type.check_bomb(cards)
 		local card3 = mh_ceil(cards[3]/4)
 		local card4 = mh_ceil(cards[4]/4)
 		if card1 == card2 and card2 == card3 and card3 == card4 then
-			return true
+			return card1
 		end
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否王炸
@@ -154,10 +154,10 @@ function poker_type.check_king(cards)
 		local card1 = mh_ceil(cards[1]/4)
 		local card2 = mh_ceil(cards[2]/4)
 		if card1 > king and card2 > king then
-			return true
+			return card1
 		end
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否顺子
@@ -170,12 +170,12 @@ function poker_type.check_1straight(cards)
 		for i, v in ipairs(cards) do
 			cur_card = mh_ceil(v/4)
 			if (first_card + i) ~= cur_card then
-				return false
+				return 0
 			end
 		end
-		return true
+		return cur_card
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否2连对
@@ -186,7 +186,7 @@ function poker_type.check_2straight(cards)
 		local child_len = mh_ceil(len/2)
 		-- 保证2的倍数
 		if child_len*2 ~= len then
-			return false
+			return 0
 		end
 
 		local temp_card = mh_ceil(cards[1]/4) - 1
@@ -194,16 +194,16 @@ function poker_type.check_2straight(cards)
 			local card1 = mh_ceil(cards[i]/4)
 			local card2 = mh_ceil(cards[i+1]/4)
 			if card1 ~= card2 then
-				return false
+				return 0
 			end
 			-- 保证连续
 			if temp_card+i ~= card1 then
-				return false
+				return 0
 			end
 		end
-		return true
+		return temp_card + child_len
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否3连对
@@ -214,7 +214,7 @@ function poker_type.check_3straight(cards)
 		local child_len = mh_ceil(len/3)
 		-- 保证3的倍数
 		if child_len*3 ~= len then
-			return false
+			return 0
 		end
 
 		local temp_card = mh_ceil(cards[1]/4) - 1
@@ -223,16 +223,16 @@ function poker_type.check_3straight(cards)
 			local card2 = mh_ceil(cards[i+1]/4)
 			local card3 = mh_ceil(cards[i+2]/4)
 			if card1 ~= card2 or card2 ~= card3 then
-				return false
+				return 0
 			end
 			-- 保证连续
 			if temp_card+i ~= card1 then
-				return false
+				return 0
 			end
 		end
-		return true
+		return temp_card + child_len
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否3带1
@@ -258,7 +258,7 @@ function poker_type.check_3with1(cards)
 
 		-- 判断牌数对不对
 		if target_count*4 ~= len then
-			return false
+			return 0
 		end
 
 		-- 判断连续
@@ -266,12 +266,12 @@ function poker_type.check_3with1(cards)
 		local first_card = check_cards[1] - 1
 		for i, v in pairs(check_cards) do
 			if first_card + i ~= v then
-				return false
+				return 0
 			end
 		end
-		return true
+		return first_card + target_count
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否3带2
@@ -300,12 +300,12 @@ function poker_type.check_3with2(cards)
 
 		-- 判断牌数对不对
 		if target_count*5 ~= len then
-			return false
+			return 0
 		end
 
 		-- 判断带的数量对不对
 		if target_count*2 ~= type_count then
-			return false
+			return 0
 		end
 
 		-- 判断连续
@@ -313,12 +313,12 @@ function poker_type.check_3with2(cards)
 		local first_card = check_cards[1] - 1
 		for i, v in pairs(check_cards) do
 			if first_card + i ~= v then
-				return false
+				return 0
 			end
 		end
-		return true
+		return first_card + target_count
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否4带1
@@ -334,12 +334,12 @@ function poker_type.check_4with1(cards)
 				temp_data[card] = temp_data[card] + 1
 				-- 收集重要数据
 				if temp_data[card] == 4 then
-					return true
+					return card
 				end
 			end
 		end
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否4带2（带两单张）
@@ -355,19 +355,19 @@ function poker_type.check_4with21(cards)
 				temp_data[card] = temp_data[card] + 1
 				-- 收集重要数据
 				if temp_data[card] == 4 then
-					return true
+					return card
 				end
 			end
 		end
 	end
-	return false
+	return 0
 end
 
 -- 检查牌型是否4带2（带两对）
 function poker_type.check_4with22(cards)
 	local len = #cards
 	if len == 8 then
-		local target_count = 0
+		local target_card = 0
 		local type_count = 0
 		local temp_data = {}
 		for _, v in pairs(cards) do
@@ -378,24 +378,24 @@ function poker_type.check_4with22(cards)
 				temp_data[card] = temp_data[card] + 1
 				-- 收集重要数据
 				if temp_data[card] == 4 then
-					target_count = target_count + 1
+					target_card = card
 				elseif temp_data[card] == 2 then
 					type_count = type_count + 1
 				end
 			end
 		end
 
-		if target_count ~= 1 then
-			return false
+		if target_card < 1 then
+			return 0
 		end
 
 		if type_count ~= 3 then
-			return false
+			return 0
 		end
 
-		return true
+		return target_card
 	end
-	return false
+	return 0
 end
 
 return poker_type
