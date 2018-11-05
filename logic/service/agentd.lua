@@ -19,12 +19,10 @@ local function unload()
 	end
 end
 
-function CMD.connect(source, c, hit)
+function CMD.connect(source, c)
 	session = c
-	if not hit then
-		net_dispatcher = dispatcher.new()
-		net_dispatcher:register_handle()
-	end
+	net_dispatcher = dispatcher.new()
+	net_dispatcher:register_handle()
 end
 
 function CMD.disconnect()

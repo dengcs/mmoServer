@@ -16,10 +16,8 @@ local agent_mgr = agent_manager.new()
 function handler.on_connect(fd)
 	local session = sessions[fd]
 	if not session then
-		local hit = true
 		local agent = agent_mgr:pop()
 		if not agent then
-			hit = false
 			agent = skynet.newservice("agentd")
 		end
 
@@ -30,7 +28,7 @@ function handler.on_connect(fd)
 	    
 	    sessions[fd] = session
 	    
-	    skynet.send(agent, "lua", "connect", session, hit)
+	    skynet.send(agent, "lua", "connect", session)
 	end
 	
 	print("open_number:"..open_number)
