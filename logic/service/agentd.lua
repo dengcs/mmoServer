@@ -19,15 +19,21 @@ local function unload()
 	end
 end
 
-function CMD.connect(source, c)
+function CMD.connect(source, c, hit)
 	session = c
-	net_dispatcher = dispatcher.new()
-	net_dispatcher:register_handle()
+	if not hit then
+		net_dispatcher = dispatcher.new()
+		net_dispatcher:register_handle()
+	end
 end
 
 function CMD.disconnect()
 	unload()
-	skynet.exit()
+
+	local ok,ret = skynet.call(GLOBAL.SERVICE_NAME.GATED, "lua", "push_agent", skynet.self())
+	if ok~=0 or ret==false then
+		skynet.exit()
+	end
 end
 
 function CMD.open()
@@ -41,7 +47,11 @@ end
 
 function CMD.close()
 	unload()
-	skynet.exit()
+
+	local ok,ret = skynet.call(GLOBAL.SERVICE_NAME.GATED, "lua", "push_agent", skynet.self())
+	if ok~=0 or ret==false then
+		skynet.exit()
+	end
 end
 
 function CMD.message(source, msg)
