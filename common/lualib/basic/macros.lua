@@ -1,5 +1,3 @@
-NORET = {}
-
 -- 全局常量根节点
 if GLOBAL == nil then
     GLOBAL = {}
@@ -62,11 +60,3 @@ GAME =
     PLAYER        = 10,    -- 角色信息
   },
 }
-
---->>> 系统内置常量定义 <<<---
-
-SCHEDULER = {}
-
-SCHEDULER.INITIAL = 100000
-SCHEDULER.REPEAT_FOREVER = -1
-SCHEDULER.NONE = 0

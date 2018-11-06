@@ -4,71 +4,55 @@ local handler = {}
 
 local scheduler = {}
 
-local SESSION_SEQUENCE = SCHEDULER.INITIAL
+local SESSION_SEQUENCE = 100000
 
-function handler.schedule(func, interval, loop, args)
-    SESSION_SEQUENCE = SESSION_SEQUENCE + 1
-    local session = SESSION_SEQUENCE
-    local f
-    f = function ()
-        local t = scheduler[session]
-        if not t then
+local function timeout(t)
+    local function f()
+        local tb = scheduler[t.session]
+        if not tb then
             return
         end
 
-        if type(func) == "string" then
-            -- service command
-            local list = string.split(func)
-            local s = nil
-            local cmd = nil
-
-            if #list == 1 then -- "function_name"
-                cmd = list[1]
-            elseif #list == 2 and list[1] ~= "" then -- "service_name.function_name"
-                s = list[1]
-                cmd = list[2]
-            elseif #list == 3 and list[1] == "" then -- ".local_service_name.function_name"
-                s = "." .. list[2]
-                cmd = list[3]
-            else
-                ERROR(EINVAL, "schedule: %s: no such function or service", func)
-            end
-
-            if not s then
-                _NOVA.COMMAND_DISPATCH.SEND("lua", cmd, args)
-            else
-                skynet.send(s, "lua", cmd, args)
-            end
-        elseif type(func) == "function" then
-            -- function callback
-            func(args)
+        if IS_FUNCTION(tb.func) then
+            pcall(tb.func, tb.args)
         else
             ERROR(EINVAL, "schedule: %s: command not found", tostring(func))
         end
 
-        if t.loop > 0 then
-            t.loop = t.loop - 1
+        if tb.loop > 0 then
+            tb.loop = tb.loop - 1
         end
 
-        if t.loop == 0 then
-            scheduler[session] = nil
+        if tb.loop == 0 then
+            scheduler[tb.session] = nil
             return
         end
 
-        skynet.timeout(t.interval * TIMER.MILLISECOND_UNIT, t.handler)
+        skynet.timeout(tb.interval, f)
     end
+
+    skynet.timeout(t.interval, f)
+end
+
+function handler.schedule(func, interval, loop, args)
+    SESSION_SEQUENCE = SESSION_SEQUENCE + 1
 
     interval = interval or 0
     loop = loop or 1
 
     local t = {
-        handler = f,
-        interval = interval,
+        func = func,
+        interval = interval * TIMER.MILLISECOND_UNIT,
         loop = loop,
+        session = SESSION_SEQUENCE,
+        args = args,
     }
-    scheduler[session] = t
-    skynet.timeout(interval * TIMER.MILLISECOND_UNIT, f)
-    return session
+
+    scheduler[t.session] = t
+
+    timeout(t)
+
+    return t.session
 end
 
 function handler.unschedule(session)
@@ -79,8 +63,8 @@ function handler.unschedule(session)
 end
 
 function handler.unschedule_all()
-    for k, _ in pairs(scheduler) do
-        handler.unschedule(k)
+    for session, _ in pairs(scheduler) do
+        scheduler[session] = nil
     end
 end
 

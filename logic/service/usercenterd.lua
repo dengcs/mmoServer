@@ -156,7 +156,7 @@ function server.start_handler()
         for uid, u in pairs(onlines) do
             save(uid, u.user)
         end
-    end, interval, SCHEDULER.REPEAT_FOREVER)
+    end, interval, SCHEDULER_FOREVER)
 end
 
 -- 服务停止通知

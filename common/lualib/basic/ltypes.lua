@@ -1,7 +1,3 @@
-local table = table
-local string = string
-local assert = assert
-
 function IS_STRING(v)
     return type(v) == "string"
 end

@@ -1,5 +1,3 @@
-local skynet = require "skynet"
-
 --[[
 
 os.date(format)

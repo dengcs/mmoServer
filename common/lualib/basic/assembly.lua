@@ -97,6 +97,12 @@ function IS_FINISHED()
     return __service_state == __SERVICE_ESTATE.FINISHED
 end
 
+-- 初始化（仅变更状态）
+function DO_INITIAL()
+    assert(IS_SUSPEND())
+    __service_state = __SERVICE_ESTATE.INITIAL
+end
+
 -- 完成初始化（仅改变状态）
 function DO_READY()
     assert(IS_INITIAL())
@@ -194,11 +200,11 @@ end
 this = {}
 
 function this.usercall(pid, command, ...)
-    return skynet.call(GLOBAL.SERVICE.USERCENTERD, "lua", "usercall", pid, command, ...)
+    return skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "usercall", pid, command, ...)
 end
 
 function this.usersend(pid, command, ...)
-    return skynet.send(GLOBAL.SERVICE.USERCENTERD, "lua", "usersend", pid, command, ...)
+    return skynet.send(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "usersend", pid, command, ...)
 end
 
 function this.call(command, ...)
