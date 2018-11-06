@@ -1,43 +1,29 @@
-local skynet  = require "skynet"
 local service = require "factory.service"
-local pbhelper = require "net.pbhelper"
-local pbs = require "config.pbs"
 
+local pb_buffers = {}
 
 local server = {}
 
 local CMD = {}
 
-function CMD.encode(uid, name, data, errcode)
-    return pbhelper.pb_encode(uid, name, data, errcode)
-end
-
-function CMD.decode(data)
-    local message,result = pbhelper.pb_decode(data)
-    return {info = message,data = result}
-end
-
-function server.init_handler()
-    local new_pbs = {}
-    local node = assert(skynet.getenv("node"),"getenv获取不到node值！")
-    for _,v in pairs(pbs) do
-        local bp_file = string.format("./%s/%s/%s",node,"lualib/config/proto/pb",v)
-        table.insert(new_pbs,bp_file)
+function CMD.read_buffer(node, filename)
+    local node_buffers = pb_buffers[node]
+    if not node_buffers then
+        pb_buffers[node] = {}
+        node_buffers = pb_buffers[node]
     end
-    pbhelper.register(new_pbs)
-end
 
-function server.exit_handler()
-end
+    local buffer = node_buffers[filename]
+    if not buffer then
+        local filepath = "lualib/config/proto/pb"
+        local bp_file = string.format("./%s/%s/%s", node, filepath, filename)
+        local f = assert(io.open(bp_file , "rb"))
+        buffer = f:read "*a"
+        f:close()
 
-function server.start_handler()
-
-    return 0
-end
-
-function server.stop_handler()
-
-    return 0
+        node_buffers[filename] = buffer
+    end
+    return buffer
 end
 
 function server.command_handler(source, cmd, ...)

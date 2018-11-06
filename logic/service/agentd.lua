@@ -25,7 +25,6 @@ function CMD.connect(source, c)
 		net_dispatcher:initialize()
 	else
 		net_dispatcher = dispatcher.new()
-		net_dispatcher:register_handle()
 	end
 end
 

@@ -1,15 +1,19 @@
 ---------------------------------------------------------------------
 --- 游戏协议解析模块
 ---------------------------------------------------------------------
-local protobuf = require "protobuf"
+local protobuf 	= require "protobuf"
+local pbs 		= require "config.pbs"
+local skynet	= require "skynet"
 
 local M = {}
 
--- 游戏协议注册
--- 1. 协议集合
-function M.register(protocols)
-	for _, name in pairs(protocols) do
-		protobuf.register_file(name)
+-- 初始化
+function M.register()
+	local node = assert(skynet.getenv("node"),"getenv获取不到node值！")
+	for _,v in pairs(pbs) do
+		local ok, buffer = skynet.call(GLOBAL.SERVICE_NAME.PBD, "lua", "read_buffer", node, v)
+		assert(ok == 0 and buffer)
+		protobuf.register(buffer)
 	end
 end
 

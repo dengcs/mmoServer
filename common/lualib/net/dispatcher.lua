@@ -3,9 +3,9 @@
 ---------------------------------------------------------------------
 local skynet = require "skynet"
 local handlers = require "config.handlers"
+local pbhelper = require "net.pbhelper"
 
 local M = {}
-M.__index   	= M
 M.HANDSHAKE 	= {}			-- 握手相关请求处理逻辑集合（确保'握手/重连'请求仅在指定状态有效）
 M.PREPARE   	= {}			-- 选角相关请求处理逻辑集合（确保'选角/创角'请求仅在指定状态有效）
 M.REQUEST   	= {}			-- 普通请求
@@ -15,25 +15,29 @@ M.INITIALIZE   	= {}			-- 重置处理
 
 -- 构造'dispatcher'对象
 function M.new()
-	local o = { map = {} }
-	setmetatable(o, M)
+	local o = {}
+	setmetatable(o, {__index = M})
+
+	o:register_pb()
+	o:register_handle()
+
 	return o
 end
 
 -- 网络消息编码
 local function net_encode(uid, name, data, error)
-    local code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","encode",uid,name,data,error)
-    if code== 0 then
-        return result
-    end
+    local result = pbhelper.pb_encode(uid,name,data,error)
+	return result
 end
 
 -- 网络消息解码
 local function net_decode(msg)
-    local code,result = skynet.call(GLOBAL.SERVICE_NAME.PBD,"lua","decode",msg)
-    if code==0 then
-        return result.info,result.data
-    end
+	local message,result = pbhelper.pb_decode(msg)
+	return message,result
+end
+
+function M:register_pb()
+	pbhelper.register()
 end
 
 function M:register_handle()
@@ -108,7 +112,7 @@ function M:user_context(session, extra)
 	-- 2. 消息内容
 	-- 3. 错误编号
 	local function __message_response(name, message, errno)
-		return self.message_response(self, session, name, message, errno)
+		return self:message_response(session, name, message, errno)
 	end
 	-- 内部命令分发
 	-- 1. 命令名称
@@ -143,7 +147,7 @@ end
 -- 2. 用户信息
 -- 3. 请求内容
 -- 4. 方法集合
-local function message_request(this, session, message, commands)
+local function message_request(self, session, message, commands)
 	-- 异常捕捉
 	local function traceback()
 		LOG_ERROR(debug.traceback())
@@ -154,13 +158,13 @@ local function message_request(this, session, message, commands)
 		ERROR("request : message unpack error!!!")
 	end
 	-- 请求转发
-	local ok, retval = xpcall(command_execute, traceback, commands, head.header.proto, this:user_context(session, {proto = proto}))
+	local ok, retval = xpcall(command_execute, traceback, commands, head.header.proto, self:user_context(session, {proto = proto}))
 	if not ok then
 		retval = ENOEXEC
 	end
 	retval = retval or 0
 	if retval > 0 then
-		this:message_response(session, head.header.proto, nil, retval)
+		self:message_response(session, head.header.proto, nil, retval)
 	end
 	return retval
 end
@@ -197,9 +201,9 @@ end
 
 -- 重置处理器
 function M:initialize()
-	for _, init in pairs(self.INITIALIZE or {}) do
-		if IS_FUNCTION(init) then
-			init()
+	for _, fn in pairs(self.INITIALIZE or {}) do
+		if IS_FUNCTION(fn) then
+			fn()
 		end
 	end
 end
