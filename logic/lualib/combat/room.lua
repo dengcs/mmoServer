@@ -1,5 +1,5 @@
 --
--- 对战组队模型
+-- 对战房间模型
 --
 local skynet   		= require "skynet_ex"
 local tinsert 		= table.insert
@@ -432,6 +432,6 @@ function Channel:remove(tid)
 end
 
 -----------------------------------------------------------
---- 返回组队模型
+--- 返回房间相关模型
 -----------------------------------------------------------
 return {Team = Team, Member = Member, Channel = Channel}

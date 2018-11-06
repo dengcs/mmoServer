@@ -3,6 +3,8 @@
 --
 local skynet   		= require "skynet_ex"
 local ENUM    		= require "config.gameenum"
+local play_manager	= require "pdk.play_manager"
+
 local tinsert 		= table.insert
 local userdriver 	= skynet.userdriver()
 
@@ -17,7 +19,7 @@ local userdriver 	= skynet.userdriver()
 local function enter_environment(uid, alias, force)
 	local errcode, retval = userdriver.usercall(uid, "on_enter_environment", ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias, force)
 	if not retval then
-		errcode = (errcode ~= 0 and errcode) or ERRCODE.GAME_ENTERENV_FAILED
+		errcode = ERRCODE.GAME_ENTERENV_FAILED
 	end
 	return errcode
 end
@@ -28,7 +30,7 @@ end
 local function leave_environment(uid, alias)
 	local errcode, retval = userdriver.usercall(uid, "on_leave_environment", ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias)
 	if not retval then
-		errcode = (errcode ~= 0 and errcode) or ERRCODE.GAME_LEAVEENV_FAILED
+		errcode = ERRCODE.GAME_LEAVEENV_FAILED
 	end
 	return errcode
 end
@@ -129,6 +131,7 @@ function Game.new(alias, data)
 			return nil
 		end
 	end
+	game.play_mgr = play_manager.new()
 
 	return game
 end
@@ -270,9 +273,14 @@ end
 -- 开始游戏
 function Game:start()
 	self:broadcast("game_start_notify", self:snapshot())
+	self.play_mgr:shuffle_and_deal()
+end
+
+function Game:update(uid, data)
+	self.play_mgr:update(uid, data)
 end
 
 -----------------------------------------------------------
---- 返回组队模型
+--- 返回游戏相关模型
 -----------------------------------------------------------
 return {Member = Member, Game = Game}

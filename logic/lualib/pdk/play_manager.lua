@@ -8,18 +8,18 @@ local poker_type	= require("pdk.poker_type")
 
 local tb_insert = table.insert
 
-local poker_manager = {}
+local play_manager = {}
 
-function poker_manager.new()
+function play_manager.new()
 	local manager = {}
 
-	setmetatable(manager, {__index = poker_manager})
+	setmetatable(manager, {__index = play_manager})
 	manager:init()
 
 	return manager
 end
 
-function poker_manager:init()
+function play_manager:init()
 	self.pokers = {}
 	self.places = {}
 
@@ -33,7 +33,8 @@ function poker_manager:init()
 end
 
 -- 洗牌
-function poker_manager:shuffle()
+function play_manager:shuffle()
+	-- 3次随机洗牌
 	local replace_count = GLOBAL_POKER_MAX * 3
 	local temp_poker = 0
 	for i = 1, replace_count do
@@ -48,7 +49,7 @@ function poker_manager:shuffle()
 end
 
 -- 发牌
-function poker_manager:deal()
+function play_manager:deal()
 	local poker_idx = 1
 	for _, v in pairs(self.places) do
 		for i = 1, GLOBAL_POKER_NUM do
@@ -58,8 +59,14 @@ function poker_manager:deal()
 	end
 end
 
+-- 洗牌并发牌
+function play_manager:shuffle_and_deal()
+	self:shuffle()
+	self:deal()
+end
+
 -- 获取底牌
-function poker_manager:get_dipai()
+function play_manager:get_dipai()
 	local cards = {}
 
 	local start = #self.pokers
@@ -70,7 +77,7 @@ function poker_manager:get_dipai()
 end
 
 -- 获取某个位置的牌
-function poker_manager:get_cards(idx)
+function play_manager:get_cards(idx)
 	local place = self.places[idx]
 	if place then
 		return place.cards
@@ -78,13 +85,18 @@ function poker_manager:get_cards(idx)
 end
 
 -- 验证棋牌类型
-function poker_manager:check_type(type, cards)
+function play_manager:check_type(type, cards)
 	return poker_type.check_type(type, cards)
 end
 
 -- 获取出牌类型
-function poker_manager:test_type(cards)
+function play_manager:test_type(cards)
 	return poker_type.test_type(cards)
 end
 
-return poker_manager
+-- 玩家操作
+function play_manager:update(uid, data)
+
+end
+
+return play_manager

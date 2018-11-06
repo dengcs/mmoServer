@@ -4,7 +4,7 @@
 local skynet  	= require "skynet"
 local service 	= require "factory.service"
 local ENUM    	= require "config.gameenum"
-local model		= require "combat.gamemodel"
+local model		= require "combat.game"
 
 local COMMAND = {}
 -----------------------------------------------------------
@@ -89,6 +89,8 @@ function COMMAND.on_game_update(alias, uid, data)
 	if member == nil then
 		return ERRCODE.GAME_NOT_MEMBER
 	end
+
+	game:update(uid, data)
 
 	game:broadcast("game_update_notify", {data = data})
 	return 0

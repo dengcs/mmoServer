@@ -3,10 +3,9 @@
 --
 local skynet  = require "skynet"
 local service = require "factory.service"
-local model = require "combat.roommodel"
+local model = require "combat.room"
 local utils = require "combat.utils"
 local robot = require "combat.robot"
-local ENUM    = require "config.gameenum"
 -- 底层驱动加载
 local userdriver = require "driver.userdriver"
 
@@ -31,31 +30,6 @@ local channels =
 	[3] = Channel.new(3),	-- 中级频道
 	[4] = Channel.new(4),	-- 高级频道
 }
-
--- 加入组队服务
--- 1. 角色编号
--- 2. 频道编号
--- 3. 队伍编号
--- 3. 强制标志
-local function enter_environment(uid, cid, tid, force)
-	local errcode, retval = userdriver.usercall(uid, "on_enter_environment", ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_ROOM, {cid = cid, tid = tid}, force)
-	if not retval then
-		errcode = (errcode ~= 0 and errcode) or ERRCODE.ROOM_ENTERENV_FAILED
-	end
-	return errcode
-end
-
--- 离开组队服务
--- 1. 角色编号
--- 2. 频道编号
--- 3. 队伍编号
-local function leave_environment(uid, cid, tid)
-	local errcode, retval = userdriver.usercall(uid, "on_leave_environment", ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_ROOM, {cid = cid, tid = tid})
-	if not retval then
-		errcode = (errcode ~= 0 and errcode) or ERRCODE.ROOM_LEAVEENV_FAILED
-	end
-	return errcode
-end
 
 -- 间隔时间
 local function interval()
@@ -145,7 +119,7 @@ end
 -- 2. 房间编号
 -- 3. 角色编号
 -- 4. 目标编号
-function COMMAND.on_invite(cid, tid, source, target)
+function COMMAND.on_invite(cid, tid, source, uid)
 	-- 获取频道
 	local channel = channels[cid]
 	if channel == nil then
@@ -173,7 +147,7 @@ function COMMAND.on_invite(cid, tid, source, target)
 		uid      = member.uid,
 		nickname = member.nickname,
 	}
-	userdriver.usersend(target, "on_common_invite", name, data)
+	userdriver.usersend(uid, "on_common_invite", name, data)
 	return 0
 end
 

@@ -119,7 +119,7 @@ end
 -- param : x, 时刻点
 -- return : secs, 相差的秒数
 function Timer.get_diff_sec_to_next_day_x(x)
-	local now = os.time()
+	local now = this.time()
 	local ti = now + 3600 * 24 --获取下一天
 
 	local nexttime = os.date('*t', ti)
@@ -133,7 +133,7 @@ end
 -- param : x, 时刻点
 -- return : unix时间戳
 function Timer.get_prev_day_x(x)
-	local time = os.time()
+	local time = this.time()
 	local date = os.date("*t", time)
 	local next = { year = date.year, month = date.month, day = date.day - 1, hour = x, min = 0, sec = 0 }
 	return os.time(next)
@@ -143,7 +143,7 @@ end
 -- param : x, 时刻点
 -- return : unix时间戳
 function Timer.get_curr_day_x(x)
-	local time = os.time()
+	local time = this.time()
 	local date = os.date("*t", time)
 	local next = { year = date.year, month = date.month, day = date.day, hour = x, min = 0, sec = 0 }
 	return os.time(next)
@@ -153,7 +153,7 @@ end
 -- param : x, 时刻点
 -- return : unix时间戳
 function Timer.get_next_day_x(x)
-	local now = os.time()
+	local now = this.time()
 	local ti = now + 3600 * 24 --获取下一天
 
 	local nexttime = os.date('*t', ti)
@@ -176,7 +176,7 @@ end
 -- hour   : 时间点
 -- return : unix时间戳
 function Timer.get_prev_week_x(wday, hour)
-	local time = os.time() - 7 * 24 * 3600
+	local time = this.time() - 7 * 24 * 3600
 	local date = os.date("*t", time)
 	local next = { year = date.year, month = date.month, day = date.day, hour = hour, min = 0, sec = 0 }
 	return os.time(next) + (wday - date.wday) * 24 * 3600
@@ -187,7 +187,7 @@ end
 -- hour   : 时间点
 -- return : unix时间戳
 function Timer.get_curr_week_x(wday, hour)
-	local time = os.time()
+	local time = this.time()
 	local date = os.date("*t", time)
 	local next = { year = date.year, month = date.month, day = date.day, hour = hour, min = 0, sec = 0 }
 	return os.time(next) + (wday - date.wday) * 24 * 3600
@@ -198,7 +198,7 @@ end
 -- hour   : 时间点
 -- return : unix时间戳
 function Timer.get_next_week_x(wday, hour)
-	local time = os.time() + 7 * 24 * 3600
+	local time = this.time() + 7 * 24 * 3600
 	local date = os.date("*t", time)
 	local next = { year = date.year, month = date.month, day = date.day, hour = hour, min = 0, sec = 0 }
 	return os.time(next) + (wday - date.wday) * 24 * 3600
@@ -219,7 +219,7 @@ end
 -- hour   : 时间点
 -- return : unix时间戳
 function Timer.get_curr_month_x(day, hour)
-	local time = os.time()
+	local time = this.time()
 	local date = os.date("*t", time)
 	local next = { year = date.year, month = date.month, day = date.day, hour = (hour or 0), min = 0, sec = 0 }
 	return os.time(next) + (day - date.day) * 24 * 3600
@@ -230,7 +230,7 @@ end
 -- hour   : 时间点
 -- return : unix时间戳
 function Timer.get_pre_month_x(day, hour)
-    local time = os.time()
+    local time = this.time()
     local date = os.date("*t", time)
     local next = { year = date.year, month = date.month -1, day = date.day, hour = (hour or 0), min = 0, sec = 0 }
     return os.time(next) + (day - date.day) * 24 * 3600
@@ -241,7 +241,7 @@ end
 -- hour   : 时间点
 -- return : unix时间戳
 function Timer.get_next_month_x(day, hour)
-	local time = os.time()
+	local time = this.time()
 	local date = os.date("*t", time)
 	local next = { year = date.year, month = date.month + 1, day = date.day, hour = (hour or 0), min = 0, sec = 0 }
 	return os.time(next) + (day - date.day) * 24 * 3600
