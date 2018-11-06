@@ -6,8 +6,9 @@ local json    = require "cjson"
 local userdriver = skynet.userdriver()
 
 
-local HANDLER    = {}
-local REQUEST = {}
+local HANDLER		= {}
+local REQUEST 		= {}
+local INITIALIZE	={}
 
 -----------------------------------------------------------
 --- 内部变量/内部逻辑
@@ -15,8 +16,18 @@ local REQUEST = {}
 local dbname  = "test"
 local tblname = "player_tbl"
 
-local login_acount = nil
-local player_uid = nil
+local login_acount 	= nil
+local player_uid 	= nil
+
+-----------------------------------------------------------
+--- 模块初始化接口
+-----------------------------------------------------------
+
+function INITIALIZE.init()
+	login_acount 	= nil
+	player_uid 		= nil
+end
+
 -----------------------------------------------------------
 --- 网络请求接口
 -----------------------------------------------------------
@@ -84,5 +95,6 @@ function REQUEST:player_login()
     self.response(resp, ret_msg)
 end
 
-HANDLER.REQUEST   = REQUEST
+HANDLER.REQUEST   	= REQUEST
+HANDLER.INITIALIZE 	= INITIALIZE
 return HANDLER

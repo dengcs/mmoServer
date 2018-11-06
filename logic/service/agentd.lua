@@ -5,8 +5,8 @@ local usermeta = require "config.usermeta"
 
 local session
 -- 网络消息分发器
-local net_dispatcher
-local datameta      -- 用户数据
+local net_dispatcher = nil
+local datameta = nil      -- 用户数据
 
 local CMD = {}
 
@@ -21,8 +21,12 @@ end
 
 function CMD.connect(source, c)
 	session = c
-	net_dispatcher = dispatcher.new()
-	net_dispatcher:register_handle()
+	if net_dispatcher then
+		net_dispatcher:initialize()
+	else
+		net_dispatcher = dispatcher.new()
+		net_dispatcher:register_handle()
+	end
 end
 
 function CMD.disconnect()
@@ -58,7 +62,7 @@ function CMD.message(source, msg)
   end
 end
 
-function CMD.data_set(source, name, data)
+function CMD.load_data(source, name, data)
 	local retval = datameta:init(name, data)
 	if not retval then
 		ERROR("usermeta:init(name = %s) failed!!!", name)

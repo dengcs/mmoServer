@@ -5,12 +5,13 @@ local skynet = require "skynet"
 local handlers = require "config.handlers"
 
 local M = {}
-M.__index   = M
-M.HANDSHAKE = {}			-- 握手相关请求处理逻辑集合（确保'握手/重连'请求仅在指定状态有效）
-M.PREPARE   = {}			-- 选角相关请求处理逻辑集合（确保'选角/创角'请求仅在指定状态有效）
-M.REQUEST   = {}			-- 普通请求
-M.COMMAND   = {}			-- 内部命令
-M.TRIGGER   = {}			-- 事件处理
+M.__index   	= M
+M.HANDSHAKE 	= {}			-- 握手相关请求处理逻辑集合（确保'握手/重连'请求仅在指定状态有效）
+M.PREPARE   	= {}			-- 选角相关请求处理逻辑集合（确保'选角/创角'请求仅在指定状态有效）
+M.REQUEST   	= {}			-- 普通请求
+M.COMMAND   	= {}			-- 内部命令
+M.TRIGGER   	= {}			-- 事件处理
+M.INITIALIZE   	= {}			-- 重置处理
 
 -- 构造'dispatcher'对象
 function M.new()
@@ -43,29 +44,30 @@ end
 
 -- 注册消息处理逻辑
 -- 1. 配置参数
-function M:register(configure)
+function M:register(handler)
 	-- 注册'握手/重连'相关请求处理逻辑
-	for k, v in pairs(configure.HANDSHAKE or {}) do
+	for k, v in pairs(handler.HANDSHAKE or {}) do
 		self.HANDSHAKE[k] = v
 	end
 	-- 注册'选角/创角'相关请求处理逻辑
-	for k, v in pairs(configure.PREPARE or {}) do
+	for k, v in pairs(handler.PREPARE or {}) do
 		self.PREPARE[k] = v
 	end
 	-- 注册正常状态网络数据处理逻辑
-	for k, v in pairs(configure.REQUEST or {}) do
+	for k, v in pairs(handler.REQUEST or {}) do
 		self.REQUEST[k] = v
 	end
 	-- 注册内部命令处理逻辑
-	for k, v in pairs(configure.CMD or {}) do
-		self.COMMAND[k] = v
-	end
-	for k, v in pairs(configure.COMMAND or {}) do
+	for k, v in pairs(handler.COMMAND or {}) do
 		self.COMMAND[k] = v
 	end
 	-- 注册事件触发处理逻辑
-	for k, v in pairs(configure.TRIGGER or {}) do
+	for _, v in pairs(handler.TRIGGER or {}) do
 		table.insert(self.TRIGGER, v)
+	end
+	-- 注册初始化处理逻辑
+	for _, v in pairs(handler.INITIALIZE or {}) do
+		table.insert(self.INITIALIZE, v)
 	end
 end
 
@@ -191,6 +193,15 @@ end
 -- 4. 命令参数
 function M:command_dispatch(session, cmd, ...)
 	return command_execute(self.COMMAND, cmd, self:user_context(session), ...)
+end
+
+-- 重置处理器
+function M:initialize()
+	for _, init in pairs(self.INITIALIZE or {}) do
+		if IS_FUNCTION(init) then
+			init()
+		end
+	end
 end
 
 -- 返回消息分发中间件模型

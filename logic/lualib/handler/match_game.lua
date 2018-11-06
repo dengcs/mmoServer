@@ -56,5 +56,5 @@ end
 
 -- '请求/命令' - 注册
 handler.REQUEST = REQUEST
-handler.CMD     = COMMAND
+handler.COMMAND = COMMAND
 return handler
