@@ -6,7 +6,7 @@ local server = {}
 
 local CMD = {}
 
-function CMD.read_buffer(node, filename)
+function CMD.read_pb_buffer(node, filename)
     local node_buffers = pb_buffers[node]
     if not node_buffers then
         pb_buffers[node] = {}

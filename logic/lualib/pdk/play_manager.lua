@@ -53,7 +53,7 @@ function play_manager:deal()
 	local poker_idx = 1
 	for _, v in pairs(self.places) do
 		for i = 1, GLOBAL_POKER_NUM do
-			tb_insert(v.cards, self.pokers[poker_idx])
+			v.cards[i] = self.pokers[poker_idx]
 			poker_idx = poker_idx + 1
 		end
 	end

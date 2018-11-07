@@ -19,8 +19,8 @@ M.summ = {
          unique = true,
      },
      {
-         name = GLOBAL.SERVICE_NAME.PBD,
-         module = "pbd",
+         name = GLOBAL.SERVICE_NAME.FBD,
+         module = "fbd",
          unique = true,
      },
      {

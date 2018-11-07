@@ -11,7 +11,7 @@ local M = {}
 function M.register()
 	local node = assert(skynet.getenv("node"),"getenv获取不到node值！")
 	for _,v in pairs(pbs) do
-		local ok, buffer = skynet.call(GLOBAL.SERVICE_NAME.PBD, "lua", "read_buffer", node, v)
+		local ok, buffer = skynet.call(GLOBAL.SERVICE_NAME.FBD, "lua", "read_pb_buffer", node, v)
 		assert(ok == 0 and buffer)
 		protobuf.register(buffer)
 	end

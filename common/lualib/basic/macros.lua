@@ -20,27 +20,11 @@ GLOBAL.MASTER_TYPE =
     TASKD   = 2,
 }
 
-GLOBAL.PROTO_TYPE = 
-{
-    UNKNOWN     = 0,
-    TERMINAL    = 1,
-    MULTICAST   = 2,
-    USERINTER   = 3,
-}
-
-GLOBAL.PROTO_NAME = 
-{
-    UNKNOWN     = "unknown",
-    TERMINAL    = "terminal",
-    MULTICAST   = "multicast",
-    USERINTER   = "userinter",
-}
-
 GLOBAL.SERVICE_NAME = 
 {
     SUMMD       = ".summd",
     GATED       = ".gated",
-    PBD         = ".pbd",
+    FBD         = ".fbd",
     DATABASED   = "DATABASE",
     DATACACHED  = "DATACACHE",
     USERCENTERD = "USERCENTER",
