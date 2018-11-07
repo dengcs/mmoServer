@@ -98,6 +98,21 @@ local GAME_MEMBER_STATE =
 
 ENUM.GAME_MEMBER_STATE = GAME_MEMBER_STATE
 
+-----------------------------------------------------------
+-- 比赛中状态枚举
+-----------------------------------------------------------
+
+local PLAY_STATE = {
+	PREPARE = 1, -- 预备
+	DEAL  	= 2, -- 发牌
+	SNATCH  = 3, -- 抢地主
+	DOUBLE	= 4, -- 加倍
+	PLAY 	= 5, -- 游戏
+	OVER 	= 6, -- 结束
+}
+
+ENUM.PLAY_STATE = PLAY_STATE
+
 function ENUM.get(name, key)
 	return ENUM[name][key]
 end

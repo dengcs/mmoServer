@@ -8,6 +8,10 @@ local play_manager	= require "pdk.play_manager"
 local tinsert 		= table.insert
 local userdriver 	= skynet.userdriver()
 
+local PLAYER_STATE_TYPE = ENUM.PLAYER_STATE_TYPE
+local GAME_MEMBER_STATE = ENUM.GAME_MEMBER_STATE
+local GAME_STATE		= ENUM.GAME_STATE
+
 -----------------------------------------------------------
 --- 内部常量/内部逻辑
 -----------------------------------------------------------
@@ -17,7 +21,7 @@ local userdriver 	= skynet.userdriver()
 -- 2. 战场别名
 -- 3. 强制标志
 local function enter_environment(uid, alias, force)
-	local errcode, retval = userdriver.usercall(uid, "on_enter_environment", ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias, force)
+	local errcode, retval = userdriver.usercall(uid, "on_enter_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias, force)
 	if not retval then
 		errcode = ERRCODE.GAME_ENTERENV_FAILED
 	end
@@ -28,7 +32,7 @@ end
 -- 1. 角色编号
 -- 2. 战场别名
 local function leave_environment(uid, alias)
-	local errcode, retval = userdriver.usercall(uid, "on_leave_environment", ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias)
+	local errcode, retval = userdriver.usercall(uid, "on_leave_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias)
 	if not retval then
 		errcode = ERRCODE.GAME_LEAVEENV_FAILED
 	end
@@ -55,7 +59,7 @@ function Member.new(vdata)
 	member.ulevel     	= vdata.ulevel					-- 角色等级
 	member.vlevel     	= vdata.vlevel					-- 贵族等级
 	member.score      	= vdata.score					-- 角色积分
-	member.state     	= ENUM.GAME_MEMBER_STATE.ONLINE	-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
+	member.state     	= GAME_MEMBER_STATE.ONLINE	-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
 	member.robot      	= vdata.robot					-- 是否是机器人
 	member.place		= vdata.place					-- 角色座位
 	member.portrait_box_id = vdata.portrait_box_id
@@ -72,7 +76,7 @@ end
 -- 2. 消息内容
 function Member:notify(name, data)
 	-- 过滤掉线成员
-	if self.state ~= ENUM.GAME_MEMBER_STATE.ONLINE then
+	if self.state ~= GAME_MEMBER_STATE.ONLINE then
 		return
 	end
 	-- 过滤机器人
@@ -117,7 +121,7 @@ function Game.new(alias, data)
 
 	-- 设置战场数据
 	game.alias    	= alias							-- 战场id
-	game.state    	= ENUM.GAME_STATE.PREPARE		-- 战场状态
+	game.state    	= GAME_STATE.PREPARE		-- 战场状态
 	game.stime    	= 0								-- 开始时间（滴答 = 10毫秒）
 	game.etime    	= 0								-- 结束时间（滴答 = 10毫秒）
 	game.members  	= {}							-- 成员列表
@@ -131,9 +135,16 @@ function Game.new(alias, data)
 			return nil
 		end
 	end
-	game.play_mgr = play_manager.new()
+
+	game:init_play_mgr()
 
 	return game
+end
+
+function Game:init_play_mgr()
+	self.play_mgr = play_manager.new()
+	local functions = self:auth_play_functions()
+	self.play_mgr:copy_game_functions(functions)
 end
 
 -- 关闭战场（延迟关闭）
@@ -172,7 +183,7 @@ function Game:quit(uid)
 	for _, v in pairs(self.members) do
 		-- 成员离线处理
 		if v.uid == uid then
-			v.state = ENUM.GAME_MEMBER_STATE.QUIT
+			v.state = GAME_MEMBER_STATE.QUIT
 			-- 记录退出成员
 			member = v
 			if not v.robot then
@@ -208,7 +219,7 @@ end
 -- 判断是否空战场
 function Game:empty()
 	for _, member in pairs(self.members) do
-		if member.state ~= ENUM.GAME_MEMBER_STATE.QUIT then
+		if member.state ~= GAME_MEMBER_STATE.QUIT then
 			return false
 		end
 	end
@@ -220,12 +231,12 @@ function Game:disconnect(uid)
 	local member = nil
 	for _, v in pairs(self.members) do
 		repeat
-			if v.state == ENUM.GAME_MEMBER_STATE.QUIT then
+			if v.state == GAME_MEMBER_STATE.QUIT then
 				break
 			end
 			if v.uid == uid then
 				member   = v
-				v.state = ENUM.GAME_MEMBER_STATE.OFFLINE
+				v.state = GAME_MEMBER_STATE.OFFLINE
 			end
 		until(true)
 	end
@@ -236,11 +247,11 @@ end
 function Game:reconnect(uid)
 	local member = nil
 	for _, v in pairs(self.members) do
-		if v.state ~= ENUM.GAME_MEMBER_STATE.QUIT then
+		if v.state ~= GAME_MEMBER_STATE.QUIT then
 			if v.uid == uid then
 				member = v
 			end
-			v.state = ENUM.GAME_MEMBER_STATE.ONLINE
+			v.state = GAME_MEMBER_STATE.ONLINE
 		end
 	end
 	return member
@@ -250,6 +261,22 @@ end
 function Game:broadcast(name, data)
 	for _, member in pairs(self.members) do
 		member:notify(name, data)
+	end
+end
+
+-- 推送消息给某个玩家
+function Game:notify(idx, name, data)
+	local member = self.members[idx]
+	if member then
+		member:notify(name, data)
+	end
+end
+
+function Game:uid_to_idx(uid)
+	for idx, member in pairs(self.members) do
+		if member.uid == uid then
+			return idx
+		end
 	end
 end
 
@@ -276,8 +303,25 @@ function Game:start()
 	self.play_mgr:shuffle_and_deal()
 end
 
+-- 封装函数给玩法模块调用
+function Game:auth_play_functions()
+	local function broadcast(data)
+		self:broadcast("game_update_notify", {data = data})
+	end
+
+	local function notify(idx, data)
+		self:notify(idx, "game_update_notify", {data = data})
+	end
+
+	local functions = {broadcast = broadcast, notify = notify}
+	return functions
+end
+
 function Game:update(uid, data)
-	self.play_mgr:update(uid, data)
+	local idx = self:uid_to_idx(uid)
+	if idx then
+		self.play_mgr:update(idx, data)
+	end
 end
 
 -----------------------------------------------------------

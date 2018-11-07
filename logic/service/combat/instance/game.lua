@@ -6,6 +6,8 @@ local service 	= require "factory.service"
 local ENUM    	= require "config.gameenum"
 local model		= require "combat.game"
 
+local GAME_STATE = ENUM.GAME_STATE
+
 local COMMAND = {}
 -----------------------------------------------------------
 --- 服务常量
@@ -92,7 +94,6 @@ function COMMAND.on_game_update(alias, uid, data)
 
 	game:update(uid, data)
 
-	game:broadcast("game_update_notify", {data = data})
 	return 0
 end
 
@@ -118,7 +119,7 @@ function COMMAND.game_finish_complete(alias)
 	local game = games[alias]
 	assert(game, "game_finish_complete() : game not exists!!!")
 
-	if game.state == ENUM.GAME_STATE.FINISHED then
+	if game.state == GAME_STATE.FINISHED then
 		-- 关闭战场
 		game:close(skynet.self())
 	end

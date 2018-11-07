@@ -7,6 +7,8 @@ local HANDLER = {}
 local REQUEST = {}
 local COMMAND = {}
 
+local PLAYER_STATE_TYPE = ENUM.PLAYER_STATE_TYPE
+
 
 -----------------------------------------------------------
 --- 服务公共回调
@@ -28,36 +30,36 @@ function COMMAND:on_enter_environment(state, param, force)
 	local switch =
 	{
 		-- 角色加入战场
-		[ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME] = function(player, param, force)
+		[PLAYER_STATE_TYPE.PLAYER_STATE_GAME] = function(player, param, force)
 			if ENUM.inspect_player_idle(player) or force then
-				change_player_state(player, ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_GAME, param)
+				change_player_state(player, PLAYER_STATE_TYPE.PLAYER_STATE_GAME, param)
 				return true
 			else
 				return false
 			end
 		end,
 		-- 角色加入房间
-		[ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_ROOM] = function(player, param, force)
+		[PLAYER_STATE_TYPE.PLAYER_STATE_ROOM] = function(player, param, force)
 			if ENUM.inspect_player_idle(player) or force then
-				change_player_state(player, ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_ROOM, param)
+				change_player_state(player, PLAYER_STATE_TYPE.PLAYER_STATE_ROOM, param)
 				return true
 			else
 				return false
 			end
 		end,
 		-- 角色加入对战
-		[ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_PVP] = function(player, param, force)
+		[PLAYER_STATE_TYPE.PLAYER_STATE_PVP] = function(player, param, force)
 			if ENUM.inspect_player_idle(player) or force then
-				change_player_state(player, ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_PVP, param)
+				change_player_state(player, PLAYER_STATE_TYPE.PLAYER_STATE_PVP, param)
 				return true
 			else
 				return false
 			end
 		end,
 		-- 角色加入排位
-		[ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_QUALIFYING] = function(player, param, force)
+		[PLAYER_STATE_TYPE.PLAYER_STATE_QUALIFYING] = function(player, param, force)
 			if ENUM.inspect_player_idle(player) or force then
-				change_player_state(player, ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_QUALIFYING, param)
+				change_player_state(player, PLAYER_STATE_TYPE.PLAYER_STATE_QUALIFYING, param)
 				return true
 			else
 				return false
@@ -77,7 +79,7 @@ function COMMAND:on_leave_environment(state)
 	local player = self.user:get("Player")
 	if player.state == state then
 		local param = player.scene
-		change_player_state(player, ENUM.PLAYER_STATE_TYPE.PLAYER_STATE_IDLE)
+		change_player_state(player, PLAYER_STATE_TYPE.PLAYER_STATE_IDLE)
 		return param
 	else
 		return nil

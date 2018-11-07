@@ -3,8 +3,8 @@
 --- Created by Dengcs.
 --- DateTime: 2018/11/1 10:01
 ---
-local random 		= require("utils.random")
-local poker_type	= require("pdk.poker_type")
+local random 	= require("utils.random")
+local play_core	= require("pdk.play_core")
 
 local tb_insert = table.insert
 
@@ -12,6 +12,7 @@ local play_manager = {}
 
 function play_manager.new()
 	local manager = {}
+	manager.play_core = play_core.new()
 
 	setmetatable(manager, {__index = play_manager})
 	manager:init()
@@ -20,26 +21,65 @@ function play_manager.new()
 end
 
 function play_manager:init()
-	self.pokers = {}
-	self.places = {}
+	self.pokers = {} -- 洗的牌
+	self.places = {} -- 每个座位上的牌
+	self.cards = {} -- 底牌
+	self.game	= {} -- 游戏相关信息
 
 	for i = 1, GLOBAL_POKER_MAX do
 		tb_insert(self.pokers, i)
 	end
 
 	for i = 1, GLOBAL_PLAYER_NUM do
-		tb_insert(self.places, {cards = {}})
+		tb_insert(self.places, {cards = {}, identity = 0})
 	end
+
+	local functions = self:auth_core_functions()
+	self.play_core:copy_play_functions(functions)
+end
+
+-- 接收游戏模块授权的函数
+function play_manager:copy_game_functions(functions)
+	self.game.functions = assert(functions)
+end
+
+-- 座位通知消息
+function play_manager:notify(idx, data)
+	local notify = self.game.functions.notify
+	if notify then
+		notify(idx, data)
+	end
+end
+
+-- 游戏广播消息
+function play_manager:broadcast(data)
+	local broadcast = self.game.functions.broadcast
+	if broadcast then
+		broadcast(data)
+	end
+end
+
+function play_manager:auth_core_functions()
+	local function broadcast(data)
+		self:broadcast(data)
+	end
+
+	local function notify(idx, data)
+		self:notify(idx, data)
+	end
+
+	local functions = {broadcast = broadcast, notify = notify}
+	return functions
 end
 
 -- 洗牌
 function play_manager:shuffle()
-	-- 3次随机洗牌
-	local replace_count = GLOBAL_POKER_MAX * 3
+	-- 1次随机洗牌
+	local poker_max = GLOBAL_POKER_MAX
 	local temp_poker = 0
-	for i = 1, replace_count do
-		local random_idx = random.Get(54)
-		local cur_idx = (i % GLOBAL_POKER_MAX) + 1
+	for i = 1, poker_max do
+		local random_idx = random.Get(poker_max)
+		local cur_idx = (i % poker_max) + 1
 		if random_idx ~= cur_idx then
 			temp_poker = self.pokers[cur_idx]
 			self.pokers[cur_idx] 	= self.pokers[random_idx]
@@ -56,7 +96,17 @@ function play_manager:deal()
 			v.cards[i] = self.pokers[poker_idx]
 			poker_idx = poker_idx + 1
 		end
+		-- 初始化身份（0：平民，1：地主）
+		v.identity = 0
 	end
+
+	-- 底牌
+	for i = 1, 3 do
+		self.cards[i] = self.pokers[poker_idx]
+		poker_idx = poker_idx + 1
+	end
+
+	self.play_core:begin({places = self.places, cards = self.cards})
 end
 
 -- 洗牌并发牌
@@ -65,38 +115,9 @@ function play_manager:shuffle_and_deal()
 	self:deal()
 end
 
--- 获取底牌
-function play_manager:get_dipai()
-	local cards = {}
-
-	local start = #self.pokers
-	for i = start, start-2, -1 do
-		tb_insert(cards, self.pokers[i])
-	end
-	return cards
-end
-
--- 获取某个位置的牌
-function play_manager:get_cards(idx)
-	local place = self.places[idx]
-	if place then
-		return place.cards
-	end
-end
-
--- 验证棋牌类型
-function play_manager:check_type(type, cards)
-	return poker_type.check_type(type, cards)
-end
-
--- 获取出牌类型
-function play_manager:test_type(cards)
-	return poker_type.test_type(cards)
-end
-
 -- 玩家操作
-function play_manager:update(uid, data)
-
+function play_manager:update(idx, data)
+	self.play_core:update(idx, data)
 end
 
 return play_manager
