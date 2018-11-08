@@ -31,7 +31,7 @@ function play_manager:init()
 	end
 
 	for i = 1, GLOBAL_PLAYER_NUM do
-		tb_insert(self.places, {cards = {}, identity = 0})
+		tb_insert(self.places, {cards = {}})
 	end
 
 	local functions = self:auth_core_functions()
@@ -106,7 +106,8 @@ function play_manager:deal()
 		poker_idx = poker_idx + 1
 	end
 
-	self.play_core:begin({places = self.places, cards = self.cards})
+	local core_data = {places = self.places, cards = self.cards}
+	self.play_core:begin(core_data)
 end
 
 -- 洗牌并发牌

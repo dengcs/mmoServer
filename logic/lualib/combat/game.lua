@@ -268,7 +268,13 @@ end
 function Game:notify(idx, name, data)
 	local member = self.members[idx]
 	if member then
-		member:notify(name, data)
+		if member.robot then
+			if name == "game_update_notify" then
+				self:update(member.uid, data.data)
+			end
+		else
+			member:notify(name, data)
+		end
 	end
 end
 

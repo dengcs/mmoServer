@@ -1,12 +1,20 @@
 local skynet = require "skynet"
 
+local tb_unpack = table.unpack
+
 local handler = {}
 
 local scheduler = {}
 
 local SESSION_SEQUENCE = 100000
 
-local function timeout(t)
+local function timeout(interval, func)
+    skynet.timeout(interval * TIMER.MILLISECOND_UNIT, func)
+end
+
+local function worker(t)
+    scheduler[t.session] = t
+
     local function f()
         local tb = scheduler[t.session]
         if not tb then
@@ -14,7 +22,7 @@ local function timeout(t)
         end
 
         if IS_FUNCTION(tb.func) then
-            pcall(tb.func, tb.args)
+            pcall(tb.func, tb_unpack(tb.args or {}))
         else
             ERROR(EINVAL, "schedule: %s: command not found", tostring(func))
         end
@@ -25,13 +33,12 @@ local function timeout(t)
 
         if tb.loop == 0 then
             scheduler[tb.session] = nil
-            return
         end
 
-        skynet.timeout(tb.interval, f)
+        timeout(tb.interval, f)
     end
 
-    skynet.timeout(t.interval, f)
+    timeout(t.interval, f)
 end
 
 function handler.schedule(func, interval, loop, args)
@@ -42,15 +49,13 @@ function handler.schedule(func, interval, loop, args)
 
     local t = {
         func = func,
-        interval = interval * TIMER.MILLISECOND_UNIT,
+        interval = interval,
         loop = loop,
         session = SESSION_SEQUENCE,
         args = args,
     }
 
-    scheduler[t.session] = t
-
-    timeout(t)
+    worker(t)
 
     return t.session
 end

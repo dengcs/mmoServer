@@ -231,14 +231,14 @@ function this.time()
     return math.floor(skynet.time())
 end
 
-this.schedule = function (...)
+function this.schedule(...)
     return __SERVICE_ASSEMBLY.COMMAND_DISPATCH.CALL("lua", "schedule", ...)
 end
 
-this.unschedule = function (...)
+function this.unschedule(...)
     return __SERVICE_ASSEMBLY.COMMAND_DISPATCH.CALL("lua", "unschedule", ...)
 end
 
-this.unschedule_all = function (...)
+function this.unschedule_all(...)
     return __SERVICE_ASSEMBLY.COMMAND_DISPATCH.CALL("lua", "unschedule_all", ...)
 end

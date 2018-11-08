@@ -25,12 +25,10 @@ function handler.on_connect(fd)
 	    skynet.send(agent, "lua", "connect", session) 
 	end
 	
-	print("open_number:"..open_number)
+	skynet.error("open_number:"..open_number)
 end
 
 function handler.on_disconnect(fd)
-    print(string.format("%d disconnect", fd))
-    
     local session = sessions[fd]
     if session then
         skynet.send(session.agent, "lua", "disconnect")        
@@ -39,8 +37,6 @@ function handler.on_disconnect(fd)
 end
 
 function handler.on_open(ws)
-    print(string.format("%d::open", ws.id))
-    
     local session = sessions[ws.id]
     
     if session then
@@ -51,8 +47,6 @@ function handler.on_open(ws)
 end
 
 function handler.on_message(ws, message)
-    print(string.format("%d receive:%s", ws.id, message))
-    
     local session = sessions[ws.id]
     if session then
         skynet.send(session.agent, "lua", "message", message)
@@ -60,8 +54,6 @@ function handler.on_message(ws, message)
 end
 
 function handler.on_close(ws, code, reason)
-    print(string.format("%d close:%s  %s", ws.id, code, reason))
-    
     local session = sessions[ws.id]
     if session then
         skynet.send(session.agent, "lua", "close")        

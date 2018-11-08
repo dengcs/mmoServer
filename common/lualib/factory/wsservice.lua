@@ -19,7 +19,7 @@ function wsService.start(handler)
             handler.on_connect(socket_id)
         end
         client_number = client_number + 1
-        print("on_connect client_number:"..client_number)
+        skynet.error("client_number:"..client_number)
     end
     
     local function on_disconnect(socket_id)
@@ -27,7 +27,7 @@ function wsService.start(handler)
             handler.on_disconnect(socket_id)
         end
         client_number = client_number - 1
-        print("on_disconnect client_number:"..client_number)
+        skynet.error("client_number:"..client_number)
     end
     
     

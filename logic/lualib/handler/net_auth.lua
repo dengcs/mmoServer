@@ -88,7 +88,6 @@ function REQUEST:player_login()
 	    	ret = 0
 	    	self.user:call("Player", "on_login", player_uid)
 	    end
-	    skynet.error("dcs---data--"..table.tostring(self.user))
 	end
     
     local ret_msg = {ret = ret}

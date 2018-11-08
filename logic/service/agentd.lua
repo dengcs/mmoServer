@@ -84,7 +84,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, ...)
-		skynet.error("dcs---cmd--"..cmd)
+		skynet.error("agent---cmd--"..cmd)
 		local safe_handler = SAFE_HANDLER(session)
 		local fn = CMD[cmd]
 		if fn then

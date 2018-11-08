@@ -38,6 +38,20 @@ function play_state:state_notify(idx, state)
 	end
 end
 
+function play_state:push_cards()
+	local push_cards = self.play_core.functions.push_cards
+	if push_cards then
+		push_cards()
+	end
+end
+
+function play_state:get_landowner()
+	local get_landowner = self.play_core.functions.get_landowner
+	if get_landowner then
+		return get_landowner()
+	end
+end
+
 function play_state:reset_state_param()
 	self.place	= 0
 	self.count  = 1
@@ -48,13 +62,17 @@ function play_state:begin()
 	self:reset_state_param()
 end
 
-function play_state:turn()
-	self:turn_process()
-
+function play_state:watch_turn()
 	return self.place,self.state
 end
 
-function play_state:turn_process()
+function play_state:turn()
+	self:turn_worker()
+	print("dcs------------", self.place, self.state)
+	return self.place,self.state
+end
+
+function play_state:turn_worker()
 	if self.state > PLAY_STATE.PLAY then
 		return
 	end
@@ -65,16 +83,38 @@ function play_state:turn_process()
 	if self.count > max_count then
 		self.state = self.state + 1
 		self:reset_state_param()
+		self:handle_state_event()
 	end
 
 	self.place	= (self.place % GLOBAL_PLAYER_NUM) + 1
+end
+
+-- 发底牌
+function play_state:handle_push_cards()
+	if self.state == PLAY_STATE.DOUBLE then
+		self:push_cards()
+	end
+end
+
+-- 地主出牌
+function play_state:handle_landowner_play()
+	if self.state == PLAY_STATE.PLAY then
+		local landowner = self:get_landowner()
+		if landowner > 0 then
+			self.place = landowner - 1
+		end
+	end
+end
+
+function play_state:handle_state_event()
+	self:handle_push_cards()
+	self:handle_landowner_play()
 end
 
 -- 运行到发牌
 function play_state:run()
 	repeat
 		local place, state = self:turn()
-		print("dcs------------", place, state)
 		self:state_notify(place, state)
 		if state > PLAY_STATE.DEAL then
 			break

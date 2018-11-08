@@ -7,13 +7,17 @@ local json_codec	= require("pdk.json_codec")
 local poker_type	= require("pdk.poker_type")
 local play_state	= require("pdk.play_state")
 local ENUM 			= require("config.gameenum")
+local random		= require("utils.random")
 
-local PLAY_STATE = ENUM.PLAY_STATE
+local tb_insert		= table.insert
+local PLAY_STATE 	= ENUM.PLAY_STATE
 
 local play_core = {}
 
 function play_core.new()
 	local core = {}
+	core.landowner = 0
+	core.double = 1
 	core.play_mgr 	= {}
 	core.play_state = play_state.new()
 	setmetatable(core, {__index = play_core})
@@ -22,6 +26,13 @@ function play_core.new()
 	core.play_state:copy_core_functions(functions)
 
 	return core
+end
+
+function play_core:begin(data)
+	self.data = data
+	self.landowner = 0
+	self.double = 1
+	self.play_state:begin_and_run()
 end
 
 -- 座位通知消息
@@ -42,11 +53,27 @@ end
 
 function play_core:state_notify(idx, state)
 	if state == PLAY_STATE.DEAL then
-		local data = json_codec.encode("deal")
+		local data = json_codec.encode(state, self:get_cards(idx))
 		self:notify(idx, data)
 	elseif state == PLAY_STATE.SNATCH then
-		local data = json_codec.encode("snatch")
+		local data = json_codec.encode(state)
 		self:notify(idx, data)
+	end
+end
+
+function play_core:push_cards()
+	if self.landowner > 0 then
+
+		local places = self.data.places[self.landowner]
+		if places then
+			for _, v in pairs(self.data.cards) do
+				tb_insert(places.cards, v)
+			end
+		end
+
+		local data = json_codec.encode(11, self.data.cards)
+		self:notify(self.landowner, data)
+		self:broadcast(json_codec.encode(11))
 	end
 end
 
@@ -56,16 +83,24 @@ function play_core:auth_state_functions()
 		self:state_notify(idx, state)
 	end
 
-	return {state_notify = state_notify}
+	local function push_cards()
+		self:push_cards()
+	end
+
+	local function get_landowner()
+		return self.landowner
+	end
+
+	local functions = {}
+	functions.state_notify 	= state_notify
+	functions.push_cards 	= push_cards
+	functions.get_landowner	= get_landowner
+
+	return functions
 end
 
 function play_core:copy_play_functions(functions)
 	self.play_mgr.functions = functions
-end
-
-function play_core:begin(data)
-	self.data = data
-	self.play_state:begin_and_run()
 end
 
 -- 获取某个位置的牌
@@ -86,15 +121,58 @@ function play_core:test_type(cards)
 	return poker_type.test_type(cards)
 end
 
+-- 托管
+function play_core:entrust(idx)
+	local msg = nil
+	return msg
+end
+
 -- 接收玩家命令
 function play_core:update(idx, data)
-
-	local place,state = self.play_state:turn()
+	local place, state = self.play_state:watch_turn()
 	if place == idx then
+		local cmd, msg = json_codec.decode(data)
+		if not cmd then
+			return
+		end
 
+		local ok = false
+
+		if state == PLAY_STATE.SNATCH and cmd == state then
+			if not msg then
+				msg = random.Get(2)
+			end
+
+			if msg == 1 then
+				self.landowner = idx
+			end
+			ok = true
+		elseif state == PLAY_STATE.DOUBLE and cmd == state then
+			if not msg then
+				msg = random.Get(2)
+			end
+
+			if msg == 1 then
+				self.double = self.double * 2
+			end
+			ok = true
+		elseif state == PLAY_STATE.PLAY and cmd == state then
+			if not msg then
+				-- 托管
+				msg = self:entrust(idx)
+			end
+			ok = true
+		end
+
+		if ok then
+			local broadcast_data = json_codec.encode(state, {idx = idx, msg = msg})
+			self:broadcast(broadcast_data)
+
+			place, state = self.play_state:turn()
+			local notify_data = json_codec.encode(state)
+			self:notify(place, notify_data)
+		end
 	end
-
-	self:broadcast(data)
 end
 
 
