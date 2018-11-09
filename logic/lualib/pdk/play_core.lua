@@ -12,12 +12,12 @@ local random		= require("utils.random")
 local tb_insert		= table.insert
 local PLAY_STATE 	= ENUM.PLAY_STATE
 
+local card_xor_flag = 1024
+
 local play_core = {}
 
 function play_core.new()
 	local core = {}
-	core.landowner = 0
-	core.double = 1
 	core.play_mgr 	= {}
 	core.play_state = play_state.new()
 	setmetatable(core, {__index = play_core})
@@ -32,6 +32,7 @@ function play_core:begin(data)
 	self.data = data
 	self.landowner = 0
 	self.double = 1
+	self.round_state = {idx = 0, type = 0, value = 0, count = 0}
 	self.play_state:begin_and_run()
 end
 
@@ -61,7 +62,7 @@ function play_core:state_notify(idx, state)
 	end
 end
 
-function play_core:push_cards()
+function play_core:push_bottom()
 	if self.landowner > 0 then
 
 		local places = self.data.places[self.landowner]
@@ -71,9 +72,8 @@ function play_core:push_cards()
 			end
 		end
 
-		local data = json_codec.encode(11, self.data.cards)
-		self:notify(self.landowner, data)
-		self:broadcast(json_codec.encode(11))
+		local data = json_codec.encode(11, {idx = self.landowner, msg = self.data.cards})
+		self:broadcast(data)
 	end
 end
 
@@ -83,8 +83,8 @@ function play_core:auth_state_functions()
 		self:state_notify(idx, state)
 	end
 
-	local function push_cards()
-		self:push_cards()
+	local function push_bottom()
+		self:push_bottom()
 	end
 
 	local function get_landowner()
@@ -93,7 +93,7 @@ function play_core:auth_state_functions()
 
 	local functions = {}
 	functions.state_notify 	= state_notify
-	functions.push_cards 	= push_cards
+	functions.push_bottom 	= push_bottom
 	functions.get_landowner	= get_landowner
 
 	return functions
@@ -121,16 +121,77 @@ function play_core:test_type(cards)
 	return poker_type.test_type(cards)
 end
 
+function play_core:get_default_indexes(idx)
+	local cards = self:get_cards(idx)
+	return poker_type.get_default_indexes(cards)
+end
+
+function play_core:get_type_indexes(idx, type, value, count)
+	local cards = self:get_cards(idx)
+	return poker_type.get_type_indexes(type, cards, value, count)
+end
+
+--
+function play_core:post_cards(idx, card_indexes)
+	local ret_cards = {}
+	local cards = self:get_cards(idx)
+	for _, v in pairs(card_indexes or {}) do
+		tb_insert(ret_cards, cards[v])
+		cards[v] = cards[v] | card_xor_flag
+	end
+	return ret_cards
+end
+
+function play_core:record_round_state(idx, type, value, count)
+	self.round_state.idx = idx
+	self.round_state.type = type
+	self.round_state.value = value
+	self.round_state.count = count
+end
+
+-- 是否可以随意出牌
+function play_core:is_main_type(idx)
+	if self.round_state.idx == 0 then
+		return true
+	end
+
+	if self.round_state.idx == idx then
+		return true
+	end
+	return false
+end
+
 -- 托管
 function play_core:entrust(idx)
 	local msg = nil
+
+	local is_main = self:is_main_type(idx)
+	if is_main then
+		local indexes, type, value, count = self:get_default_indexes(idx)
+		if indexes then
+			local cards = self:post_cards(idx, indexes)
+			self:record_round_state(idx, type, value, count)
+			msg = cards
+		end
+	else
+		local type = self.round_state.type
+		local value = self.round_state.value
+		local count = self.round_state.count
+		local indexes, max_value = self:get_type_indexes(idx, type, value, count)
+		if indexes then
+			local cards = self:post_cards(idx, indexes)
+			self:record_round_state(idx, type, max_value, count)
+			msg = cards
+		end
+	end
+
 	return msg
 end
 
 -- 接收玩家命令
 function play_core:update(idx, data)
-	local place, state = self.play_state:watch_turn()
-	if place == idx then
+	local place_idx, state = self.play_state:watch_turn()
+	if place_idx == idx then
 		local cmd, msg = json_codec.decode(data)
 		if not cmd then
 			return
@@ -168,9 +229,9 @@ function play_core:update(idx, data)
 			local broadcast_data = json_codec.encode(state, {idx = idx, msg = msg})
 			self:broadcast(broadcast_data)
 
-			place, state = self.play_state:turn()
+			place_idx, state = self.play_state:turn()
 			local notify_data = json_codec.encode(state)
-			self:notify(place, notify_data)
+			self:notify(place_idx, notify_data)
 		end
 	end
 end

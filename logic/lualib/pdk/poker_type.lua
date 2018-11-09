@@ -7,6 +7,8 @@ local mh_ceil 	= math.ceil
 local tb_sort 	= table.sort
 local tb_insert	= table.insert
 
+local card_xor_flag = 1024
+
 local poker_type = {}
 
 -- 判断类型是否匹配
@@ -81,6 +83,92 @@ function poker_type.test_type(cards)
 	end
 
 	return 0
+end
+
+function poker_type.get_default_indexes(cards)
+	local indexes = nil
+	local max_value = 0
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3STRAIGHT, cards, 1, 2)
+	if indexes then
+		return indexes, POKER_TYPE_3STRAIGHT, max_value, 2
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_2STRAIGHT, cards, 2, 3)
+	if indexes then
+		return indexes, POKER_TYPE_2STRAIGHT, max_value, 3
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_1STRAIGHT, cards, 4, 5)
+	if indexes then
+		return indexes, POKER_TYPE_1STRAIGHT, max_value, 5
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_BOMB, cards, 0)
+	if indexes then
+		return indexes, POKER_TYPE_BOMB, max_value
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_THREE, cards, 0)
+	if indexes then
+		return indexes, POKER_TYPE_THREE, max_value
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_KING, cards, 13)
+	if indexes then
+		return indexes, POKER_TYPE_KING, max_value
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_TWO, cards, 0)
+	if indexes then
+		return indexes, POKER_TYPE_TWO, max_value
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_ONE, cards, 0)
+	if indexes then
+		return indexes, POKER_TYPE_ONE, max_value
+	end
+
+	return indexes
+end
+
+function poker_type.get_type_indexes(type, cards, value, count)
+	local switch =
+	{
+		[POKER_TYPE_ONE] 		= poker_type.get_one,
+		[POKER_TYPE_TWO] 		= poker_type.get_two,
+		[POKER_TYPE_THREE] 		= poker_type.get_three,
+		[POKER_TYPE_BOMB] 		= poker_type.get_bomb,
+		[POKER_TYPE_KING] 		= poker_type.get_two,
+		[POKER_TYPE_1STRAIGHT] 	= poker_type.get_1straight,
+		[POKER_TYPE_2STRAIGHT] 	= poker_type.get_2straight,
+		[POKER_TYPE_3STRAIGHT] 	= poker_type.get_3straight,
+		[POKER_TYPE_3WITH1] 	= poker_type.get_3with1,
+		[POKER_TYPE_3WITH2] 	= poker_type.get_3with2,
+		[POKER_TYPE_4WITH1] 	= poker_type.get_4with1,
+		[POKER_TYPE_4WITH21] 	= poker_type.get_4with21,
+		[POKER_TYPE_4WITH22] 	= poker_type.get_4with22,
+	}
+
+	local fn = switch[type]
+	if fn then
+		local mode = poker_type.get_type_mode(cards)
+		return fn(mode, value, count)
+	end
+end
+
+function poker_type.get_type_mode(cards)
+	local mode = {}
+	for i, v in pairs(cards or {}) do
+		if v < card_xor_flag then
+			local card = mh_ceil(v/4)
+			if not mode[card] then
+				mode[card] = {}
+			end
+			tb_insert(mode[card], i)
+		end
+	end
+	return mode
 end
 
 -- 检测牌是否有效
@@ -396,6 +484,254 @@ function poker_type.check_4with22(cards)
 		return target_card
 	end
 	return 0
+end
+
+function poker_type.get_one(mode, value)
+	local indexes = nil
+	local max_value = 0
+	for i, v in pairs(mode or {}) do
+		local len = #v
+		if len == 1 then
+			if i > value then
+				indexes = v
+				max_value = i
+				break
+			end
+		end
+	end
+	return indexes, max_value
+end
+
+function poker_type.get_two(mode, value)
+	local indexes = nil
+	local max_value = 0
+	for i, v in pairs(mode or {}) do
+		local len = #v
+		if len == 2 then
+			if i > value then
+				indexes = v
+				max_value = i
+				break
+			end
+		end
+	end
+	return indexes, max_value
+end
+
+function poker_type.get_three(mode, value)
+	local indexes = nil
+	local max_value = 0
+	for i, v in pairs(mode or {}) do
+		local len = #v
+		if len == 3 then
+			if i > value then
+				indexes = v
+				max_value = i
+				break
+			end
+		end
+	end
+	return indexes, max_value
+end
+
+function poker_type.get_bomb(mode, value)
+	local indexes = nil
+	local max_value = 0
+	for i, v in pairs(mode or {}) do
+		local len = #v
+		if len == 4 then
+			if i > value then
+				indexes = v
+				max_value = i
+				break
+			end
+		end
+	end
+	return indexes, max_value
+end
+
+function poker_type.get_1straight(mode, value, count)
+	local indexes = nil
+	local max_value = 0
+
+	if count < 5 then
+		return
+	end
+
+	local key_list = {}
+
+	for i, v in pairs(mode or {}) do
+		tb_insert(key_list, i)
+	end
+
+	local key_len = #key_list
+	if key_len < count then
+		return
+	end
+
+	tb_sort(key_list)
+
+	local find_idx = 0
+	local straight_count = 0
+	local first = key_list[1] - 1
+	for i, v in pairs(key_list) do
+		if (first + i) == v then
+			straight_count = straight_count + 1
+		else
+			straight_count = 1
+		end
+
+		if straight_count >= count then
+			if v > value then
+				find_idx = i
+				max_value = v
+				break
+			end
+		end
+	end
+
+	if find_idx >= count then
+		indexes = {}
+		for i = find_idx, find_idx - count + 1, -1 do
+			tb_insert(indexes, mode[key_list[i]][1])
+		end
+	end
+
+	return indexes, max_value
+end
+
+function poker_type.get_2straight(mode, value, count)
+	local indexes = nil
+	local max_value = 0
+
+	if count < 3 then
+		return
+	end
+
+	local key_list = {}
+
+	for i, v in pairs(mode or {}) do
+		local len = #v
+		if len > 1 then
+			tb_insert(key_list, i)
+		end
+	end
+
+	local key_len = #key_list
+	if key_len < count then
+		return
+	end
+
+	tb_sort(key_list)
+
+	local find_idx = 0
+	local straight_count = 0
+	local first = key_list[1] - 1
+	for i, v in pairs(key_list) do
+		if (first + i) == v then
+			straight_count = straight_count + 1
+		else
+			straight_count = 1
+		end
+
+		if straight_count >= count then
+			if v > value then
+				find_idx = i
+				max_value = v
+				break
+			end
+		end
+	end
+
+	if find_idx >= count then
+		indexes = {}
+		for i = find_idx, find_idx - count + 1, -1 do
+			tb_insert(indexes, mode[key_list[i]][1])
+			tb_insert(indexes, mode[key_list[i]][2])
+		end
+	end
+
+	return indexes, max_value
+end
+
+function poker_type.get_3straight(mode, value, count)
+	local indexes = nil
+	local max_value = 0
+
+	if count < 2 then
+		return
+	end
+
+	local key_list = {}
+
+	for i, v in pairs(mode or {}) do
+		local len = #v
+		if len > 2 then
+			tb_insert(key_list, i)
+		end
+	end
+
+	local key_len = #key_list
+	if key_len < count then
+		return
+	end
+
+	tb_sort(key_list)
+
+	local find_idx = 0
+	local straight_count = 0
+	local first = key_list[1] - 1
+	for i, v in pairs(key_list) do
+		if (first + i) == v then
+			straight_count = straight_count + 1
+		else
+			straight_count = 1
+		end
+
+		if straight_count >= count then
+			if v > value then
+				find_idx = i
+				max_value = v
+				break
+			end
+		end
+	end
+
+	if find_idx >= count then
+		indexes = {}
+		for i = find_idx, find_idx - count + 1, -1 do
+			tb_insert(indexes, mode[key_list[i]][1])
+			tb_insert(indexes, mode[key_list[i]][2])
+			tb_insert(indexes, mode[key_list[i]][3])
+		end
+	end
+
+	return indexes, max_value
+end
+
+function poker_type.get_3with1(mode, value, count)
+	local indexes = nil
+	return indexes
+end
+
+function poker_type.get_3with2(mode, value, count)
+	local indexes = nil
+	return indexes
+end
+
+function poker_type.get_4with1(mode, value)
+	local indexes = nil
+	return indexes
+end
+
+function poker_type.get_4with21(mode, value)
+	local indexes = nil
+	return indexes
+end
+
+function poker_type.get_4with22(mode, value)
+	local indexes = nil
+	return indexes
 end
 
 return poker_type
