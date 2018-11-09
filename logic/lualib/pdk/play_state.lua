@@ -12,7 +12,7 @@ local STATE_COUNT = {
 	[PLAY_STATE.DEAL] = 3,
 	[PLAY_STATE.SNATCH] = 4,
 	[PLAY_STATE.DOUBLE] = 3,
-	[PLAY_STATE.PLAY] = 54,
+	[PLAY_STATE.PLAY] = 120,
 }
 
 local play_state = {}

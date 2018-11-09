@@ -89,6 +89,16 @@ function poker_type.get_default_indexes(cards)
 	local indexes = nil
 	local max_value = 0
 
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_KING, cards, 13)
+	if indexes then
+		return indexes, POKER_TYPE_KING, max_value
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_BOMB, cards, 0)
+	if indexes then
+		return indexes, POKER_TYPE_BOMB, max_value
+	end
+
 	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3STRAIGHT, cards, 1, 2)
 	if indexes then
 		return indexes, POKER_TYPE_3STRAIGHT, max_value, 2
@@ -104,19 +114,9 @@ function poker_type.get_default_indexes(cards)
 		return indexes, POKER_TYPE_1STRAIGHT, max_value, 5
 	end
 
-	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_BOMB, cards, 0)
-	if indexes then
-		return indexes, POKER_TYPE_BOMB, max_value
-	end
-
 	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_THREE, cards, 0)
 	if indexes then
 		return indexes, POKER_TYPE_THREE, max_value
-	end
-
-	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_KING, cards, 13)
-	if indexes then
-		return indexes, POKER_TYPE_KING, max_value
 	end
 
 	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_TWO, cards, 0)
@@ -152,12 +152,12 @@ function poker_type.get_type_indexes(type, cards, value, count)
 
 	local fn = switch[type]
 	if fn then
-		local mode = poker_type.get_type_mode(cards)
+		local mode = poker_type.get_cards_mode(cards)
 		return fn(mode, value, count)
 	end
 end
 
-function poker_type.get_type_mode(cards)
+function poker_type.get_cards_mode(cards)
 	local mode = {}
 	for i, v in pairs(cards or {}) do
 		if v < card_xor_flag then
@@ -711,27 +711,37 @@ end
 
 function poker_type.get_3with1(mode, value, count)
 	local indexes = nil
-	return indexes
+	local max_value = 0
+
+	return indexes, max_value
 end
 
 function poker_type.get_3with2(mode, value, count)
 	local indexes = nil
-	return indexes
+	local max_value = 0
+
+	return indexes, max_value
 end
 
 function poker_type.get_4with1(mode, value)
 	local indexes = nil
-	return indexes
+	local max_value = 0
+
+	return indexes, max_value
 end
 
 function poker_type.get_4with21(mode, value)
 	local indexes = nil
-	return indexes
+	local max_value = 0
+
+	return indexes, max_value
 end
 
 function poker_type.get_4with22(mode, value)
 	local indexes = nil
-	return indexes
+	local max_value = 0
+
+	return indexes, max_value
 end
 
 return poker_type
