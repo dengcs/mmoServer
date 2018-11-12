@@ -167,10 +167,10 @@ function play_core:entrust(idx)
 
 	local is_main = self:is_main_type(idx)
 	if is_main then
-		local indexes, type, value, count = self:get_default_indexes(idx)
+		local indexes, type, max_value, count = self:get_default_indexes(idx)
 		if indexes then
 			local cards = self:post_cards(idx, indexes)
-			self:record_round_state(idx, type, value, count)
+			self:record_round_state(idx, type, max_value, count)
 			msg = cards
 		end
 	else
