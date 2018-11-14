@@ -28,7 +28,7 @@ local SEQUENCE  = 0
 -- 生成编号(50位整数)
 -- 1. 主类型
 -- 2. 子类型
-local function allocid(major, minor)
+local function alloc_id(major, minor)
 	SEQUENCE = SEQUENCE + 1
 	return string.format("%x", ((major & 0xF) << 46) + ((minor & 0xF) << 42) + SEQUENCE)
 end
@@ -39,7 +39,7 @@ end
 -- 创建战场
 function COMMAND.on_create(major, minor, data)
 	-- 构造别名
-	local alias = allocid(major, minor)
+	local alias = alloc_id(major, minor)
 	-- 构造战场
 	local game = Game.new(alias, data)
 	if game == nil then
@@ -52,7 +52,6 @@ function COMMAND.on_create(major, minor, data)
 	return 0
 end
 
--- 关闭战场（通过'game.close'间接调用）
 -- 1. 战场编号
 function COMMAND.on_close(alias)
 	games[self.alias] = nil
@@ -71,7 +70,7 @@ function COMMAND.on_leave(alias, uid)
 		game:broadcast("game_quit__notify", {uid = member.uid})
 		-- 清理战场
 		if game:empty() then
-			game:close(skynet.self())
+			COMMAND.on_close(alias)
 		end
 	end
 	return 0
@@ -115,14 +114,13 @@ end
 
 -- 战场关闭（延时关闭，确保用户成功返回组队服务）
 -- 1. 战场编号
-function COMMAND.game_finish_complete(alias)
+function COMMAND.game_finish(alias, data)
 	local game = games[alias]
-	assert(game, "game_finish_complete() : game not exists!!!")
+	assert(game, "game_finish: game not exists!!!")
 
-	if game.state == GAME_STATE.FINISHED then
-		-- 关闭战场
-		game:close(skynet.self())
-	end
+	games[alias] = nil
+
+	skynet.error("game_finish----", table.tostring(data))
 end
 
 -- 成员掉线通知

@@ -27,7 +27,7 @@ function play_state.new()
 end
 
 -- 接收玩法模块授权的函数
-function play_state:copy_core_functions(functions)
+function play_state:copy_functions_from_core(functions)
 	self.play_core.functions = assert(functions)
 end
 
@@ -57,8 +57,13 @@ function play_state:reset_state_param()
 	self.place_idx	= 0
 end
 
-function play_state:begin()
+function play_state:start()
 	self.state 	= PLAY_STATE.PREPARE
+	self:reset_state_param()
+end
+
+function play_state:stop()
+	self.state 	= PLAY_STATE.OVER
 	self:reset_state_param()
 end
 
@@ -122,8 +127,8 @@ function play_state:run()
 	until(false)
 end
 
-function play_state:begin_and_run()
-	self:begin()
+function play_state:start_and_run()
+	self:start()
 	self:run()
 end
 

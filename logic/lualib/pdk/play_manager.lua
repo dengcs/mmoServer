@@ -34,13 +34,21 @@ function play_manager:init()
 		tb_insert(self.places, {cards = {}})
 	end
 
-	local functions = self:auth_core_functions()
-	self.play_core:copy_play_functions(functions)
+	local functions = self:auth_functions_to_core()
+	self.play_core:copy_functions_from_manager(functions)
 end
 
 -- 接收游戏模块授权的函数
-function play_manager:copy_game_functions(functions)
+function play_manager:copy_functions_from_game(functions)
 	self.game.functions = assert(functions)
+end
+
+-- 内部消息通知
+function play_manager:event(id, data)
+	local event = self.game.functions.event
+	if event then
+		event(id, data)
+	end
 end
 
 -- 座位通知消息
@@ -59,7 +67,7 @@ function play_manager:broadcast(data)
 	end
 end
 
-function play_manager:auth_core_functions()
+function play_manager:auth_functions_to_core()
 	local function broadcast(data)
 		self:broadcast(data)
 	end
@@ -68,7 +76,15 @@ function play_manager:auth_core_functions()
 		self:notify(idx, data)
 	end
 
-	local functions = {broadcast = broadcast, notify = notify}
+	local function event(id, data)
+		self:event(id, data)
+	end
+
+	local functions = {}
+	functions.broadcast = broadcast
+	functions.notify = notify
+	functions.event = event
+
 	return functions
 end
 

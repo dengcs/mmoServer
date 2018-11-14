@@ -11,6 +11,7 @@ local userdriver 	= skynet.userdriver()
 local PLAYER_STATE_TYPE = ENUM.PLAYER_STATE_TYPE
 local GAME_MEMBER_STATE = ENUM.GAME_MEMBER_STATE
 local GAME_STATE		= ENUM.GAME_STATE
+local PLAY_EVENT		= ENUM.PLAY_EVENT
 
 -----------------------------------------------------------
 --- 内部常量/内部逻辑
@@ -143,23 +144,8 @@ end
 
 function Game:init_play_mgr()
 	self.play_mgr = play_manager.new()
-	local functions = self:auth_play_functions()
-	self.play_mgr:copy_game_functions(functions)
-end
-
--- 关闭战场（延迟关闭）
-function Game:close(source)
-	-- 关闭战场通知
-	if not self.closed then
-		-- 设置关闭标志
-		self.closed = true
-		-- 移除战场成员
-		for _, member in pairs(self.members) do
-			self:quit(member.uid)
-		end
-	end
-
-	skynet.send(source, "lua", "on_close", self.alias)
+	local functions = self:auth_functions_to_manager()
+	self.play_mgr:copy_functions_from_game(functions)
 end
 
 -- 加入战场
@@ -205,17 +191,6 @@ function Game:get(uid)
 	return nil
 end
 
--- 队伍成员列表
-function Game:get_member_list(teamid)
-	local list = {}
-	for _, member in pairs(self.members) do
-		if teamid == member.teamid then
-			tinsert(list,member.uid)
-		end
-	end
-	return list
-end
-
 -- 判断是否空战场
 function Game:empty()
 	for _, member in pairs(self.members) do
@@ -255,6 +230,13 @@ function Game:reconnect(uid)
 		end
 	end
 	return member
+end
+
+-- 内部事件
+function Game:event(id, data)
+	if id == PLAY_EVENT.GAME_OVER then
+		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "game_finish", self.alias, data)
+	end
 end
 
 -- 消息广播
@@ -310,7 +292,7 @@ function Game:start()
 end
 
 -- 封装函数给玩法模块调用
-function Game:auth_play_functions()
+function Game:auth_functions_to_manager()
 	local function broadcast(data)
 		self:broadcast("game_update_notify", {data = data})
 	end
@@ -319,7 +301,15 @@ function Game:auth_play_functions()
 		self:notify(idx, "game_update_notify", {data = data})
 	end
 
-	local functions = {broadcast = broadcast, notify = notify}
+	local function event(id, data)
+		self:event(id, data)
+	end
+
+	local functions = {}
+	functions.broadcast = broadcast
+	functions.notify = notify
+	functions.event = event
+
 	return functions
 end
 

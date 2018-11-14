@@ -7,7 +7,7 @@ local mh_ceil 	= math.ceil
 local tb_sort 	= table.sort
 local tb_insert	= table.insert
 
-local card_xor_flag = 1024
+local hide_byte_bit = 1024
 
 local poker_type = {}
 
@@ -91,7 +91,7 @@ function poker_type.get_default_indexes(cards)
 
 	local cards_len = 0
 	for _, v in pairs(cards) do
-		if v < card_xor_flag then
+		if v < hide_byte_bit then
 			cards_len = cards_len + 1
 		end
 	end
@@ -202,7 +202,7 @@ end
 function poker_type.get_cards_mode(cards)
 	local mode = {}
 	for i, v in pairs(cards or {}) do
-		if v < card_xor_flag then
+		if v < hide_byte_bit then
 			local card = mh_ceil(v/4)
 			if not mode[card] then
 				mode[card] = {}

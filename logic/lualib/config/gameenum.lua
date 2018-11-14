@@ -113,6 +113,16 @@ local PLAY_STATE = {
 
 ENUM.PLAY_STATE = PLAY_STATE
 
+-----------------------------------------------------------
+-- 比赛中状态枚举
+-----------------------------------------------------------
+
+local PLAY_EVENT = {
+	GAME_OVER 	= 1, -- 结束
+}
+
+ENUM.PLAY_EVENT = PLAY_EVENT
+
 function ENUM.get(name, key)
 	return ENUM[name][key]
 end
