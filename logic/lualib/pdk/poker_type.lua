@@ -688,9 +688,11 @@ function poker_type.get_2straight(mode, value, count)
 
 	if max_value > 0 then
 		indexes = {}
+		local card = 0
 		for i = count, 1, -1 do
-			tb_insert(indexes, mode[max_value - i + 1][1])
-			tb_insert(indexes, mode[max_value - i + 1][2])
+			card = max_value - i + 1
+			tb_insert(indexes, mode[card][1])
+			tb_insert(indexes, mode[card][2])
 		end
 	end
 
@@ -741,10 +743,12 @@ function poker_type.get_3straight(mode, value, count)
 
 	if max_value > 0 then
 		indexes = {}
+		local card = 0
 		for i = count, 1, -1 do
-			tb_insert(indexes, mode[max_value - i + 1][1])
-			tb_insert(indexes, mode[max_value - i + 1][2])
-			tb_insert(indexes, mode[max_value - i + 1][3])
+			card = max_value - i + 1
+			tb_insert(indexes, mode[card][1])
+			tb_insert(indexes, mode[card][2])
+			tb_insert(indexes, mode[card][3])
 		end
 	end
 
