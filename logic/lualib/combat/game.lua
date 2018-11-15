@@ -235,6 +235,11 @@ end
 -- 内部事件
 function Game:event(id, data)
 	if id == PLAY_EVENT.GAME_OVER then
+		for i, v in pairs(self.members) do
+			if not v.robot then
+				leave_environment(v.uid, self.alias)
+			end
+		end
 		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "game_finish", self.alias, data)
 	end
 end

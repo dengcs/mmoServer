@@ -42,9 +42,10 @@ local function schedule()
 		for id, channel in pairs(channels) do
 			for _, team in pairs(channel.teams) do
 				if team:prepare() then
-					if team:full() then
+					if team:is_full() then
 						utils.start(1,1,team:snapshot())
 						team:start()
+						team:convert("RUNNING")
 					else
 						local member = robot.generate_robot()
 						team:join(member)
@@ -204,31 +205,23 @@ end
 -- 战场通知战斗结束
 -- 1. 队伍信息
 -- 2. 胜者编号
-function COMMAND.on_game_finish(vdata, uid)
-    local cid = assert(vdata.cid)
-    local tid = assert(vdata.tid)
-    -- 获取频道
-    local channel = channels[cid]
-    if channel == nil then
-      return ERRCODE.COMMON_PARAMS_ERROR
-    end
-    -- 队伍检查
-    local team = channel:get(tid)
-    if team == nil then
-      return ERRCODE.ROOM_NOT_EXISTS
-    else
-      -- 更换领队
-      local member = team:get(uid)
-      if member then
-        if team.owner ~= member.uid then
-          team.owner = member.uid
-        end
-      end
-      -- 变更状态
-      team:convert("PREPARE")
-      team:synchronize(cid)
-      return 0
-    end
+function COMMAND.on_game_finish(cid, tid, data)
+	-- 获取频道
+	local channel = channels[cid]
+	if channel == nil then
+		return ERRCODE.COMMON_PARAMS_ERROR
+	end
+	-- 队伍检查
+	local team = channel:get(tid)
+	if team == nil then
+		return ERRCODE.COMMON_SYSTEM_ERROR
+	end
+
+	-- 变更状态
+	team:convert("PREPARE")
+	team:synchronize()
+
+	return 0
 end
 
 -----------------------------------------------------------

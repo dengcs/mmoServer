@@ -120,7 +120,7 @@ function COMMAND.game_finish(alias, data)
 
 	games[alias] = nil
 
-	skynet.error("game_finish----", table.tostring(data))
+	skynet.send(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_game_finish", game.channel, game.teamid, data)
 end
 
 -- 成员掉线通知

@@ -102,22 +102,22 @@ function Member:running()
 	end
 end
 
--- 成员快照（用于推送到战场）
-function Member:snapshot()
-	local snapshot =
-	{
-		uid        		= self.uid,
-		sex        		= self.sex,
-		nickname   		= self.nickname,
-		portrait   		= self.portrait,
-		ulevel     		= self.ulevel,
-		vlevel     		= self.vlevel,
-		place			= self.place,
-		state			= self.state,
-		robot			= self.robot,
-		portrait_box_id = self.portrait_box_id,
-		agent			= self.agent,
-	}
+-- 成员快照
+function Member:snapshot(type)
+	local snapshot = {}
+	snapshot.uid        		= self.uid
+	snapshot.sex        		= self.sex
+	snapshot.nickname   		= self.nickname
+	snapshot.portrait   		= self.portrait
+	snapshot.ulevel     		= self.ulevel
+	snapshot.vlevel     		= self.vlevel
+	snapshot.place				= self.place
+	snapshot.state				= self.state
+	snapshot.portrait_box_id 	= self.portrait_box_id
+	if not type then
+		snapshot.robot				= self.robot
+		snapshot.agent				= self.agent
+	end
 	return snapshot
 end
 
@@ -160,17 +160,13 @@ function Team.new(vdata)
 	setmetatable(team, Team)
 
 	-- 设置队伍数据
-	team.id      = allocid()					-- 队伍编号（顺序递增）
-	team.owner   = vdata.uid					-- 领队编号
-	team.state   = ESTATES.PREPARE				-- 队伍状态
-	team.xtime   = 0							-- 匹配时间
-	team.weight  = 0							-- 匹配权重
-	team.places  = {}							-- 座位信息
-	team.channel = 0							-- 频道
-	team.members = {}							-- 成员列表
-	for i = 1, ROOM_MAX_MEMBERS do
-		table.insert(team.places, {id = i})
-	end
+	team.id      	= allocid()					-- 队伍编号（顺序递增）
+	team.owner   	= vdata.uid					-- 领队编号
+	team.state   	= ESTATES.PREPARE			-- 队伍状态
+	team.xtime   	= 0							-- 匹配时间
+	team.count	 	= 0							-- 成员数量
+	team.channel 	= 0							-- 频道
+	team.members 	= {}						-- 成员列表
 	-- 成员加入队伍
 	local member = team:join(vdata)
 	if not member then
@@ -207,37 +203,22 @@ function Team:running()
 	end
 end
 
--- 队伍容量
-function Team:capacity()
-	local capacity = 0
-	for _, v in pairs(self.places) do
-		if not v.locked then
-			capacity = capacity + 1
-		end
-	end
-	return capacity
-end
-
 -- 队伍是否满员
-function Team:full()
-	for _, v in pairs(self.places) do
-		if not v.member then
-			return false
-		end
-	end
-	return true
+function Team:is_full()
+	return self.count >= ROOM_MAX_MEMBERS
 end
 
 -- 队伍快照（用于推送到战场）
-function Team:snapshot()
+function Team:snapshot(type)
 	local snapshot = {}
 	snapshot.teamid 	= self.id
 	snapshot.channel 	= self.channel
 	snapshot.owner 		= self.owner
 	snapshot.state		= self.state
 	snapshot.members	= {}
+
 	for _, v in pairs(self.members or {}) do
-		tinsert(snapshot.members, v:snapshot())
+		snapshot.members[v.place] = v:snapshot(type)
 	end
 
 	return snapshot
@@ -254,33 +235,22 @@ end
 
 -- 指定成员
 function Team:get(uid)
-	for _, v in pairs(self.members) do
-		if v.uid == uid then
-			return v
-		end
-	end
-	return nil
+	return self.members[uid]
 end
 
 -- 加入队伍
 function Team:join(vdata)
-	-- 查找空闲座位
-	local place = nil
-	for _, v in pairs(self.places) do
-		if not v.member then
-			place = v
-			break
-		end
+	if self:is_full() then
+		return
 	end
-	if place == nil then
-		return nil
-	end
-	vdata.place	 = place.id
+
 	-- 成员加入队伍
 	local member = Member.new(vdata)
 	if member ~= nil then
-		place.member             = member
 		self.members[member.uid] = member
+
+		self.count = self.count + 1
+		member.place = self.count
 	end
 	return member
 end
@@ -289,38 +259,26 @@ end
 function Team:quit(uid)
 	-- 移除队伍成员
 	local member = nil
-	for _, v in pairs(self.places) do
-		if (v.member ~= nil) and (v.member.uid == uid) then
-			member            = v.member
-			v.member          = nil
+	for _, v in pairs(self.members) do
+		if (v.uid == uid) then
+			member            = v
 			self.members[uid] = nil
+			self.count = self.count - 1
 			break
 		end
 	end
-	-- 分发队伍判断
-	local effective = false
-	for _, v in pairs(self.places) do
-		if (v.member ~= nil) then
-			effective = true
-			break
-		end
-	end
-	if not effective then
-		-- 清空队伍
-		self.places  = {}
-		self.members = {}
-	else
-		-- 转移队长权限
-		if (member ~= nil) and (member.uid == self.owner) then
-			for _, v in pairs(self.members) do
-				self.owner = v.uid
-				if v:ready() then
-					v:convert("PREPARE")
-				end
-				break
+
+	-- 转移队长权限
+	if (member ~= nil) and (member.uid == self.owner) then
+		for _, v in pairs(self.members) do
+			self.owner = v.uid
+			if v:ready() then
+				v:convert(ESTATES.PREPARE)
 			end
+			break
 		end
 	end
+
 	return member
 end
 
@@ -378,8 +336,7 @@ end
 function Team:synchronize()
 	-- 房间同步逻辑
 	local name = "room_synchronize_notify"
-	local data = self:snapshot()
-	self:broadcast(name, { data = data })
+	self:broadcast(name, self:snapshot(1))
 end
 
 -----------------------------------------------------------
