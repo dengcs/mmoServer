@@ -616,7 +616,6 @@ function poker_type.get_1straight(mode, value, count)
 
 	tb_sort(key_list)
 
-	local find_idx = 0
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
@@ -624,21 +623,21 @@ function poker_type.get_1straight(mode, value, count)
 			straight_count = straight_count + 1
 		else
 			straight_count = 1
+			first = v - i
 		end
 
 		if straight_count >= count then
 			if v > value then
-				find_idx = i
 				max_value = v
 				break
 			end
 		end
 	end
 
-	if find_idx >= count then
+	if max_value > 0 then
 		indexes = {}
-		for i = find_idx, find_idx - count + 1, -1 do
-			tb_insert(indexes, mode[key_list[i]][1])
+		for i = count, 1, -1 do
+			tb_insert(indexes, mode[max_value - i + 1][1])
 		end
 	end
 
@@ -669,7 +668,6 @@ function poker_type.get_2straight(mode, value, count)
 
 	tb_sort(key_list)
 
-	local find_idx = 0
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
@@ -677,22 +675,22 @@ function poker_type.get_2straight(mode, value, count)
 			straight_count = straight_count + 1
 		else
 			straight_count = 1
+			first = v - i
 		end
 
 		if straight_count >= count then
 			if v > value then
-				find_idx = i
 				max_value = v
 				break
 			end
 		end
 	end
 
-	if find_idx >= count then
+	if max_value > 0 then
 		indexes = {}
-		for i = find_idx, find_idx - count + 1, -1 do
-			tb_insert(indexes, mode[key_list[i]][1])
-			tb_insert(indexes, mode[key_list[i]][2])
+		for i = count, 1, -1 do
+			tb_insert(indexes, mode[max_value - i + 1][1])
+			tb_insert(indexes, mode[max_value - i + 1][2])
 		end
 	end
 
@@ -723,7 +721,6 @@ function poker_type.get_3straight(mode, value, count)
 
 	tb_sort(key_list)
 
-	local find_idx = 0
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
@@ -731,23 +728,23 @@ function poker_type.get_3straight(mode, value, count)
 			straight_count = straight_count + 1
 		else
 			straight_count = 1
+			first = v - i
 		end
 
 		if straight_count >= count then
 			if v > value then
-				find_idx = i
 				max_value = v
 				break
 			end
 		end
 	end
 
-	if find_idx >= count then
+	if max_value > 0 then
 		indexes = {}
-		for i = find_idx, find_idx - count + 1, -1 do
-			tb_insert(indexes, mode[key_list[i]][1])
-			tb_insert(indexes, mode[key_list[i]][2])
-			tb_insert(indexes, mode[key_list[i]][3])
+		for i = count, 1, -1 do
+			tb_insert(indexes, mode[max_value - i + 1][1])
+			tb_insert(indexes, mode[max_value - i + 1][2])
+			tb_insert(indexes, mode[max_value - i + 1][3])
 		end
 	end
 
@@ -789,7 +786,6 @@ function poker_type.get_3with1(mode, value, count)
 
 	tb_sort(key_list)
 
-	local find_idx = 0
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
@@ -797,24 +793,25 @@ function poker_type.get_3with1(mode, value, count)
 			straight_count = straight_count + 1
 		else
 			straight_count = 1
+			first = v - i
 		end
 
 		if straight_count >= count then
 			if v > value then
-				find_idx = i
 				max_value = v
 				break
 			end
 		end
 	end
 
-	if find_idx >= count then
+	if max_value > 0 then
 		indexes = {}
-		for i = find_idx, find_idx - count + 1, -1 do
-			tb_insert(indexes, mode[key_list[i]][1])
-			tb_insert(indexes, mode[key_list[i]][2])
-			tb_insert(indexes, mode[key_list[i]][3])
-			mode[key_list[i]] = nil
+		local card = 0
+		for i = count, 1, -1 do
+			card = max_value - i + 1
+			tb_insert(indexes, mode[card][1])
+			tb_insert(indexes, mode[card][2])
+			tb_insert(indexes, mode[card][3])
 		end
 
 		local attach_count = 0
@@ -864,7 +861,6 @@ function poker_type.get_3with2(mode, value, count)
 
 	tb_sort(key_list)
 
-	local find_idx = 0
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
@@ -872,23 +868,25 @@ function poker_type.get_3with2(mode, value, count)
 			straight_count = straight_count + 1
 		else
 			straight_count = 1
+			first = v - i
 		end
 
 		if straight_count >= count then
 			if v > value then
-				find_idx = i
 				max_value = v
 				break
 			end
 		end
 	end
 
-	if find_idx >= count then
+	if max_value > 0 then
 		indexes = {}
-		for i = find_idx, find_idx - count + 1, -1 do
-			tb_insert(indexes, mode[key_list[i]][1])
-			tb_insert(indexes, mode[key_list[i]][2])
-			tb_insert(indexes, mode[key_list[i]][3])
+		local card = 0
+		for i = count, 1, -1 do
+			card = max_value - i + 1
+			tb_insert(indexes, mode[card][1])
+			tb_insert(indexes, mode[card][2])
+			tb_insert(indexes, mode[card][3])
 		end
 
 		local attach_count = 0
