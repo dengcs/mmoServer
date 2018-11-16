@@ -11,6 +11,10 @@ local hide_byte_bit = 1024
 
 local poker_type = {}
 
+local function div4_ceil(val)
+	return mh_ceil(val/4)
+end
+
 -- 判断类型是否匹配
 function poker_type.check_type(type, cards)
 	local switch =
@@ -33,53 +37,6 @@ function poker_type.check_type(type, cards)
 	local fn = switch[type]
 	if fn then
 		return fn(cards)
-	end
-
-	return 0
-end
-
--- 检测牌的类型
-function poker_type.test_type(cards)
-	local len = #cards
-
-	if len == 1 then
-		if poker_type.check_one(cards) > 0 then
-			return POKER_TYPE_ONE
-		end
-	elseif len == 2 then
-		if poker_type.check_king(cards) > 0 then
-			return POKER_TYPE_KING
-		elseif poker_type.check_two(cards) > 0 then
-			return POKER_TYPE_TWO
-		end
-	elseif len ==3 then
-		if poker_type.check_three(cards) > 0 then
-			return POKER_TYPE_THREE
-		end
-	elseif len == 4 then
-		if poker_type.check_bomb(cards) > 0 then
-			return POKER_TYPE_BOMB
-		elseif poker_type.check_3with1(cards) > 0 then
-			return POKER_TYPE_3WITH1
-		end
-	elseif len > 4 then
-		if poker_type.check_1straight(cards) > 0 then
-			return POKER_TYPE_1STRAIGHT
-		elseif poker_type.check_2straight(cards) > 0 then
-			return POKER_TYPE_2STRAIGHT
-		elseif poker_type.check_3straight(cards) > 0 then
-			return POKER_TYPE_3STRAIGHT
-		elseif poker_type.check_4with1(cards) > 0 then
-			return POKER_TYPE_4WITH1
-		elseif poker_type.check_4with21(cards) > 0 then
-			return POKER_TYPE_4WITH21
-		elseif poker_type.check_4with22(cards) > 0 then
-			return POKER_TYPE_4WITH22
-		elseif poker_type.check_3with1(cards) > 0 then
-			return POKER_TYPE_3WITH1
-		elseif poker_type.check_3with2(cards) > 0 then
-			return POKER_TYPE_3WITH20
-		end
 	end
 
 	return 0
@@ -203,7 +160,7 @@ function poker_type.get_cards_mode(cards)
 	local mode = {}
 	for i, v in pairs(cards or {}) do
 		if v < hide_byte_bit then
-			local card = mh_ceil(v/4)
+			local card = div4_ceil(v)
 			if not mode[card] then
 				mode[card] = {}
 			end
@@ -229,7 +186,7 @@ end
 function poker_type.check_one(cards)
 	local len = #cards
 	if len == 1 then
-		return mh_ceil(cards[1]/4)
+		return div4_ceil(cards[1])
 	end
 	return 0
 end
@@ -238,8 +195,8 @@ end
 function poker_type.check_two(cards)
 	local len = #cards
 	if len == 2 then
-		local card1 = mh_ceil(cards[1]/4)
-		local card2 = mh_ceil(cards[2]/4)
+		local card1 = div4_ceil(cards[1])
+		local card2 = div4_ceil(cards[2])
 		if card1 == card2 then
 			return card1
 		end
@@ -251,9 +208,9 @@ end
 function poker_type.check_three(cards)
 	local len = #cards
 	if len == 3 then
-		local card1 = mh_ceil(cards[1]/4)
-		local card2 = mh_ceil(cards[2]/4)
-		local card3 = mh_ceil(cards[3]/4)
+		local card1 = div4_ceil(cards[1])
+		local card2 = div4_ceil(cards[2])
+		local card3 = div4_ceil(cards[3])
 		if card1 == card2 and card2 == card3 then
 			return card1
 		end
@@ -265,10 +222,10 @@ end
 function poker_type.check_bomb(cards)
 	local len = #cards
 	if len == 4 then
-		local card1 = mh_ceil(cards[1]/4)
-		local card2 = mh_ceil(cards[2]/4)
-		local card3 = mh_ceil(cards[3]/4)
-		local card4 = mh_ceil(cards[4]/4)
+		local card1 = div4_ceil(cards[1])
+		local card2 = div4_ceil(cards[2])
+		local card3 = div4_ceil(cards[3])
+		local card4 = div4_ceil(cards[4])
 		if card1 == card2 and card2 == card3 and card3 == card4 then
 			return card1
 		end
@@ -281,8 +238,8 @@ function poker_type.check_king(cards)
 	local len = #cards
 	if len == 2 then
 		local king = 13
-		local card1 = mh_ceil(cards[1]/4)
-		local card2 = mh_ceil(cards[2]/4)
+		local card1 = div4_ceil(cards[1]/4)
+		local card2 = div4_ceil(cards[2]/4)
 		if card1 > king and card2 > king then
 			return card1
 		end
@@ -295,10 +252,10 @@ function poker_type.check_1straight(cards)
 	local len = #cards
 	if len > 4 then
 		tb_sort(cards)
-		local first_card = mh_ceil(cards[1]/4) - 1
+		local first_card = div4_ceil(cards[1]) - 1
 		local cur_card = 0
 		for i, v in ipairs(cards) do
-			cur_card = mh_ceil(v/4)
+			cur_card = div4_ceil(v)
 			if (first_card + i) ~= cur_card then
 				return 0
 			end
@@ -319,10 +276,10 @@ function poker_type.check_2straight(cards)
 			return 0
 		end
 
-		local temp_card = mh_ceil(cards[1]/4) - 1
+		local temp_card = div4_ceil(cards[1]) - 1
 		for i = 1, child_len do
-			local card1 = mh_ceil(cards[i*2 - 1]/4)
-			local card2 = mh_ceil(cards[i*2]/4)
+			local card1 = div4_ceil(cards[i*2 - 1])
+			local card2 = div4_ceil(cards[i*2])
 			if card1 ~= card2 then
 				return 0
 			end
@@ -347,11 +304,11 @@ function poker_type.check_3straight(cards)
 			return 0
 		end
 
-		local temp_card = mh_ceil(cards[1]/4) - 1
+		local temp_card = div4_ceil(cards[1]) - 1
 		for i = 1, child_len do
-			local card1 = mh_ceil(cards[i*3 - 2]/4)
-			local card2 = mh_ceil(cards[i*3 - 1]/4)
-			local card3 = mh_ceil(cards[i*3]/4)
+			local card1 = div4_ceil(cards[i*3 - 2])
+			local card2 = div4_ceil(cards[i*3 - 1])
+			local card3 = div4_ceil(cards[i*3])
 			if card1 ~= card2 or card2 ~= card3 then
 				return 0
 			end
@@ -373,7 +330,7 @@ function poker_type.check_3with1(cards)
 		local temp_data = {}
 		local check_cards = {}
 		for _, v in pairs(cards) do
-			local card = mh_ceil(v/4)
+			local card = div4_ceil(v)
 			if not temp_data[card] then
 				temp_data[card] = 1
 			else
@@ -409,11 +366,11 @@ function poker_type.check_3with2(cards)
 	local len = #cards
 	if len > 4 then
 		local target_count = 0
-		local type_count = 0
+		local attach_count = 0
 		local temp_data = {}
 		local check_cards = {}
 		for _, v in pairs(cards) do
-			local card = mh_ceil(v/4)
+			local card = div4_ceil(v)
 			if not temp_data[card] then
 				temp_data[card] = 1
 			else
@@ -423,18 +380,13 @@ function poker_type.check_3with2(cards)
 					target_count = target_count + 1
 					tb_insert(check_cards, card)
 				elseif temp_data[card] == 2 then
-					type_count = type_count + 1
+					attach_count = attach_count + 1
 				end
 			end
 		end
 
-		-- 判断牌数对不对
-		if target_count*5 ~= len then
-			return 0
-		end
-
 		-- 判断带的数量对不对
-		if target_count*2 ~= type_count then
+		if target_count ~= attach_count then
 			return 0
 		end
 
@@ -457,7 +409,7 @@ function poker_type.check_4with1(cards)
 	if len == 5 then
 		local temp_data = {}
 		for _, v in pairs(cards) do
-			local card = mh_ceil(v/4)
+			local card = div4_ceil(v)
 			if not temp_data[card] then
 				temp_data[card] = 1
 			else
@@ -478,7 +430,7 @@ function poker_type.check_4with21(cards)
 	if len == 6 then
 		local temp_data = {}
 		for _, v in pairs(cards) do
-			local card = mh_ceil(v/4)
+			local card = div4_ceil(v)
 			if not temp_data[card] then
 				temp_data[card] = 1
 			else
@@ -498,10 +450,10 @@ function poker_type.check_4with22(cards)
 	local len = #cards
 	if len == 8 then
 		local target_card = 0
-		local type_count = 0
+		local attach_count = 0
 		local temp_data = {}
 		for _, v in pairs(cards) do
-			local card = mh_ceil(v/4)
+			local card = div4_ceil(v)
 			if not temp_data[card] then
 				temp_data[card] = 1
 			else
@@ -510,7 +462,7 @@ function poker_type.check_4with22(cards)
 				if temp_data[card] == 4 then
 					target_card = card
 				elseif temp_data[card] == 2 then
-					type_count = type_count + 1
+					attach_count = attach_count + 1
 				end
 			end
 		end
@@ -519,7 +471,7 @@ function poker_type.check_4with22(cards)
 			return 0
 		end
 
-		if type_count ~= 3 then
+		if attach_count ~= 3 then
 			return 0
 		end
 
