@@ -1,11 +1,11 @@
 include "config.game.engine"
 include "config.game.common"
-include "config.game.login"
+include "config.game.gate"
 
 root = "./engine/"
-luaservice = login_service..";"..common_service..";"..engine_service
+luaservice = gate_service..";"..common_service..";"..engine_service
 lualoader = root .. "lualib/loader.lua"
-lua_path = login_path..";"..common_path..";"..engine_path
+lua_path = gate_path..";"..common_path..";"..engine_path
 lua_cpath = root .. "luaclib/?.so"
 
 preload = "./common/lualib/preload.lua"	-- run preload.lua before every lua service run
@@ -17,7 +17,7 @@ start = "main"	-- main script
 bootstrap = "snlua bootstrap"	-- The service for bootstrap
 cpath = root.."cservice/?.so"
 cluster = "./common/lualib/config/clustername.lua"
--- daemon = "./login.pid"
+-- daemon = "./gate.pid"
 
 datasource = "config.datasource"
-node = "login"
+node = "gate"

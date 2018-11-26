@@ -13,14 +13,7 @@ GLOBAL.DB =
     MYSQL   = 4,
 }
 
-GLOBAL.MASTER_TYPE = 
-{
-    UNKNOWN = 0,
-    SUMMD   = 1,
-    TASKD   = 2,
-}
-
-GLOBAL.SERVICE_NAME = 
+GLOBAL.SERVICE_NAME =
 {
     SUMMD       = ".summd",
     GATED       = ".gated",
@@ -28,19 +21,18 @@ GLOBAL.SERVICE_NAME =
     DATABASED   = "DATABASE",
     DATACACHED  = "DATACACHE",
     USERCENTERD = "USERCENTER",
-    HANDSHAKE   = "handshake",
     GAME        = ".game",
     ROOM        = ".room",
 }
 
 GAME = 
 {
-  ---------------------------------------------
-  -- 业务数据类型枚举
-  ---------------------------------------------
-  META = 
-  {
-    -- 角色相关数据类型
-    PLAYER        = 10,    -- 角色信息
-  },
+    ---------------------------------------------
+    -- 业务数据类型枚举
+    ---------------------------------------------
+    META =
+    {
+        -- 角色相关数据类型
+        PLAYER        = 10,    -- 角色信息
+    },
 }

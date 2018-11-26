@@ -4,7 +4,7 @@
 NetError
 code (Rcode"3
 	NetHeader
-uid (Ruid
+uid (	Ruid
 proto (	Rproto"u
 
 NetMessage'

@@ -1,0 +1,83 @@
+syntax = "proto3";
+package game;
+
+
+///////////////////////////////////////////////////////////
+// 数据结构
+///////////////////////////////////////////////////////////
+
+// 参赛者信息
+message GameMember
+{
+	string     uid			        = 1;	// 参赛者编号
+	uint32     place			    = 2;	// 参赛者座位
+	uint32     sex                  = 3;	// 参赛者性别
+	string     nickname	            = 4;	// 参赛者昵称
+	string     portrait	            = 5;	// 参赛者头像
+	uint32 	   portrait_box_id	    = 6;	// 头像像框
+	uint32     state                = 7;	// 参赛者状态(0 - 未准备就绪， 1 - 已准备就绪)
+	uint32     ulevel		        = 8;	// 参赛者角色等级
+	uint32     vlevel               = 9;	// 参赛者贵族等级
+}
+
+
+///////////////////////////////////////////////////////////
+// 请求/应答
+///////////////////////////////////////////////////////////
+
+
+// 参赛者比赛数据更新(这个请求不返回应答信息)
+message game_update
+{
+    string         data             = 1;	// json格式数据
+}
+
+// 提交参赛者统计数据到服务器（这个请求不返回应答消息）
+message game_submit
+{
+	string         uid             = 1;	// 成员编号
+}
+
+// 参赛者强制退出
+message game_leave
+{
+}
+
+// 应答
+message game_leave_resp
+{
+	uint32 ret       = 1;				// 操作结果（0 - 成功， 否则失败）
+}
+
+message game_update_notify
+{
+    string         data             = 1;	// json格式数据
+}
+
+message game_quit__notify
+{
+    string         uid             = 1;	// 成员编号
+}
+
+message game_complete_notify
+{
+    uint32 score  = 1; // 获得积分
+}
+
+message game_start_notify
+{
+    uint32      teamid                      = 1;    // 房间ID
+    uint32      channel                     = 2;    // 房间类型
+    string      owner                       = 3;    // 房主或地主
+    uint32      state                       = 4;	// 赛场状态
+    repeated    GameMember members		    = 5;	// 参赛者信息
+}
+
+message room_synchronize_notify
+{
+    uint32      teamid                      = 1;    // 房间ID
+    uint32      channel                     = 2;    // 房间类型
+    string      owner                       = 3;    // 房主或地主
+    uint32      state                       = 4;	// 赛场状态
+    repeated    GameMember members		    = 5;	// 参赛者信息
+}

@@ -1,5 +1,4 @@
 local skynet = require "skynet_ex"
-local cluster = require "skynet.cluster"
 local spconf = require "config.spconf"
 local hibernaloader = require "data.hibernaloader"
 
@@ -13,7 +12,7 @@ skynet.start(function()
   local services = require("config.services")
   local summdriver = skynet.summdriver()
   summdriver.start()
-  summdriver.autoload(services.summ)
+  summdriver.autoload(services.list)
 
   local gated = skynet.newservice("client/gated", "0.0.0.0", 51001)
   skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
@@ -27,8 +26,6 @@ skynet.start(function()
     router  = { "router.cmd" },
   })
 
-  cluster.open "logic"
-  
   skynet.error("Server end")
   skynet.exit()
 end)

@@ -12,23 +12,8 @@ M.list = {
          unique = true,
      },
      {
-         name = GLOBAL.SERVICE_NAME.USERCENTERD,
-         module = "usercenterd",
-         unique = true,
-     },
-     {
          name = GLOBAL.SERVICE_NAME.FBD,
          module = "fbd",
-         unique = true,
-     },
-     {
-         name = GLOBAL.SERVICE_NAME.GAME,
-         module = "combat.instance.game",
-         unique = true,
-     },
-     {
-         name = GLOBAL.SERVICE_NAME.ROOM,
-         module = "combat.room",
          unique = true,
      },
 }

@@ -3,12 +3,12 @@ common_service = common.."service/?.lua"
 common_path = common.."lualib/?.lua"
 
 -- "REDIS"数据库配置
-dc_host = "127.0.0.1"
-dc_port = "6379"
+dc_host = "192.168.188.82"
+dc_port = "10002"
 dc_auth = "888888"
 
 -- "MYSQL"数据库配置
-db_host = "127.0.0.1"
+db_host = "192.168.188.82"
 db_port = "3306"
 db_name = "test"
 db_auth = "test"

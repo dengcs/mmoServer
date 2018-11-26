@@ -1,0 +1,3 @@
+gate = "./gate/"
+gate_service = gate.."service/?.lua"
+gate_path = gate.."lualib/?.lua"

@@ -9,7 +9,7 @@ skynet.start(function()
   local services = require("config.services")
   local summdriver = skynet.summdriver()
   summdriver.start()
-  summdriver.autoload(services.summ)
+  summdriver.autoload(services.list)
   
   cluster.open "center"
   

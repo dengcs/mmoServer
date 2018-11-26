@@ -74,7 +74,6 @@ local function accept_connection(header, check_origin, check_origin_ok)
     end
 
     return nil, challenge_response(key, protocol)
-
 end
 
 local H = {}
@@ -125,11 +124,11 @@ function ws.new(id, header, handler, conf)
         mask_outgoing = conf.mask_outgoing,
         check_origin = conf.check_origin
     }
-    
+
     local mt = setmetatable(self, ws_mt)
 
-    self.handler.on_open(self)
- 
+    handler.on_open(mt)
+
     return mt
 end
 
@@ -165,7 +164,6 @@ function ws:send_frame(fin, opcode, data)
     frame = frame .. data
 
     write(self.id, frame)
-    
 end
 
 function ws:send_text(data)
@@ -180,7 +178,6 @@ end
 function ws:send_ping(data)
     self:send_frame(true, 0x9, data)
 end
-
 
 function ws:send_pong(data)
     self:send_frame(true, 0xA, data)
@@ -223,7 +220,7 @@ function ws:recv()
             data = data .. message
         end
     end
-    self.handler.on_message(self, data)
+    self.handler.on_message(self.id, data)
     return data
 end
 
@@ -327,16 +324,15 @@ function ws:recv_frame()
             end
             self.client_terminated = true
             self:close()
-            self.handler.on_close(self, code, reason)
+            self.handler.on_close(self.id, code, reason)
         elseif frame_opcode == 0x9 then --Ping
             self:send_pong()
         elseif frame_opcode == 0xA then -- Pong
-            self.handler.on_pong(self, frame_data)
+            self.handler.on_pong(self.id, frame_data)
         end
 
         return true, true, nil
     end
-
 end
 
 function ws:start()
