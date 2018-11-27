@@ -113,7 +113,7 @@ local function dispatch_by_session(self)
 				end
 			else
 				self.__thread[session] = nil
-				skynet.error("socket: unknown session :", session)
+				-- skynet.error("socket: unknown session :", session)
 			end
 		else
 			close_channel_socket(self)

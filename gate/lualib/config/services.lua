@@ -12,8 +12,8 @@ M.list = {
          unique = true,
      },
      {
-         name = GLOBAL.SERVICE_NAME.FBD,
-         module = "fbd",
+         name = GLOBAL.SERVICE_NAME.RELAY,
+         module = "relay",
          unique = true,
      },
 }

@@ -17,11 +17,6 @@ M.list = {
          unique = true,
      },
      {
-         name = GLOBAL.SERVICE_NAME.FBD,
-         module = "fbd",
-         unique = true,
-     },
-     {
          name = GLOBAL.SERVICE_NAME.GAME,
          module = "combat.instance.game",
          unique = true,

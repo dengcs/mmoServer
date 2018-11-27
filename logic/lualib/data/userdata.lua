@@ -1,8 +1,6 @@
 local hibernator = require "data.hibernator"
 local userdata = {}
 
-userdata.__index = userdata
-
 -- 构建'userdata'对象
 -- 1. 读写模式
 function userdata.new(mode)
@@ -11,7 +9,7 @@ function userdata.new(mode)
         configure = {},
         datatable = {},
     }
-    setmetatable(o, userdata)
+    setmetatable(o, {__index = userdata})
     return o
 end
 

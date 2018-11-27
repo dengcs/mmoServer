@@ -1,9 +1,11 @@
 ---------------------------------------------------------------------
 --- 消息分发中间件
 ---------------------------------------------------------------------
-local skynet = require "skynet"
-local handlers = require "config.handlers"
-local pbhelper = require "net.pbhelper"
+local skynet 	= require "skynet"
+local socket 	= require "skynet.socket"
+local handlers 	= require "config.handlers"
+
+local strpack = string.pack
 
 local M = {}
 M.HANDSHAKE 	= {}			-- 握手相关请求处理逻辑集合（确保'握手/重连'请求仅在指定状态有效）
@@ -18,26 +20,9 @@ function M.new()
 	local o = {}
 	setmetatable(o, {__index = M})
 
-	o:register_pb()
 	o:register_handle()
 
 	return o
-end
-
--- 网络消息编码
-local function net_encode(uid, name, data, error)
-    local result = pbhelper.pb_encode(uid,name,data,error)
-	return result
-end
-
--- 网络消息解码
-local function net_decode(msg)
-	local message,result = pbhelper.pb_decode(msg)
-	return message,result
-end
-
-function M:register_pb()
-	pbhelper.register()
 end
 
 function M:register_handle()
@@ -98,8 +83,20 @@ function M:message_response(session, name, message, errno)
 	if fd == 0 then
 		return ENONET
 	end
-	local data = net_encode(session.uid, name, message, errno)
-	skynet.send(GLOBAL.SERVICE_NAME.GATED,"lua","response",session.fd,data)
+
+	local data =
+	{
+		header = {fd = fd, proto = name},
+		error = {code = errno},
+		payload = message,
+	}
+
+	local msg_data = skynet.packstring(data)
+	local msg_len = strpack(">H", msg_data:len())
+	local compose_data = {msg_len, msg_data}
+	local packet_data = table.concat(compose_data)
+
+	socket.write(fd, packet_data)
 	return 0
 end
 
@@ -148,23 +145,24 @@ end
 -- 3. 请求内容
 -- 4. 方法集合
 local function message_request(self, session, message, commands)
+	assert(message)
 	-- 异常捕捉
 	local function traceback()
 		LOG_ERROR(debug.traceback())
 	end
 	-- 协议解析
-	local head, proto = net_decode(message)
+	local head, proto = message.header, message.payload
 	if not head then
 		ERROR("request : message unpack error!!!")
 	end
 	-- 请求转发
-	local ok, retval = xpcall(command_execute, traceback, commands, head.header.proto, self:user_context(session, {proto = proto}))
+	local ok, retval = xpcall(command_execute, traceback, commands, head.proto, self:user_context(session, {proto = proto}))
 	if not ok then
 		retval = ENOEXEC
 	end
 	retval = retval or 0
 	if retval > 0 then
-		self:message_response(session, head.header.proto, nil, retval)
+		self:message_response(session, head.proto, nil, retval)
 	end
 	return retval
 end

@@ -11,8 +11,13 @@ local M = {}
 function M.register()
 	local node = assert(skynet.getenv("node"),"getenv获取不到node值！")
 	for _,v in pairs(pbs) do
-		local ok, buffer = skynet.call(GLOBAL.SERVICE_NAME.FBD, "lua", "read_pb_buffer", node, v)
-		assert(ok == 0 and buffer)
+		local filepath = "lualib/config/proto/pb"
+		local bp_file = string.format("./%s/%s/%s", node, filepath, v)
+		local f = assert(io.open(bp_file , "rb"))
+		local buffer = f:read "*a"
+		f:close()
+
+		assert(buffer)
 		protobuf.register(buffer)
 	end
 end
@@ -22,11 +27,11 @@ end
 -- 2. 协议名称
 -- 3. 协议内容
 -- 4. 错误码（如果存在）
-function M.pb_encode(uid, name, data, errcode)
+function M.pb_encode(name, data, errcode)
 	assert(name, "protocol is nil!!!")
 	local message = 
 	{
-		header = { uid = uid, proto = name },
+		header = { proto = name },
 	}
 	if errcode then
 		message.error = { code = errcode }
@@ -43,12 +48,13 @@ function M.pb_decode(data)
 	local message = protobuf.decode("game.NetMessage", data)
 	if message.header then
 		if message.header.proto then
-			return message, protobuf.decode("game." .. message.header.proto, message.payload)
+			message.payload = protobuf.decode("game." .. message.header.proto, message.payload)
+			return message
 		else
 			error(string.format("%s : incorrect payload!!!", message.header.proto))
 		end
 	end
-	return message, nil
+	return message
 end
 
 -- 返回协议解析模块

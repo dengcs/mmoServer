@@ -9,6 +9,14 @@ local net_dispatcher = nil
 local datameta = nil      -- 用户数据
 
 local CMD = {}
+local SOCKET = {}
+
+skynet.register_protocol {
+	name 	= "client",
+	id 		= skynet.PTYPE_CLIENT,
+	pack 	= skynet.pack,
+	unpack 	= skynet.unpack,
+}
 
 local function unload()
 	if datameta then
@@ -19,34 +27,34 @@ local function unload()
 	end
 end
 
-function CMD.connect()
+function CMD.connect(source, fd, ip)
 	if net_dispatcher then
 		net_dispatcher:initialize()
 	else
 		net_dispatcher = dispatcher.new()
 	end
-end
 
-function CMD.disconnect()
-	unload()
-end
-
-function CMD.open(source, fd)
 	session = {}
 	session.fd = fd
 	datameta = userdata.new("w")
 	datameta:register(usermeta)
 
 	session.data = datameta
+
+	skynet.send(source, "lua", "accept", fd)
 end
 
-function CMD.close()
+function CMD.disconnect(source)
 	unload()
+	if session then
+		skynet.send(source, "lua", "kick", session.fd)
+	end
 end
 
-function CMD.message(source, msg)
+function CMD.message(source, msg, sz)
   if session then
-        net_dispatcher:message_dispatch(session, msg)
+	  	local msg_data = skynet.unpack(msg, sz)
+        net_dispatcher:message_dispatch(session, msg_data)
   end
 end
 
@@ -73,7 +81,7 @@ end
 
 skynet.start(function()
 	skynet.dispatch("lua", function(session, source, cmd, ...)
-		skynet.error("agent---cmd--"..cmd)
+		skynet.error("agent---lua--"..cmd)
 		local safe_handler = SAFE_HANDLER(session)
 		local fn = CMD[cmd]
 		if fn then
@@ -82,4 +90,13 @@ skynet.start(function()
 			return safe_handler(command_handler, source, cmd, ...)
 		end
 	end)
+
+	--skynet.dispatch("client", function(session, source, cmd, ...)
+	--	skynet.error("agent---client--"..cmd)
+	--	local safe_handler = SAFE_HANDLER(session)
+	--	local fn = SOCKET[cmd]
+	--	if fn then
+	--		return safe_handler(fn, source, ...)
+	--	end
+	--end)
 end)

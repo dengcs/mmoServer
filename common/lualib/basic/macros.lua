@@ -17,7 +17,7 @@ GLOBAL.SERVICE_NAME =
 {
     SUMMD       = ".summd",
     GATED       = ".gated",
-    FBD         = ".fbd",
+    RELAY       = ".relay",
     DATABASED   = "DATABASE",
     DATACACHED  = "DATACACHE",
     USERCENTERD = "USERCENTER",
