@@ -3,6 +3,13 @@ local dispatcher = require "net.dispatcher"
 local userdata = require "data.userdata"
 local usermeta = require "config.usermeta"
 
+-- 协议注册（接收'client'类型消息）
+skynet.register_protocol({
+	name   = "client",
+	id     = skynet.PTYPE_CLIENT,
+	unpack = skynet.unpack,
+})
+
 local session = nil
 -- 网络消息分发器
 local net_dispatcher = nil
@@ -44,12 +51,6 @@ function CMD.disconnect(source, fd, client_fd, ok)
 	end
 end
 
-function CMD.message(source, msg)
-	if session then
-		net_dispatcher:message_dispatch(session, msg)
-	end
-end
-
 function CMD.load_data(source, name, data)
 	local retval = datameta:init(name, data)
 	if not retval then
@@ -82,4 +83,11 @@ skynet.start(function()
 			return safe_handler(command_handler, source, cmd, ...)
 		end
 	end)
+end)
+
+-- 注册网络消息处理逻辑
+skynet.dispatch("client", function(_, _, message)
+	if session then
+		net_dispatcher:message_dispatch(session, message)
+	end
 end)

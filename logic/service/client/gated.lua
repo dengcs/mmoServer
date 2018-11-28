@@ -7,6 +7,12 @@ local skynet        = require "skynet"
 local gateserver    = require "snax.gateserver"
 local agent_manager = require "agent_manager"
 
+-- 协议注册(允许提交'client'类型消息)
+skynet.register_protocol({
+    name = "client",
+    id   = skynet.PTYPE_CLIENT,
+})
+
 local sky_unpack = skynet.unpack
 
 local agent_mgr = agent_manager.new()
@@ -46,7 +52,7 @@ local function fork_msg(fd, msg, sz)
 
                 skynet.send(agent, "lua", cmdName, fd, client_fd, push_ok)
             else
-                return agent, msg_data
+                return agent
             end
         end
     end
@@ -58,9 +64,9 @@ function handler.connect(fd, addr)
 end
 
 function handler.message(fd, msg, sz)
-    local agent, msg_data = fork_msg(fd, msg, sz)
+    local agent = fork_msg(fd, msg, sz)
     if agent then
-        skynet.send(agent, "lua", "message", msg_data)
+        skynet.rawsend(agent, "client", msg, sz)
     end
 end
 
