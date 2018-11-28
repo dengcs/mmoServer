@@ -13,12 +13,15 @@ local open_number = 0
 function handler.on_connect(fd)
 	local session = sessions[fd]
 	if not session then
-	    local session = {
-	      fd = fd,
-	    }
-	    
-	    sessions[fd] = session
+		local session = {
+			fd = fd,
+		}
+		sessions[fd] = session
+	else
+		session.fd = fd
 	end
+
+	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "transmit", fd, "connect")
 end
 
 function handler.on_disconnect(fd)
@@ -26,6 +29,8 @@ function handler.on_disconnect(fd)
     if session then
         sessions[fd] = nil
     end
+
+	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "transmit", fd, "disconnect")
 end
 
 function handler.on_open(ws)
@@ -42,7 +47,7 @@ end
 function handler.on_message(fd, message)
     local session = sessions[fd]
     if session then
-		skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "receive", fd, message)
+		skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "forward", fd, message)
     end
 end
 

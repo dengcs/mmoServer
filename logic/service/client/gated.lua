@@ -5,38 +5,62 @@
 ---
 local skynet        = require "skynet"
 local gateserver    = require "snax.gateserver"
+local agent_manager = require "agent_manager"
+
+local sky_unpack = skynet.unpack
+
+local agent_mgr = agent_manager.new()
 
 local connection = {}
 
 local handler = {}
 
 local function close_fd(fd)
-    local c = connection[fd]
-    if c then
+    if connection[fd] then
         connection[fd] = nil
+        gateserver.closeclient(fd)
+    end
+end
 
-        skynet.send(c.agent, "lua", "disconnect")
+local function fork_msg(fd, msg, sz)
+    local clients = connection[fd]
+    if clients then
+        local msg_data = sky_unpack(msg, sz)
+        if msg_data then
+            local cmd       = msg_data.header.cmd
+            local client_fd = msg_data.header.fd
+            local agent     = clients[client_fd]
+            if not agent then
+                agent = agent_mgr:pop() or skynet.newservice("agentd")
+                clients[client_fd] = agent
+            end
+
+            if cmd then
+                local cmdName = msg_data.header.proto
+
+                local push_ok = nil
+                if cmdName == "disconnect" then
+                    push_ok = agent_mgr:push(agent)
+                    clients[client_fd] = nil
+                end
+
+                skynet.send(agent, "lua", cmdName, fd, client_fd, push_ok)
+            else
+                return agent, msg_data
+            end
+        end
     end
 end
 
 function handler.connect(fd, addr)
-    local agent = skynet.newservice("agentd")
-
-    local c = {
-        fd      = fd,
-        agent   = agent,
-    }
-
-    connection[fd] = c
-
-    skynet.send(agent, "lua", "connect", fd, addr)
+    connection[fd] = {}
+    gateserver.openclient(fd)
 end
 
 function handler.message(fd, msg, sz)
-    local c = connection[fd]
-    local agent = c.agent
+    local agent, msg_data = fork_msg(fd, msg, sz)
     if agent then
-        skynet.send(agent, "lua", "message", msg, sz)
+        skynet.send(agent, "lua", "message", msg_data)
     end
 end
 
@@ -53,12 +77,7 @@ end
 
 local CMD = {}
 
-function CMD.accept(fd)
-    gateserver.openclient(fd)
-end
-
-function CMD.kick(fd)
-    gateserver.closeclient(fd)
+function CMD.test()
 end
 
 function handler.command(cmd, source, ...)

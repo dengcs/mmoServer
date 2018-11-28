@@ -1,9 +1,9 @@
 ---------------------------------------------------------------------
 --- 消息分发中间件
 ---------------------------------------------------------------------
-local skynet 	= require "skynet"
-local socket 	= require "skynet.socket"
-local handlers 	= require "config.handlers"
+local skynet 		= require "skynet"
+local handlers 		= require "config.handlers"
+local socketdriver 	= require "skynet.socketdriver"
 
 local strpack = string.pack
 
@@ -86,7 +86,7 @@ function M:message_response(session, name, message, errno)
 
 	local data =
 	{
-		header = {fd = fd, proto = name},
+		header = {fd = session.client_fd, proto = name},
 		error = {code = errno},
 		payload = message,
 	}
@@ -96,7 +96,7 @@ function M:message_response(session, name, message, errno)
 	local compose_data = {msg_len, msg_data}
 	local packet_data = table.concat(compose_data)
 
-	socket.write(fd, packet_data)
+	socketdriver.send(fd, packet_data)
 	return 0
 end
 

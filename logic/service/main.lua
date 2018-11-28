@@ -18,7 +18,7 @@ skynet.start(function()
   skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
   skynet.call(gated, "lua", "open", {
     port = 51001,
-    maxclient = 10000,
+    maxclient = 100,
     nodelay = true,
   })
   
