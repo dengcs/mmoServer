@@ -73,9 +73,9 @@ function wsService.start(handler)
             local safe_handler = SAFE_HANDLER(session)
             local f = CMD[cmd]
             if f then
-                return safe_handler(f, source, ...)
+                safe_handler(f, source, ...)
             else
-                return safe_handler(handler.command, cmd, ...)
+                safe_handler(handler.command, cmd, ...)
             end
         end)
     end)

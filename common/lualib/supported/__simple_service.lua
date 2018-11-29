@@ -111,9 +111,9 @@ function service.start(module)
             local safe_handler = SAFE_HANDLER(session)
 	        local f = command[cmd]
 	        if f then
-	            return safe_handler(f, source, ...)
+	            safe_handler(f, source, ...)
 	        else
-	            return safe_handler(do_command, source, cmd, ...)
+	            safe_handler(do_command, source, cmd, ...)
 	        end
         end)
     end)

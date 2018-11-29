@@ -104,9 +104,9 @@ local function launch_slave(conf)
 	    local safe_handler = SAFE_HANDLER(session)
 	    local f = CMD[cmd]
 	    if f then
-	        return safe_handler(f, source, ...)
+	        safe_handler(f, source, ...)
 	    else
-	        return safe_handler(conf.command_handler, source, cmd, ...)
+	        safe_handler(conf.command_handler, source, cmd, ...)
 	    end
 	end)
 end
@@ -247,9 +247,9 @@ local function launch_master(conf)
         local safe_handler = SAFE_HANDLER(session)
         local f = CMD[cmd]
         if f then
-            return safe_handler(f, source, ...)
+            safe_handler(f, source, ...)
         else
-            return safe_handler(conf.command_handler, source, cmd, ...)
+            safe_handler(conf.command_handler, source, cmd, ...)
         end
     end)
 

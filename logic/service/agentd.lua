@@ -78,9 +78,9 @@ skynet.start(function()
 		local safe_handler = SAFE_HANDLER(session)
 		local fn = CMD[cmd]
 		if fn then
-			return safe_handler(fn, source, ...)
+			safe_handler(fn, source, ...)
 		else
-			return safe_handler(command_handler, source, cmd, ...)
+			safe_handler(command_handler, source, cmd, ...)
 		end
 	end)
 end)
