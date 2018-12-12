@@ -44,7 +44,7 @@ function CMD.forward(fd, msg)
     if channel then
         local msgData = decode(msg)
         if msgData then
-            msgData.header.fd = fd
+            msgData.fd = fd
             local msg_data = sky_packstring(msgData)
             local msg_len = strpack(">H", msg_data:len())
             local compose_data = {msg_len, msg_data}
@@ -59,10 +59,9 @@ function CMD.transmit(fd, protoName)
     if channel then
         local msgData =
         {
+            fd = fd,
             header =
             {
-                fd      = fd,
-                cmd     = true,
                 proto   = protoName,
             }
         }

@@ -33,15 +33,15 @@ local function fork_msg(fd, msg, sz)
     if clients then
         local msg_data = sky_unpack(msg, sz)
         if msg_data then
-            local cmd       = msg_data.header.cmd
-            local client_fd = msg_data.header.fd
+            local payload   = msg_data.payload
+            local client_fd = msg_data.fd
             local agent     = clients[client_fd]
             if not agent then
                 agent = agent_mgr:pop() or skynet.newservice("agentd")
                 clients[client_fd] = agent
             end
 
-            if cmd then
+            if not payload then
                 local cmdName = msg_data.header.proto
 
                 local push_ok = nil
