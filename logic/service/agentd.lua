@@ -30,13 +30,14 @@ local function unload()
 	end
 end
 
-function CMD.connect(source, fd, client_fd)
-
+function CMD.init()
 	net_dispatcher = dispatcher.new()
 
 	data_meta = userdata.new("w")
 	data_meta:register(user_meta)
+end
 
+function CMD.connect(source, fd, client_fd)
 	session 			= {}
 	session.fd 			= fd
 	session.client_fd 	= client_fd
