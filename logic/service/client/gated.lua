@@ -13,7 +13,9 @@ skynet.register_protocol({
     id   = skynet.PTYPE_CLIENT,
 })
 
-local sky_unpack = skynet.unpack
+local str_unpack    = string.unpack
+
+local fd_sz = string.pack(">J", 1):len()
 
 local agent_mgr = agent_manager.new()
 
@@ -28,32 +30,21 @@ local function close_fd(fd)
     end
 end
 
-local function fork_msg(fd, msg, sz)
+local function fork_msg(fd, msg)
     local clients = connection[fd]
     if clients then
-        local msg_data = sky_unpack(msg, sz)
-        if msg_data then
-            local payload   = msg_data.payload
-            local client_fd = msg_data.fd
+        local fd_data = skynet.tostring(msg, fd_sz)
+        if fd_data then
+            local client_fd = str_unpack(">J", fd_data)
             local agent     = clients[client_fd]
             if not agent then
-                agent = agent_mgr:pop() or skynet.newservice("agentd")
+                agent = skynet.newservice("agentd") -- agent_mgr:pop() or
                 clients[client_fd] = agent
+                skynet.call(agent, "lua", "connect", fd, client_fd)
+                return
             end
 
-            if not payload then
-                local cmdName = msg_data.header.proto
-
-                local push_ok = nil
-                if cmdName == "disconnect" then
-                    push_ok = agent_mgr:push(agent)
-                    clients[client_fd] = nil
-                end
-
-                skynet.send(agent, "lua", cmdName, fd, client_fd, push_ok)
-            else
-                return agent
-            end
+            return agent
         end
     end
 end
@@ -64,7 +55,7 @@ function handler.connect(fd, addr)
 end
 
 function handler.message(fd, msg, sz)
-    local agent = fork_msg(fd, msg, sz)
+    local agent = fork_msg(fd, msg)
     if agent then
         skynet.rawsend(agent, "client", msg, sz)
     end

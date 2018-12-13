@@ -11,8 +11,8 @@ local pbhelper      = require "net.pbhelper"
 local server = {}
 local CMD = {}
 
-local strpack           = string.pack
-local strunpack         = string.unpack
+local str_pack          = string.pack
+local str_unpack        = string.unpack
 local sky_packstring    = skynet.packstring
 
 local encode = pbhelper.pb_encode
@@ -23,7 +23,7 @@ local reply_id = 1
 
 local function dispatch_reply(so)
     local len_reply	= so:read(2)
-    len_reply = strunpack(">H", len_reply)
+    len_reply = str_unpack(">H", len_reply)
     local reply	= so:read(len_reply)
 
     local result = skynet.unpack(reply)
@@ -44,10 +44,10 @@ function CMD.forward(fd, msg)
     if channel then
         local msgData = decode(msg)
         if msgData then
-            msgData.fd = fd
+            local byte_fd = str_pack(">J", fd)
             local msg_data = sky_packstring(msgData)
-            local msg_len = strpack(">H", msg_data:len())
-            local compose_data = {msg_len, msg_data}
+            local msg_len = str_pack(">H", msg_data:len() + byte_fd:len())
+            local compose_data = {msg_len, byte_fd, msg_data}
             local packet_data = table.concat(compose_data)
 
             channel:request(packet_data)
@@ -59,15 +59,15 @@ function CMD.transmit(fd, protoName)
     if channel then
         local msgData =
         {
-            fd = fd,
             header =
             {
                 proto   = protoName,
             }
         }
+        local byte_fd = str_pack(">J", fd)
         local msg_data = sky_packstring(msgData)
-        local msg_len = strpack(">H", msg_data:len())
-        local compose_data = {msg_len, msg_data}
+        local msg_len = str_pack(">H", msg_data:len() + byte_fd:len())
+        local compose_data = {msg_len, byte_fd, msg_data}
         local packet_data = table.concat(compose_data)
 
         channel:request(packet_data)

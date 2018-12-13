@@ -31,6 +31,10 @@ end
 -----------------------------------------------------------
 --- 网络请求接口
 -----------------------------------------------------------
+-- 请求选角状态
+function REQUEST:disconnect()
+	skynet.send(skynet.self(), "lua", "disconnect")
+end
 
 -- 请求选角状态
 function REQUEST:query_players()
