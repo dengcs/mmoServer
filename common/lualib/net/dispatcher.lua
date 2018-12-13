@@ -13,7 +13,6 @@ M.PREPARE   	= {}			-- 选角相关请求处理逻辑集合（确保'选角/创�
 M.REQUEST   	= {}			-- 普通请求
 M.COMMAND   	= {}			-- 内部命令
 M.TRIGGER   	= {}			-- 事件处理
-M.INITIALIZE   	= {}			-- 重置处理
 
 -- 构造'dispatcher'对象
 function M.new()
@@ -53,10 +52,6 @@ function M:register(handler)
 	-- 注册事件触发处理逻辑
 	for _, v in pairs(handler.TRIGGER or {}) do
 		table.insert(self.TRIGGER, v)
-	end
-	-- 注册初始化处理逻辑
-	for _, v in pairs(handler.INITIALIZE or {}) do
-		table.insert(self.INITIALIZE, v)
 	end
 end
 
@@ -195,15 +190,6 @@ end
 -- 4. 命令参数
 function M:command_dispatch(session, cmd, ...)
 	return command_execute(self.COMMAND, cmd, self:user_context(session), ...)
-end
-
--- 重置处理器
-function M:initialize()
-	for _, fn in pairs(self.INITIALIZE or {}) do
-		if IS_FUNCTION(fn) then
-			fn()
-		end
-	end
 end
 
 -- 返回消息分发中间件模型

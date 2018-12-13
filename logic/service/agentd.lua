@@ -1,7 +1,7 @@
 local skynet = require "skynet"
 local dispatcher = require "net.dispatcher"
 local userdata = require "data.userdata"
-local usermeta = require "config.usermeta"
+local user_meta = require "config.usermeta"
 
 local sky_unpack = skynet.unpack
 
@@ -17,13 +17,13 @@ skynet.register_protocol({
 local session = nil
 -- 网络消息分发器
 local net_dispatcher = nil
-local datameta = nil      -- 用户数据
+local data_meta = nil      -- 用户数据
 
 local CMD = {}
 
 local function unload()
-	if datameta then
-		local player = datameta:get("Player")
+	if data_meta then
+		local player = data_meta:get("Player")
 		if player then
 			skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "unload", player.uid)
 		end
@@ -31,19 +31,16 @@ local function unload()
 end
 
 function CMD.connect(source, fd, client_fd)
-	if net_dispatcher then
-		net_dispatcher:initialize()
-	else
-		net_dispatcher = dispatcher.new()
-	end
 
-	datameta = userdata.new("w")
-	datameta:register(usermeta)
+	net_dispatcher = dispatcher.new()
+
+	data_meta = userdata.new("w")
+	data_meta:register(user_meta)
 
 	session 			= {}
 	session.fd 			= fd
 	session.client_fd 	= client_fd
-	session.data 		= datameta
+	session.data 		= data_meta
 end
 
 function CMD.disconnect()
@@ -54,12 +51,12 @@ function CMD.disconnect()
 end
 
 function CMD.load_data(source, name, data)
-	local retval = datameta:init(name, data)
-	if not retval then
-		ERROR("usermeta:init(name = %s) failed!!!", name)
+	local ret_val = data_meta:init(name, data)
+	if not ret_val then
+		ERROR("data_meta:init(name = %s) failed!!!", name)
 	end
 
-	local result = retval:copy()
+	local result = ret_val:copy()
 
 	return result
 end

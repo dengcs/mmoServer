@@ -5,7 +5,7 @@
 ---
 local skynet        = require "skynet"
 local gateserver    = require "snax.gateserver"
-local agent_manager = require "agent_manager"
+local agent_pool    = require "agent_pool"
 
 -- 协议注册(允许提交'client'类型消息)
 skynet.register_protocol({
@@ -17,7 +17,7 @@ local str_unpack    = string.unpack
 
 local fd_sz = string.pack(">J", 1):len()
 
-local agent_mgr = agent_manager.new()
+local agent_pool_inst = agent_pool.new()
 
 local connection = {}
 
@@ -38,7 +38,7 @@ local function fork_msg(fd, msg)
             local client_fd = str_unpack(">J", fd_data)
             local agent     = clients[client_fd]
             if not agent then
-                agent = skynet.newservice("agentd") -- agent_mgr:pop() or
+                agent = agent_pool_inst:pop()
                 clients[client_fd] = agent
                 skynet.call(agent, "lua", "connect", fd, client_fd)
                 return

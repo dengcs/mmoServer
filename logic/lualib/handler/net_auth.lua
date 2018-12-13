@@ -8,7 +8,6 @@ local userdriver = skynet.userdriver()
 
 local HANDLER		= {}
 local REQUEST 		= {}
-local INITIALIZE	={}
 
 -----------------------------------------------------------
 --- 内部变量/内部逻辑
@@ -18,15 +17,6 @@ local tblname = "player_tbl"
 
 local login_acount 	= nil
 local player_uid 	= nil
-
------------------------------------------------------------
---- 模块初始化接口
------------------------------------------------------------
-
-function INITIALIZE.init()
-	login_acount 	= nil
-	player_uid 		= nil
-end
 
 -----------------------------------------------------------
 --- 网络请求接口
@@ -99,5 +89,4 @@ function REQUEST:player_login()
 end
 
 HANDLER.REQUEST   	= REQUEST
-HANDLER.INITIALIZE 	= INITIALIZE
 return HANDLER
