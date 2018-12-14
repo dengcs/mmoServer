@@ -49,6 +49,11 @@ local function fork_msg(fd, msg)
     end
 end
 
+function handler.open()
+    agent_pool_inst:init()
+    skynet.error("agent_pool init finish")
+end
+
 function handler.connect(fd, addr)
     connection[fd] = {}
     gateserver.openclient(fd)
