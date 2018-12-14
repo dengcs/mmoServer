@@ -16,11 +16,7 @@ function summdriver.start()
     local summd = skynet.uniqueservice("summd")
     skynet.name(GLOBAL.SERVICE_NAME.SUMMD, summd)
 
-    skynet.call(summd, "lua", "init", {
-        name = GLOBAL.SERVICE_NAME.SUMMD,
-        unique = true,
-        auto = true,
-    })
+    skynet.call(summd, "lua", "init", {auto = true})
 end
 
 function summdriver.close()
@@ -60,17 +56,5 @@ end
 function summdriver.call(name, command, ...)
     return __call("call", name, command, ...)
 end
-
--- function summdriver.schedule(name, address, cb, args, interval, loop)
---     return skynet.call(GLOBAL.SERVICE_NAME.SCHEDULED, "lua", "schedule", name, address, GLOBAL.MASTER_TYPE.SUMMD, cb, args, interval, loop)
--- end
-
--- function summdriver.reschedule(name, address, cb, args, interval, loop)
---     return skynet.call(GLOBAL.SERVICE_NAME.SCHEDULED, "lua", "reschedule", name, address, GLOBAL.MASTER_TYPE.SUMMD, cb, args, interval, loop)
--- end
-
--- function summdriver.unschedule(name)
---     skynet.send(GLOBAL.SERVICE_NAME.SCHEDULED, "lua", "unschedule", name)
--- end
 
 return summdriver
