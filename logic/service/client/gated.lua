@@ -79,7 +79,11 @@ end
 
 local CMD = {}
 
-function CMD.test()
+function CMD.disconnect(fd, client_fd)
+    local clients = connection[fd]
+    if clients then
+        clients[client_fd] = nil
+    end
 end
 
 function handler.command(cmd, source, ...)
