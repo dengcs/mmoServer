@@ -83,6 +83,9 @@ function play_core:push_bottom()
 
 		local data = json_codec.encode(11, {idx = self.landowner, msg = self.data.cards})
 		self:broadcast(data)
+
+		local notify_data = json_codec.encode(11)
+		self:notify(self.landowner, notify_data)
 	end
 end
 
@@ -236,19 +239,11 @@ function play_core:update(idx, data)
 		local ok = false
 
 		if state == PLAY_STATE.SNATCH and cmd == state then
-			if not msg then
-				msg = random.Get(2)
-			end
-
 			if msg == 1 then
 				self.landowner = idx
 			end
 			ok = true
 		elseif state == PLAY_STATE.DOUBLE and cmd == state then
-			if not msg then
-				msg = random.Get(2)
-			end
-
 			if msg == 1 then
 				self.double = self.double * 2
 			end

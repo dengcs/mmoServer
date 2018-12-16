@@ -3,7 +3,7 @@ local skynet        = require "skynet"
 local tb_insert = table.insert
 local tb_remove = table.remove
 
-local init_count = 100
+local init_count = 10
 local agent_pool = {}
 
 function agent_pool.new()
