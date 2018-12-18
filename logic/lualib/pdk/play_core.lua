@@ -81,10 +81,10 @@ function play_core:push_bottom()
 			end
 		end
 
-		local data = json_codec.encode(11, {idx = self.landowner, msg = self.data.cards})
+		local data = json_codec.encode(PLAY_STATE.BOTTOM, {idx = self.landowner, msg = self.data.cards})
 		self:broadcast(data)
 
-		local notify_data = json_codec.encode(11)
+		local notify_data = json_codec.encode(PLAY_STATE.BOTTOM)
 		self:notify(self.landowner, notify_data)
 	end
 end
