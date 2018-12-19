@@ -8,7 +8,7 @@ local ENUM = require("config.gameenum")
 local PLAY_STATE = ENUM.PLAY_STATE
 
 local STATE_COUNT = {
-	[PLAY_STATE.PREPARE] = 1,
+	[PLAY_STATE.PREPARE] = 3,
 	[PLAY_STATE.DEAL] = 3,
 	[PLAY_STATE.SNATCH] = 4,
 	[PLAY_STATE.DOUBLE] = 3,

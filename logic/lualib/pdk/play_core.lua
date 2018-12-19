@@ -62,7 +62,10 @@ function play_core:broadcast(data)
 end
 
 function play_core:state_notify(idx, state)
-	if state == PLAY_STATE.DEAL then
+	if state == PLAY_STATE.PREPARE then
+		local data = json_codec.encode(state, {idx = idx})
+		self:notify(idx, data)
+	elseif state == PLAY_STATE.DEAL then
 		local data = json_codec.encode(state, self:get_cards(idx))
 		self:notify(idx, data)
 	elseif state == PLAY_STATE.SNATCH then
