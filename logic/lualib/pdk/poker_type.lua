@@ -15,6 +15,75 @@ local function div4_ceil(val)
 	return mh_ceil(val/4)
 end
 
+function poker_type.test_type(cards)
+	local max_value, count = 0, 0, 0
+
+	max_value, count = poker_type.check_one(cards)
+	if max_value > 0 then
+		return POKER_TYPE_ONE, max_value, count
+	end
+
+	max_value, count = poker_type.check_king(cards)
+	if max_value > 0 then
+		return POKER_TYPE_KING, max_value, count
+	end
+
+	max_value, count = poker_type.check_two(cards)
+	if max_value > 0 then
+		return POKER_TYPE_TWO, max_value, count
+	end
+
+	max_value, count = poker_type.check_three(cards)
+	if max_value > 0 then
+		return POKER_TYPE_THREE, max_value, count
+	end
+
+	max_value, count = poker_type.check_bomb(cards)
+	if max_value > 0 then
+		return POKER_TYPE_BOMB, max_value, count
+	end
+
+	max_value, count = poker_type.check_1straight(cards)
+	if max_value > 0 then
+		return POKER_TYPE_1STRAIGHT, max_value, count
+	end
+
+	max_value, count = poker_type.check_2straight(cards)
+	if max_value > 0 then
+		return POKER_TYPE_2STRAIGHT, max_value, count
+	end
+
+	max_value, count = poker_type.check_3straight(cards)
+	if max_value > 0 then
+		return POKER_TYPE_3STRAIGHT, max_value, count
+	end
+
+	max_value, count = poker_type.check_3with1(cards)
+	if max_value > 0 then
+		return POKER_TYPE_3WITH1, max_value, count
+	end
+
+	max_value, count = poker_type.check_3with2(cards)
+	if max_value > 0 then
+		return POKER_TYPE_3WITH2, max_value, count
+	end
+
+	max_value, count = poker_type.check_4with1(cards)
+	if max_value > 0 then
+		return POKER_TYPE_4WITH1, max_value, count
+	end
+
+	max_value, count = poker_type.check_4with21(cards)
+	if max_value > 0 then
+		return POKER_TYPE_4WITH21, max_value, count
+	end
+
+	max_value, count = poker_type.check_4with22(cards)
+	if max_value > 0 then
+		return POKER_TYPE_4WITH22, max_value, count
+	end
+end
+
 -- 判断类型是否匹配
 function poker_type.check_type(type, cards)
 	local switch =
@@ -170,18 +239,6 @@ function poker_type.get_cards_mode(cards)
 	return mode
 end
 
--- 检测牌是否有效
-function poker_type.check_valid(card)
-	if card < 1 then
-		return false
-	end
-
-	if card > GLOBAL_POKER_MAX then
-		return false
-	end
-	return true
-end
-
 -- 检查牌型是否单张
 function poker_type.check_one(cards)
 	local len = #cards
@@ -260,7 +317,7 @@ function poker_type.check_1straight(cards)
 				return 0
 			end
 		end
-		return cur_card
+		return cur_card, len
 	end
 	return 0
 end
@@ -288,7 +345,7 @@ function poker_type.check_2straight(cards)
 				return 0
 			end
 		end
-		return temp_card + child_len
+		return (temp_card + child_len), child_len
 	end
 	return 0
 end
@@ -317,7 +374,7 @@ function poker_type.check_3straight(cards)
 				return 0
 			end
 		end
-		return temp_card + child_len
+		return (temp_card + child_len), child_len
 	end
 	return 0
 end
@@ -351,12 +408,11 @@ function poker_type.check_3with1(cards)
 		-- 判断连续
 		tb_sort(check_cards)
 		local first_card = check_cards[1] - 1
-		for i, v in pairs(check_cards) do
-			if first_card + i ~= v then
-				return 0
-			end
+		local target_card = check_cards[target_count]
+
+		if (target_card - first_card) == target_count then
+			return target_card, target_count
 		end
-		return first_card + target_count
 	end
 	return 0
 end
@@ -386,19 +442,23 @@ function poker_type.check_3with2(cards)
 		end
 
 		-- 判断带的数量对不对
-		if target_count ~= attach_count then
+		if target_count*2 ~= attach_count then
+			return 0
+		end
+
+		-- 判断牌数对不对
+		if target_count*5 ~= len then
 			return 0
 		end
 
 		-- 判断连续
 		tb_sort(check_cards)
 		local first_card = check_cards[1] - 1
-		for i, v in pairs(check_cards) do
-			if first_card + i ~= v then
-				return 0
-			end
+		local target_card = check_cards[target_count]
+
+		if (target_card - first_card) == target_count then
+			return target_card, target_count
 		end
-		return first_card + target_count
 	end
 	return 0
 end

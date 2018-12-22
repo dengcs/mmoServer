@@ -3,11 +3,11 @@
 --- Created by dengcs.
 --- DateTime: 2018/11/7 15:28
 ---
+local skynet 		= require "skynet"
 local json_codec	= require("pdk.json_codec")
 local poker_type	= require("pdk.poker_type")
 local play_state	= require("pdk.play_state")
 local ENUM 			= require("config.gameenum")
-local random		= require("utils.random")
 
 local tb_insert		= table.insert
 local PLAY_STATE 	= ENUM.PLAY_STATE
@@ -126,16 +126,6 @@ function play_core:get_cards(idx)
 	end
 end
 
--- 验证棋牌类型
-function play_core:check_type(type, cards)
-	return poker_type.check_type(type, cards)
-end
-
--- 获取出牌类型
-function play_core:test_type(cards)
-	return poker_type.test_type(cards)
-end
-
 function play_core:get_default_indexes(idx)
 	local cards = self:get_cards(idx)
 	return poker_type.get_default_indexes(cards)
@@ -198,9 +188,52 @@ function play_core:is_main_type(idx)
 	return false
 end
 
+-- 主动出牌
+function play_core:check_play(idx, msg)
+	local indexes = {}
+	local cards = self:get_cards(idx)
+	for _, v in pairs(msg or {}) do
+		local bFind = false
+		for kk, vv in pairs(cards or {}) do
+			if v == vv then
+				bFind = true
+				tb_insert(indexes, kk)
+				break
+			end
+		end
+
+		if not bFind then
+			return false
+		end
+	end
+
+	local is_main = self:is_main_type(idx)
+	if is_main then
+		local type, max_value, count = poker_type.test_type(msg)
+		if type then
+			self:post_cards(idx, indexes)
+			self:set_round_state(idx, type, max_value, count)
+			return true
+		end
+	else
+		local type = self.round_state.type
+		local value = self.round_state.value
+		local count = self.round_state.count
+
+		local max_value, ret_count = poker_type.check_type(type, msg)
+		if max_value > value and count == ret_count then
+			self:post_cards(idx, indexes)
+			self:set_round_state(idx, type, max_value, count)
+			return true
+		end
+	end
+
+	return false
+end
+
 -- 托管
 function play_core:entrust(idx)
-	local msg = nil
+	local msg = 0
 
 	local is_main = self:is_main_type(idx)
 	if is_main then
@@ -225,8 +258,17 @@ function play_core:entrust(idx)
 	return msg
 end
 
+function play_core:timeout_update(ti, idx, cmd, msg)
+	local function execute()
+		local data = json_codec.encode(cmd, msg)
+		self:update(idx, data, true)
+	end
+
+	skynet.timeout(ti, execute)
+end
+
 -- 接收玩家命令
-function play_core:update(idx, data)
+function play_core:update(idx, data, direct)
 	local place_idx, state = self.play_state:watch_turn()
 
 	if state == PLAY_STATE.OVER then
@@ -252,11 +294,17 @@ function play_core:update(idx, data)
 			end
 			ok = true
 		elseif state == PLAY_STATE.PLAY and cmd == state then
-			if not msg then
-				-- 托管
-				msg = self:entrust(idx)
+			if direct then
+				ok = true
+			else
+				if not msg then
+					-- 托管
+					msg = self:entrust(idx)
+					self:timeout_update(300, idx, cmd, msg)
+				elseif msg == 0 or self:check_play(idx, msg) then
+					ok = true
+				end
 			end
-			ok = true
 		end
 
 		if ok then

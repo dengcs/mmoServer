@@ -33,7 +33,7 @@ local channels =
 
 -- 间隔时间
 local function interval()
-	return 100
+	return 10
 end
 
 local function schedule()
