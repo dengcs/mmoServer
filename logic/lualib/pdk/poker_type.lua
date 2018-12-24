@@ -17,82 +17,105 @@ end
 
 function poker_type.test_type(cards)
 	local max_value, count = 0, 0, 0
+	local len = #cards
 
-	max_value, count = poker_type.check_one(cards)
-	if max_value > 0 then
-		return POKER_TYPE_ONE, max_value, count
+	if len == 1 then
+		max_value, count = poker_type.check_one(cards)
+		if max_value > 0 then
+			return POKER_TYPE_ONE, max_value, count
+		end
+	elseif len == 2 then
+		max_value, count = poker_type.check_king(cards)
+		if max_value > 0 then
+			return POKER_TYPE_KING, max_value, count
+		end
+
+		max_value, count = poker_type.check_two(cards)
+		if max_value > 0 then
+			return POKER_TYPE_TWO, max_value, count
+		end
+	elseif len == 3 then
+		max_value, count = poker_type.check_three(cards)
+		if max_value > 0 then
+			return POKER_TYPE_THREE, max_value, count
+		end
+	elseif len == 4 then
+		max_value, count = poker_type.check_bomb(cards)
+		if max_value > 0 then
+			return POKER_TYPE_BOMB, max_value, count
+		end
+
+		max_value, count = poker_type.check_3with1(cards)
+		if max_value > 0 then
+			return POKER_TYPE_3WITH1, max_value, count
+		end
+	elseif len == 5 then
+		max_value, count = poker_type.check_1straight(cards)
+		if max_value > 0 then
+			return POKER_TYPE_1STRAIGHT, max_value, count
+		end
+
+		max_value, count = poker_type.check_3with2(cards)
+		if max_value > 0 then
+			return POKER_TYPE_3WITH2, max_value, count
+		end
+
+		max_value, count = poker_type.check_4with1(cards)
+		if max_value > 0 then
+			return POKER_TYPE_4WITH1, max_value, count
+		end
+	else
+		max_value, count = poker_type.check_1straight(cards)
+		if max_value > 0 then
+			return POKER_TYPE_1STRAIGHT, max_value, count
+		end
+
+		max_value, count = poker_type.check_2straight(cards)
+		if max_value > 0 then
+			return POKER_TYPE_2STRAIGHT, max_value, count
+		end
+
+		max_value, count = poker_type.check_3straight(cards)
+		if max_value > 0 then
+			return POKER_TYPE_3STRAIGHT, max_value, count
+		end
+
+		max_value, count = poker_type.check_3with1(cards)
+		if max_value > 0 then
+			return POKER_TYPE_3WITH1, max_value, count
+		end
+
+		max_value, count = poker_type.check_3with2(cards)
+		if max_value > 0 then
+			return POKER_TYPE_3WITH2, max_value, count
+		end
+
+		max_value, count = poker_type.check_4with1(cards)
+		if max_value > 0 then
+			return POKER_TYPE_4WITH1, max_value, count
+		end
+
+		max_value, count = poker_type.check_4with21(cards)
+		if max_value > 0 then
+			return POKER_TYPE_4WITH21, max_value, count
+		end
+
+		max_value, count = poker_type.check_4with22(cards)
+		if max_value > 0 then
+			return POKER_TYPE_4WITH22, max_value, count
+		end
 	end
 
-	max_value, count = poker_type.check_king(cards)
-	if max_value > 0 then
-		return POKER_TYPE_KING, max_value, count
-	end
-
-	max_value, count = poker_type.check_two(cards)
-	if max_value > 0 then
-		return POKER_TYPE_TWO, max_value, count
-	end
-
-	max_value, count = poker_type.check_three(cards)
-	if max_value > 0 then
-		return POKER_TYPE_THREE, max_value, count
-	end
-
-	max_value, count = poker_type.check_bomb(cards)
-	if max_value > 0 then
-		return POKER_TYPE_BOMB, max_value, count
-	end
-
-	max_value, count = poker_type.check_1straight(cards)
-	if max_value > 0 then
-		return POKER_TYPE_1STRAIGHT, max_value, count
-	end
-
-	max_value, count = poker_type.check_2straight(cards)
-	if max_value > 0 then
-		return POKER_TYPE_2STRAIGHT, max_value, count
-	end
-
-	max_value, count = poker_type.check_3straight(cards)
-	if max_value > 0 then
-		return POKER_TYPE_3STRAIGHT, max_value, count
-	end
-
-	max_value, count = poker_type.check_3with1(cards)
-	if max_value > 0 then
-		return POKER_TYPE_3WITH1, max_value, count
-	end
-
-	max_value, count = poker_type.check_3with2(cards)
-	if max_value > 0 then
-		return POKER_TYPE_3WITH2, max_value, count
-	end
-
-	max_value, count = poker_type.check_4with1(cards)
-	if max_value > 0 then
-		return POKER_TYPE_4WITH1, max_value, count
-	end
-
-	max_value, count = poker_type.check_4with21(cards)
-	if max_value > 0 then
-		return POKER_TYPE_4WITH21, max_value, count
-	end
-
-	max_value, count = poker_type.check_4with22(cards)
-	if max_value > 0 then
-		return POKER_TYPE_4WITH22, max_value, count
-	end
 end
 
 -- 判断类型是否匹配
-function poker_type.check_type(type, cards)
+function poker_type.check_type(type, cards, value, count)
 	local switch =
 	{
 		[POKER_TYPE_ONE] 		= poker_type.check_one,
 		[POKER_TYPE_TWO] 		= poker_type.check_two,
 		[POKER_TYPE_THREE] 		= poker_type.check_three,
 		[POKER_TYPE_BOMB] 		= poker_type.check_bomb,
-		[POKER_TYPE_KING] 		= poker_type.check_king,
 		[POKER_TYPE_1STRAIGHT] 	= poker_type.check_1straight,
 		[POKER_TYPE_2STRAIGHT] 	= poker_type.check_2straight,
 		[POKER_TYPE_3STRAIGHT] 	= poker_type.check_3straight,
@@ -105,7 +128,24 @@ function poker_type.check_type(type, cards)
 
 	local fn = switch[type]
 	if fn then
-		return fn(cards)
+		local max_value = fn(cards)
+		if max_value > value and count == #cards then
+			return max_value, type, count
+		end
+
+		if type ~= POKER_TYPE_BOMB then
+			max_value = poker_type.check_bomb(cards)
+			if max_value > 0 then
+				type = POKER_TYPE_BOMB
+			end
+		end
+
+		max_value = poker_type.check_king(cards)
+		if max_value > 0 then
+			type = POKER_TYPE_KING
+		end
+
+		return max_value, type
 	end
 
 	return 0

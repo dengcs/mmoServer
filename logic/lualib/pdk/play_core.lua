@@ -220,10 +220,10 @@ function play_core:check_play(idx, msg)
 		local value = self.round_state.value
 		local count = self.round_state.count
 
-		local max_value, ret_count = poker_type.check_type(type, msg)
-		if max_value > value and count == ret_count then
+		local max_value, ret_type, ret_count = poker_type.check_type(type, msg, value, count)
+		if max_value > 0 then
 			self:post_cards(idx, indexes)
-			self:set_round_state(idx, type, max_value, count)
+			self:set_round_state(idx, ret_type, max_value, ret_count)
 			return true
 		end
 	end
