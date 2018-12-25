@@ -64,11 +64,11 @@ function COMMAND.load(source, uid)
         	retval = json.decode(retval)
         end
         
-        local ok, objcpy = skynet.call(source, "lua", "load_data", name, retval)
-        if ok ~= 0 and not objcpy then
+        local ok = skynet.call(source, "lua", "load_data", name, retval)
+        if ok ~= 0 then
             ERROR("usercenterd : component[%s] bind failed!!!", name)
         end
-        user:init(name, objcpy)
+        user:init(name, retval)
     end
     -- 记录在线角色
     onlines[uid] = 
