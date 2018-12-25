@@ -151,8 +151,6 @@ function poker_type.check_type(type, cards, value, count)
 			return POKER_TYPE_KING, max_value
 		end
 	end
-
-	return 0
 end
 
 function poker_type.get_default_indexes(cards)
