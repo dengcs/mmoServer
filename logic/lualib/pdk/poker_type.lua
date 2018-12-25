@@ -129,23 +129,27 @@ function poker_type.check_type(type, cards, value, count)
 	local fn = switch[type]
 	if fn then
 		local max_value = fn(cards)
-		if max_value > value and count == #cards then
-			return max_value, type, count
+		if max_value > value then
+			if count then
+				if count == #cards then
+					return type, max_value, count
+				end
+			else
+				return type, max_value
+			end
 		end
 
 		if type ~= POKER_TYPE_BOMB then
 			max_value = poker_type.check_bomb(cards)
 			if max_value > 0 then
-				type = POKER_TYPE_BOMB
+				return POKER_TYPE_BOMB, max_value
 			end
 		end
 
 		max_value = poker_type.check_king(cards)
 		if max_value > 0 then
-			type = POKER_TYPE_KING
+			return POKER_TYPE_KING, max_value
 		end
-
-		return max_value, type
 	end
 
 	return 0
@@ -292,9 +296,10 @@ end
 function poker_type.check_two(cards)
 	local len = #cards
 	if len == 2 then
+		local king = 14
 		local card1 = div4_ceil(cards[1])
 		local card2 = div4_ceil(cards[2])
-		if card1 == card2 then
+		if card1 == card2 and card1 < king then
 			return card1
 		end
 	end
@@ -334,10 +339,10 @@ end
 function poker_type.check_king(cards)
 	local len = #cards
 	if len == 2 then
-		local king = 13
+		local king = 14
 		local card1 = div4_ceil(cards[1]/4)
 		local card2 = div4_ceil(cards[2]/4)
-		if card1 > king and card2 > king then
+		if card1 == king and card2 == king then
 			return card1
 		end
 	end
