@@ -62,6 +62,10 @@ function CMD.load_data(source, name, data)
 	if not ret_val then
 		ERROR("data_meta:init(name = %s) failed!!!", name)
 	end
+
+	local result = ret_val:copy()
+
+	return result
 end
 
 -- 内部命令转发
