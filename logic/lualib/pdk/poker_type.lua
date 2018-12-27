@@ -128,10 +128,10 @@ function poker_type.check_type(type, cards, value, count)
 
 	local fn = switch[type]
 	if fn then
-		local max_value = fn(cards)
+		local max_value, ret_count = fn(cards)
 		if max_value > value then
 			if count then
-				if count == #cards then
+				if count == ret_count then
 					return type, max_value, count
 				end
 			else
@@ -338,8 +338,8 @@ function poker_type.check_king(cards)
 	local len = #cards
 	if len == 2 then
 		local king = 14
-		local card1 = div4_ceil(cards[1]/4)
-		local card2 = div4_ceil(cards[2]/4)
+		local card1 = div4_ceil(cards[1])
+		local card2 = div4_ceil(cards[2])
 		if card1 == king and card2 == king then
 			return card1
 		end
