@@ -33,7 +33,7 @@ local channels =
 
 -- 间隔时间
 local function interval()
-	return 10
+	return 500
 end
 
 local function schedule()
@@ -77,13 +77,23 @@ function COMMAND.on_create(cid, vdata)
 		return ERRCODE.COMMON_PARAMS_ERROR
 	end
 
-    -- 创建房间
-    local team = channel:create(vdata)
-    if team ~= nil then
-        return 0
-    else
-        return ERRCODE.ROOM_CREATE_FAILED
-    end
+	local bJoin = false
+	for _, team in pairs(channel.teams) do
+		if team:join(vdata) then
+			bJoin = true
+			break
+		end
+	end
+
+	if bJoin == false then
+		-- 创建房间
+		local team = channel:create(vdata)
+		if team == nil then
+			return ERRCODE.ROOM_CREATE_FAILED
+		end
+	end
+
+	return 0
 end
 
 -- 加入房间

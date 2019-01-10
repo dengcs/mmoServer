@@ -244,6 +244,10 @@ function Team:join(vdata)
 		return
 	end
 
+	if not self:prepare() then
+		return
+	end
+
 	-- 成员加入队伍
 	local member = Member.new(vdata)
 	if member ~= nil then
