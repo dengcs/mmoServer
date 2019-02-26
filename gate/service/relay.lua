@@ -80,7 +80,7 @@ function server.init_handler()
     channel = socketchannel.channel {
         host        = "127.0.0.1",
         port        = 51001,
-        nodelay     = true,
+        nodelay     = false,
         response    = dispatch_reply,
     }
 
