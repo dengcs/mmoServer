@@ -3,6 +3,7 @@ SCHEDULER_FOREVER 		= -1
 GLOBAL_POKER_MAX 		= 54 	-- 扑克数量
 GLOBAL_PLAYER_NUM		= 3		-- 玩家数量
 GLOBAL_POKER_NUM		= 17	-- 玩家扑克数量
+GLOBAL_POKER_VALUE2		= 13	-- 2的值
 
 POKER_TYPE_ONE 		= 1 -- 单张
 POKER_TYPE_TWO 		= 2 -- 对子

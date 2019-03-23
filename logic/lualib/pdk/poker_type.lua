@@ -359,6 +359,10 @@ function poker_type.check_1straight(cards)
 			if (first_card + i) ~= cur_card then
 				return 0
 			end
+			-- 不包括2
+			if cur_card >= GLOBAL_POKER_VALUE2 then
+				return 0
+			end
 		end
 		return cur_card, len
 	end
@@ -385,6 +389,10 @@ function poker_type.check_2straight(cards)
 			end
 			-- 保证连续
 			if temp_card+i ~= card1 then
+				return 0
+			end
+			-- 不包括2
+			if card1 >= GLOBAL_POKER_VALUE2 then
 				return 0
 			end
 		end
@@ -416,6 +424,11 @@ function poker_type.check_3straight(cards)
 			if temp_card+i ~= card1 then
 				return 0
 			end
+
+			-- 不包括2
+			if card1 >= GLOBAL_POKER_VALUE2 then
+				return 0
+			end
 		end
 		return (temp_card + child_len), child_len
 	end
@@ -436,7 +449,7 @@ function poker_type.check_3with1(cards)
 			else
 				temp_data[card] = temp_data[card] + 1
 				-- 收集重要数据
-				if temp_data[card] == 3 then
+				if temp_data[card] == 3 and card < GLOBAL_POKER_VALUE2 then
 					target_count = target_count + 1
 					tb_insert(check_cards, card)
 				end
@@ -475,7 +488,7 @@ function poker_type.check_3with2(cards)
 			else
 				temp_data[card] = temp_data[card] + 1
 				-- 收集重要数据
-				if temp_data[card] == 3 then
+				if temp_data[card] == 3  and card < GLOBAL_POKER_VALUE2 then
 					target_count = target_count + 1
 					tb_insert(check_cards, card)
 				elseif temp_data[card] == 2 then
@@ -689,7 +702,7 @@ function poker_type.get_1straight(mode, value, count)
 		end
 	end
 
-	if max_value > 0 then
+	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
 		indexes = {}
 		for i = count, 1, -1 do
 			tb_insert(indexes, mode[max_value - i + 1][1])
@@ -741,7 +754,7 @@ function poker_type.get_2straight(mode, value, count)
 		end
 	end
 
-	if max_value > 0 then
+	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
@@ -796,7 +809,7 @@ function poker_type.get_3straight(mode, value, count)
 		end
 	end
 
-	if max_value > 0 then
+	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
@@ -863,7 +876,7 @@ function poker_type.get_3with1(mode, value, count)
 		end
 	end
 
-	if max_value > 0 then
+	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
@@ -938,7 +951,7 @@ function poker_type.get_3with2(mode, value, count)
 		end
 	end
 
-	if max_value > 0 then
+	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
