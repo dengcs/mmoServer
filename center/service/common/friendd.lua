@@ -3,9 +3,6 @@
 ---------------------------------------------------------------------
 local service   = require "factory.service"
 local skynet    = require "skynet"
-local database  = require "common.database"
-
-local tinsert = table.insert
 
 -----------------------------------------------------------
 --- 常量表
@@ -39,11 +36,7 @@ function udata:ctor(pid)
     self.friend             = { len = 0, list = {} }        -- 好友信息
     self.enemy              = { len = 0, list = {} }        -- 敌人信息
     self.applicant          = { len = 0, list = {} }        -- 申请信息（申请成为目标好友）
-    self.authorize          = { len = 0, list = {} }        -- 申请信息（目标申请等待批准）
-    self.friendly_send      = { len = 0, list = {} }        -- 友情贈送
-    self.friendly_recive    = { len = 0, list = {} }        -- 友情接收
-    self.group              = { len = 0, list = {} }        -- 群信息
-    self.subscribe          = { len = 0, list = {} }        -- 订阅通知
+    self.authorize          = { len = 0, list = {} }        -- 申请信息（目标申请等待批准
 end
 
 -- 序列化
@@ -114,8 +107,6 @@ function udata:add_friend(pid)
         if data then
             this.usersend(self.pid, "response_message", "social_add_friend_notice", {data = data})
         end
-
-        add_subscribe(pid, self.pid)
     end
 end
 
@@ -127,8 +118,6 @@ function udata:del_friend(pid)
         self:set_dirty()
 
         this.usersend(self.pid, "response_message", "social_del_friend_notice", {pid = pid})
-
-        del_subscribe(pid, self.pid)
     end
 end
 
@@ -147,8 +136,6 @@ function udata:add_enemy(pid)
         self.enemy.list[pid] = {ctime = this.time()}
         self.enemy.len = self.enemy.len + 1
         self:set_dirty()
-
-        add_subscribe(pid, self.pid)
     end
 end
 
@@ -158,8 +145,6 @@ function udata:del_enemy(pid)
         self.enemy.list[pid] = nil
         self.enemy.len = self.enemy.len - 1
         self:set_dirty()
-
-        del_subscribe(pid, self.pid)
     end
 end
 
@@ -251,19 +236,13 @@ function udata:authorize_has_full()
 end
 
 -----------------------------------------------------------
---- 社交数据缓存
+--- 社交缓存对象
 -----------------------------------------------------------
-local evbuilder = require "common.cache.evbuilder"
-local builder   = require "luamon.cachebuilder"
-
--- 社交数据加载模型
-local loader = class("service.common.social.cache.loader", require("luamon.cache.loader"))
-
 -- 数据加载逻辑
 -- 1. 数据键值
-function loader:load(key)
-    local vdata = skynet.call(GLOBAL.SERVICE.DATACACHE, "lua", "get", "social", key)
+local function load(key)
     local udata = udata.new(key)
+    local vdata = skynet.call(GLOBAL.SERVICE.DATACACHE, "lua", "get", "social", key)
     if vdata then
         udata:unserialize(vdata)
     end
@@ -273,7 +252,7 @@ end
 -- 数据移除逻辑
 -- 1. 数据键值
 -- 2. 数据内容
-local function remove(key, udata)
+local function save(key, udata)
     if udata then
         if (udata:check_dirty()) then
             skynet.send(GLOBAL.SERVICE.DATACACHE, "lua", "set", "social", key, udata:serialize())
@@ -282,13 +261,27 @@ local function remove(key, udata)
     end
 end
 
+function dCache:ctor()
+    self.queue = {}
+end
+
+function dCache:get(pid)
+    local udata = self.queue[pid]
+    if not udata then
+        udata = load(pid)
+        self.queue[pid] = udata
+    end
+    return udata
+end
+
+function dCache:clear()
+    for i, v in pairs(self.queue) do
+        save(i, v)
+    end
+end
+
 -- 构建缓存对象
-cache = builder.new():capacity(5000)
-               :evbuilder(evbuilder.new())
-               :loader(loader.new())
-               :removal(remove)
-               :access_expired(86400)
-               :build()
+local cache = dCache.new()
 
 -----------------------------------------------------------
 --- 服务业务接口
@@ -446,6 +439,13 @@ local server = {}
 
 -- 服务启动通知
 function server.on_init()
+    -- 每小时更新社交数据到数据库
+    local interval = 360000
+    local function schedule()
+        cache:clear()
+        pcall(skynet.timeout, interval, schedule)
+    end
+    pcall(skynet.timeout, interval, schedule)
 end
 
 -- 服务结束通知

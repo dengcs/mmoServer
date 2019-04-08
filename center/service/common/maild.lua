@@ -150,29 +150,11 @@ local db =
 	-- 1. 角色编号
 	['select'] = function(pid)
 		-- 邮件加载方法
-		local function query(pageno, quantum)
-			local sql = string.format("SELECT * FROM mail WHERE pid = %s AND (status & %s) = 0 AND (deadline = 0 OR deadline > %s) LIMIT %s, %s",
-					pid,
-					ESYMBOL.RECEIVE | ESYMBOL.REMOVED,
-					this.time(),
-					(pageno - 1) * quantum,
-					quantum)
-			return database.exec("db.mysql", sql)
-		end
-		-- 邮件分页加载(消息'64k'限制)
-		local quantum = 20
-		local retval  = {}
-		for pageno = 1, 50 do
-			local count = 0
-			for _, v in pairs(query(pageno, quantum)) do
-				count = count + 1
-				table.insert(retval, v)
-			end
-			if count < quantum then
-				break
-			end
-		end
-		return retval
+		local sql = string.format("SELECT * FROM mail WHERE pid = %s AND (status & %s) = 0 AND (deadline = 0 OR deadline > %s)",
+				pid,
+				ESYMBOL.REMOVED,
+				this.time())
+		return database.exec("db.mysql", sql)
 	end,
 }
 
@@ -215,7 +197,7 @@ local command = {}
 -- 2. 角色编号
 -- 3. 邮件偏移
 -- 4. 邮件数量
-function command.load(sid, pid, offset, quantum)
+function command.load(sid, pid)
 	-- 获取角色邮箱
 	local mailbox = onlines[pid]
 	if mailbox == nil then
@@ -255,23 +237,10 @@ function command.load(sid, pid, offset, quantum)
 			end
 		end
 	end
-	-- 邮件分页返回(消息'64k'限制)
+	-- 邮件分页返回
 	local mails   = {}
-	local lovalue = (offset or 1)
-	local hivalue = (offset or 1) + (quantum or 20)
-	if hivalue > lovalue then
-		local index = 0
-		for _, mail in mailbox:iterator() do
-			index = index + 1
-			-- 终止遍历
-			if index >= hivalue then
-				break
-			end
-			-- 记录邮件
-			if index >= lovalue then
-				table.insert(mails, mail)
-			end
-		end
+	for _, mail in mailbox:iterator() do
+		table.insert(mails, mail)
 	end
 	return { sid = mailbox.sid, mails = mails }
 end
