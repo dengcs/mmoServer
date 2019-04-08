@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------
---- 社交服务
+--- 好友服务
 ---------------------------------------------------------------------
 local service   = require "factory.service"
 local skynet    = require "skynet"
@@ -25,7 +25,7 @@ local MAX_ENEMIES_VALUE    = 100
 --- 内部類
 -----------------------------------------------------------
 
--- 社交数据模型
+-- 好友数据模型
 local udata = class("udata")
 
 -- 构建模型实例
@@ -236,13 +236,13 @@ function udata:authorize_has_full()
 end
 
 -----------------------------------------------------------
---- 社交缓存对象
+--- 好友缓存对象
 -----------------------------------------------------------
 -- 数据加载逻辑
 -- 1. 数据键值
 local function load(key)
     local udata = udata.new(key)
-    local vdata = skynet.call(GLOBAL.SERVICE.DATACACHE, "lua", "get", "social", key)
+    local vdata = skynet.call(GLOBAL.SERVICE.DATACACHE, "lua", "get", "friend", key)
     if vdata then
         udata:unserialize(vdata)
     end
@@ -255,7 +255,7 @@ end
 local function save(key, udata)
     if udata then
         if (udata:check_dirty()) then
-            skynet.send(GLOBAL.SERVICE.DATACACHE, "lua", "set", "social", key, udata:serialize())
+            skynet.send(GLOBAL.SERVICE.DATACACHE, "lua", "set", "friend", key, udata:serialize())
             udata:clear_dirty()
         end
     end
