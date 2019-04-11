@@ -47,7 +47,6 @@ function wsService.start(handler)
                 }
                 local ws = websocket.new(fd, header, service, params)
                 if ws then
-                    ws:start()
                     return true
                 end
             end

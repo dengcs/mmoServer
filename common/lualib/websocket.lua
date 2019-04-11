@@ -125,6 +125,8 @@ function ws.new(id, header, handler, conf)
 
     handler.connect(self)
 
+    self:start()
+
     return self
 end
 

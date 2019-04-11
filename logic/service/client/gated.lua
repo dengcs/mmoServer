@@ -14,7 +14,7 @@ skynet.register_protocol({
 })
 
 local str_unpack    = string.unpack
-
+-- 无符号整型数据类型的长度
 local fd_sz = string.pack(">J", 1):len()
 
 local agent_pool_inst = agent_pool.new()
