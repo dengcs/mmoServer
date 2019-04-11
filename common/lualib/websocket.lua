@@ -1,4 +1,3 @@
-local skynet = require "skynet"
 local crypt = require "skynet.crypt"
 local socket = require "skynet.socket"
 local httpd = require "http.httpd"
@@ -6,12 +5,10 @@ local sockethelper = require "http.sockethelper"
 local urllib = require "http.url"
 
 local ws = {}
-local ws_mt = { __index = ws }
 
 local function response(id, ...)
     return httpd.write_response(sockethelper.writefunc(id), ...)
 end
-
 
 local function write(id, data)
     socket.write(id, data)
@@ -20,7 +17,6 @@ end
 local function read(id, sz)
     return socket.read(id, sz)
 end
-
 
 local function challenge_response(key, protocol)
     protocol = protocol or ""
@@ -115,7 +111,7 @@ function ws.new(id, header, handler, conf)
         write(id, result)
     end
     
-    local self = {
+    local ws_mt = {
         id = id,
         handler = handler,
         client_terminated = false,
@@ -125,13 +121,12 @@ function ws.new(id, header, handler, conf)
         check_origin = conf.check_origin
     }
 
-    local mt = setmetatable(self, ws_mt)
+    local self = setmetatable(ws_mt, { __index = ws })
 
-    handler.on_open(mt)
+    handler.connect(self)
 
-    return mt
+    return self
 end
-
 
 function ws:send_frame(fin, opcode, data)
     local finbit, mask_bit
@@ -158,9 +153,6 @@ function ws:send_frame(fin, opcode, data)
         frame = frame .. string.pack(">BL", 127 | mask_bit, l)
     end
 
-    if self.mask_outgoing then
-    end
-
     frame = frame .. data
 
     write(self.id, frame)
@@ -174,13 +166,17 @@ function ws:send_binary(data)
     self:send_frame(true, 0x2, data)
 end
 
-
 function ws:send_ping(data)
     self:send_frame(true, 0x9, data)
 end
 
 function ws:send_pong(data)
     self:send_frame(true, 0xA, data)
+end
+
+function ws:close_fd()
+    socket.close(self.id)
+    self.handler.disconnect(self.id)
 end
 
 function ws:close(code, reason)
@@ -202,7 +198,7 @@ function ws:close(code, reason)
     end
 
     if self.client_terminated then
-        socket.close(self.id)
+        self:close_fd()
     end
 end
 
@@ -215,12 +211,12 @@ function ws:recv()
         end
         if final then
             data = data .. message
+            self.handler.message(self.id, data)
             break
         else
             data = data .. message
         end
     end
-    self.handler.on_message(self.id, data)
     return data
 end
 
@@ -323,8 +319,7 @@ function ws:recv_frame()
                 reason = frame_data:sub(3)
             end
             self.client_terminated = true
-            self:close()
-            self.handler.on_close(self.id, code, reason)
+            self:close(code, reason)
         elseif frame_opcode == 0x9 then --Ping
             self:send_pong()
         elseif frame_opcode == 0xA then -- Pong
@@ -337,10 +332,11 @@ end
 
 function ws:start()
     while true do
-        local message, err = self:recv()
-        if not message then
-            print('recv eror:', message, err)
-            socket.close(self.id)
+        local ok, message = self:recv()
+        if not ok then
+            print('recv eror:', message)
+            self:close_fd()
+            return
         end
     end
 end

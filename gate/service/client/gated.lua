@@ -3,22 +3,17 @@ local wsservice 	= require "factory.wsservice"
 
 local sessions = {}
 
-local ip,port = ...
-
 local CMD = {}
 local handler = {}
 
-local open_number = 0
-
-function handler.on_connect(fd)
+function handler.on_connect(ws)
+	local fd = ws.id
 	local session = sessions[fd]
 	if not session then
-		local session = {
-			fd = fd,
-		}
+		local session = { ws = ws }
 		sessions[fd] = session
 	else
-		session.fd = fd
+		session.ws = ws
 	end
 
 	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "transmit", fd, "connect")
@@ -33,35 +28,11 @@ function handler.on_disconnect(fd)
 	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "transmit", fd, "disconnect")
 end
 
-function handler.on_open(ws)
-	local fd = ws.id
-    local session = sessions[fd]
-    
-    if session then
-		session.ws = ws
-		open_number = open_number + 1
-    end
-	skynet.error("open_number:"..open_number)
-end
-
 function handler.on_message(fd, message)
     local session = sessions[fd]
     if session then
 		skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "forward", fd, message)
     end
-end
-
-function handler.on_close(fd, code, reason)
-    local session = sessions[fd]
-    if session then
-        sessions[fd] = nil
-        open_number = open_number - 1
-    end
-	skynet.error("open_number:"..open_number)
-end
-
-function handler.configure()
-    return {ip=ip,port=port}
 end
 
 -- 关闭客户端

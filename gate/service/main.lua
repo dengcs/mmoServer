@@ -9,9 +9,13 @@ skynet.start(function()
   local summdriver = skynet.summdriver()
   summdriver.start()
   summdriver.autoload(services.list)
-  
-  local gated = skynet.newservice("client/gated", "0.0.0.0", 50001)
-  skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
+
+  local gated = skynet.newservice("client/gated")
+  skynet.name(GLOBAL.SERVICE_NAME.GATED, gated)
+  skynet.call(gated, "lua", "open", {
+    port = 50001,
+    maxclient = 100,
+  })
   
   skynet.error("Server end")
   skynet.exit()
