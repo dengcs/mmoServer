@@ -50,6 +50,22 @@ local M =
                 database  = DB.REDIS_B,
                 maxclient = 2,
               },
+        },
+
+        -------------------------------
+        --- 'MONGO'
+        -------------------------------
+
+        datamongod = {
+            {
+                category  = GLOBAL.DB.MONGO,
+                host      = "127.0.0.1",
+                port      = "27017",
+                auth      = "root",
+                password  = "123456",
+                database  = "poker",
+                maxclient = 2,
+            }
         }
 }
 return M

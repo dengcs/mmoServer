@@ -7,10 +7,10 @@ local connection_pools = {}
 
 local initialized = false
 
--- 建立'redis'连接(注意返回值，等于0才是操作成功)
+-- 建立连接(注意返回值，等于0才是操作成功)
 local function do_open(conf)
     -- 加载'redis'连接池模块
-    local connection_pool = require "persistent.redis_connection_pool"
+    local connection_pool = require "persistent.mongo_connection_pool"
     -- 创建连接池实例对象
     local inst = connection_pool.new()
     -- 通过配置启动连接池
@@ -42,10 +42,10 @@ local function init_connection_pool()
         return EINVAL
     end
     -- 加载数据库配置信息
-    local conf = require (datasource)
-    assert(conf and conf.datacached)
+    local conf = require(datasource)
+    assert(conf and conf.datamongod)
     -- 建立'redis'连接
-    for _, v in pairs(conf.datacached) do
+    for _, v in pairs(conf.datamongod) do
         local ok = do_open(v)
         if ok then
             return ok
@@ -108,12 +108,6 @@ end
 function CMD.exists(source, db, key)
     local pool = assert(connection_pools[db], "db is nil")
     return pool:do_query("exists", key)
-end
-
--- ？？
-function CMD.keys(source, db, key)
-    local pool = assert(connection_pools[db], "db is nil")
-    return pool:do_query("keys", key)
 end
 
 -- 服务初始通知
