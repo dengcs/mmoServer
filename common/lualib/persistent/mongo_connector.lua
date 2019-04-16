@@ -1,5 +1,5 @@
 local connector = require "persistent.db_connector"
-local mongo = require "skynet.db.mongo"
+local mongo     = require "skynet.db.mongo"
 
 local mongo_connector = class("MongoConnector", connector)
 
@@ -59,27 +59,45 @@ end
 
 -- 获取指定数据
 -- 1. SQL语句
-function mongo_connector:get(collection, query, selector)
-    return self.connect[collection]:find(query, selector)
+function mongo_connector:get(collection, key)
+    return self.connect[collection]:findOne(key)
 end
 
 -- 更新指定数据
 -- 1. SQL语句
 -- 2. 无效内容
-function mongo_connector:set(collection, selector, update, upsert, multi)
-    return self.connect[collection]:update(selector, update, upsert, multi)
+function mongo_connector:set(collection, key, value)
+    local update = {['$set'] = value}
+    return self.connect[collection]:update(key, update, true)
 end
 
 -- 删除指定数据
 -- 1. SQL语句
-function mongo_connector:del(collection, selector, single)
-    return self.connect[collection]:delete(selector, single)
+function mongo_connector:del(collection, key)
+    return self.connect[collection]:delete(key)
 end
 
 -- 判断指定数据是否存在
 -- 1. SQL语句
-function mongo_connector:exists(collection, query, selector)
-    return self.connect[collection]:findOne(query, selector)
+function mongo_connector:exists(collection, key)
+    return self.connect[collection]:find(key):count() > 0
+end
+
+-- 列出全部键值
+function mongo_connector:keys(collection, key)
+    local result = {}
+    local cursor = self.connect[collection]:find(key)
+    if cursor then
+        while cursor:hasNext() do
+            table.insert(result, cursor:next())
+        end
+    end
+    return result
+end
+
+-- 插入数据
+function mongo_connector:insert(collection, value)
+    return self.connect[collection]:safe_insert(value)
 end
 
 return mongo_connector

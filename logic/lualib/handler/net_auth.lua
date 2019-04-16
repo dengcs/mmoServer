@@ -1,9 +1,9 @@
 -----------------------------------------------------------
 --- 游戏服登录逻辑
 -----------------------------------------------------------
-local skynet     = require "skynet_ex"
-local json    = require "cjson"
-local userdriver = skynet.userdriver()
+local skynet  	= require "skynet"
+local player	= require "db.mongo.player"
+local allocid	= require "utils.allocid"
 
 
 local HANDLER		= {}
@@ -12,11 +12,9 @@ local REQUEST 		= {}
 -----------------------------------------------------------
 --- 内部变量/内部逻辑
 -----------------------------------------------------------
-local dbname  = "test"
-local tblname = "player_tbl"
 
 local login_acount 	= nil
-local player_uid 	= nil
+local player_id 	= nil
 
 -----------------------------------------------------------
 --- 网络请求接口
@@ -32,12 +30,11 @@ function REQUEST:query_players()
 	local ret = 1
 	
 	local account = self.proto.account
-	local sql = string.format("SELECT uid FROM %s WHERE account = '%s'", tblname, account)
-	local result = userdriver.db_select(dbname, sql)
+	local data = player.keys({account = account})
 	
-	if next(result) then
+	if data and next(data) then
 		ret = 0
-		player_uid = result[1].uid
+		player_id = data[1].pid
 	end
 	
 	login_acount = account
@@ -52,17 +49,19 @@ function REQUEST:create_player()
 	local ret = 1
 	
 	if login_acount then
+
 		local vdata = {
+			pid			= allocid.generate(),
 			sex 		= self.proto.sex,
-			nickname  = self.proto.nickname,
-			portrait  = self.proto.portrait,
+			nickname  	= self.proto.nickname,
+			portrait  	= self.proto.portrait,
+			account   	= login_acount,
 		}
 		
-		local sql = string.format("INSERT %s(account,vdata) VALUES('%s','%s')", tblname, login_acount, json.encode(vdata))
-		local result = userdriver.db_insert(dbname, sql)
+		local result = player.insert(vdata)
 		
-		if result then
-			player_uid = result.insert_id		
+		if result and result.n == 1 then
+			player_id = vdata.pid
 	    	ret = 0
 		end
 	end
@@ -76,11 +75,11 @@ function REQUEST:player_login()
 	local resp = "player_login_resp"
 	local ret = 1
 	
-	if player_uid then
-	    local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", player_uid)
+	if player_id then
+	    local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", player_id)
 	    if ok == 0 then
 	    	ret = 0
-	    	self.user:call("Player", "on_login", player_uid)
+	    	self.user:call("Player", "on_login", player_id)
 	    end
 	end
     

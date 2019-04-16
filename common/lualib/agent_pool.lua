@@ -4,7 +4,7 @@ local random        = require "utils.random"
 local tb_insert = table.insert
 local tb_remove = table.remove
 
-local init_count = 3
+local init_count = 10
 local agent_pool = {}
 
 function agent_pool.new()

@@ -9,7 +9,7 @@ local initialized = false
 
 -- 建立连接(注意返回值，等于0才是操作成功)
 local function do_open(conf)
-    -- 加载'redis'连接池模块
+    -- 加载连接池模块
     local connection_pool = require "persistent.mongo_connection_pool"
     -- 创建连接池实例对象
     local inst = connection_pool.new()
@@ -24,7 +24,7 @@ local function do_open(conf)
     return ok
 end
 
--- 关闭'redis'连接
+-- 关闭连接
 local function do_close(db)
     local inst = connection_pools[db]
     if inst then
@@ -33,7 +33,7 @@ local function do_close(db)
     end
 end
 
--- 建立'redis'连接池
+-- 建立连接池
 local function init_connection_pool()
     -- 获取数据库配置路径
     local datasource = skynet.getenv("datasource") or "config.datasource"
@@ -54,7 +54,7 @@ local function init_connection_pool()
     return 0
 end
 
--- 管理'redis'连接池
+-- 管理连接池
 local function cleanup_connection_pool()
     for k, inst in pairs(connection_pools) do
         assert(inst, "Unknown connection instance.")
@@ -72,42 +72,62 @@ function CMD.call(source, db, cmd, ...)
     end
 end
 
--- 数据集查询操作（仅仅访问'redis'数据源）
+-- 数据集查询操作（仅仅访问数据源）
 -- 1. 命令来源
 -- 2. 数据源
--- 3. 关键字
-function CMD.get(source, db, key)
+-- 3. 数据表
+-- 4. 关键字
+function CMD.get(source, db, dt, key)
     local pool = assert(connection_pools[db], "db is nil")
-    return pool:do_query("get", key)
+    return pool:do_query("get", dt, key)
 end
 
 -- '插入/更新'数据操作
 -- 1. 命令来源
 -- 2. 数据源
--- 3. 关键字
--- 4. 数据内容
-function CMD.set(source, db, key, value)
+-- 3. 数据表
+-- 4. 关键字
+-- 5. 数据内容
+function CMD.set(source, db, dt, key, value)
     -- 更新数据到'redis'数据库
     local pool = assert(connection_pools[db], "db is nil")
-    return pool:do_update("set", key, value)
+    return pool:do_update("set", dt, key, value)
 end
 
 -- 删除指定数据（一般不会使用）
 -- 1. 命令来源
 -- 2. 数据源
--- 3. 关键字
-function CMD.del(source, db, key)
+-- 3. 数据表
+-- 4. 关键字
+function CMD.del(source, db, dt, key)
     local pool = assert(connection_pools[db], "db is nil")
-    return pool:do_update("del", key)
+    return pool:do_update("del", dt, key)
 end
 
 -- 判断'redis'中是否存在指定数据
 -- 1. 命令来源
 -- 2. 数据源
--- 3. 关键字
-function CMD.exists(source, db, key)
+-- 3. 数据表
+-- 4. 关键字
+function CMD.exists(source, db, dt, key)
     local pool = assert(connection_pools[db], "db is nil")
-    return pool:do_query("exists", key)
+    return pool:do_query("exists", dt, key)
+end
+
+function CMD.keys(source, db, dt, key)
+    local pool = assert(connection_pools[db], "db is nil")
+    return pool:do_query("keys", dt, key)
+end
+
+-- '插入'数据操作
+-- 1. 命令来源
+-- 2. 数据源
+-- 3. 数据表
+-- 4. 数据内容
+function CMD.insert(source, db, dt, value)
+    -- 更新数据到'redis'数据库
+    local pool = assert(connection_pools[db], "db is nil")
+    return pool:do_update("insert", dt, value)
 end
 
 -- 服务初始通知

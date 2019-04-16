@@ -1,13 +1,6 @@
-local skynet  = require "skynet"
-
-local DB_MAP = 
+local COLLECTION_MAP =
 {
-	cache = {
-		[GAME.META.PLAYER] = "db.redis.player"
-	},
-	base = {
-		[GAME.META.PLAYER] = "db.mysql.player"
-	}
+    [GAME.COLLECTIONS.PLAYER] = require("db.mongo.player")
 }
 
 local Proxy = {}
@@ -15,14 +8,9 @@ local Proxy = {}
 -- 数据集查询操作（仅仅访问'redis'数据源）
 -- 1. 数据源
 -- 2. 关键字
-function Proxy.get(db, key)
-    local cacheStatement = require(DB_MAP.cache[db])
-    local result = cacheStatement.get(key)
-    if not result then
-    	local baseStatement = require(DB_MAP.base[db])
-    	result = baseStatement.get(key)    	
-    end
-    
+function Proxy.get(tb, key)
+    local collection = COLLECTION_MAP[tb]
+    local result = collection.get(key)
     return result
 end
 
@@ -30,16 +18,9 @@ end
 -- 1. 数据源
 -- 2. 关键字
 -- 3. 数据内容
-function Proxy.set(db, key, value)
-    local cacheStatement = require(DB_MAP.cache[db])
-    local result = cacheStatement.set(key, value)
-    if not result then
-		return nil
-    end
-    
-    local baseStatement = require(DB_MAP.base[db])
-	result = baseStatement.set(key, value)
-    
+function Proxy.set(tb, key, value)
+    local collection = COLLECTION_MAP[tb]
+    local result = collection.set(key, value)
     return result
 end
 

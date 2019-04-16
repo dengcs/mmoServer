@@ -5,7 +5,6 @@ local service = require "factory.service"
 local skynet   = require "skynet_ex"
 local userdata = require "data.userdata"
 local configure = require "config.usermeta"
-local json    = require "cjson"
 local dbproxy = require "dbproxy"
 
 ---------------------------------------------------------------------
@@ -18,11 +17,11 @@ local onlines = {}
 -- 保存角色数据
 -- 1. 角色编号
 -- 2. 角色信息
-local function save(uid, user)
+local function save(pid, user)
     for name, c in pairs(user.configure) do
         local data = user:get(name)
         if data:update() then
-            dbproxy.set(c.mode,uid,json.encode(data.__data))
+            dbproxy.set(c.mode,pid,data.__data)
         end
     end
 end
@@ -47,10 +46,10 @@ local COMMAND = {}
 -- 1. 命令来源
 -- 2. 角色编号
 -- 3. 配置信息
-function COMMAND.load(source, uid)
+function COMMAND.load(source, pid)
     -- 防止重复加载
-    if onlines[uid] then
-        ERROR("usercenterd : user[%s] already exists!!!", uid)
+    if onlines[pid] then
+        ERROR("usercenterd : user[%s] already exists!!!", pid)
     end
     -- 加载角色数据
     local user = ucreate()
@@ -58,11 +57,7 @@ function COMMAND.load(source, uid)
         -- 加载角色组件数据
         -- name : 组件名称
         -- c    : 组件描述        
-        local retval = dbproxy.get(c.mode, uid)
-                
-        if retval then
-        	retval = json.decode(retval)
-        end
+        local retval = dbproxy.get(c.mode, pid)
         
         local ok, objcpy = skynet.call(source, "lua", "load_data", name, retval)
         if ok ~= 0 and not objcpy then
@@ -71,7 +66,7 @@ function COMMAND.load(source, uid)
         user:init(name, objcpy)
     end
     -- 记录在线角色
-    onlines[uid] = 
+    onlines[pid] =
     {
         agent = source,
         user  = user,
@@ -82,14 +77,14 @@ end
 -- 释放在线角色
 -- 1. 命令来源
 -- 2. 角色编号
-function COMMAND.unload(source, uid)
-    local u = onlines[uid]
+function COMMAND.unload(source, pid)
+    local u = onlines[pid]
     if u then
-        save(uid, u.user)
+        save(pid, u.user)
         u.user:cleanup_all()
-        onlines[uid] = nil
+        onlines[pid] = nil
     else
-        ERROR("usercenterd : user[%s] not found!!!", uid)
+        ERROR("usercenterd : user[%s] not found!!!", pid)
     end
     return 0
 end
@@ -97,8 +92,8 @@ end
 -- 获取角色句柄
 -- 1. 命令来源
 -- 2. 角色编号
-function COMMAND.useragent(source, uid)
-    local u = onlines[uid]
+function COMMAND.useragent(source, pid)
+    local u = onlines[pid]
     if u then
         return u.agent
     else
@@ -111,8 +106,8 @@ end
 -- 2. 角色编号
 -- 3. 消息类型
 -- 4. 消息内容
-function COMMAND.usersend(source, uid, cmd, ...)
-    local u = onlines[uid]
+function COMMAND.usersend(source, pid, cmd, ...)
+    local u = onlines[pid]
     if u then
         skynet.send(u.agent, "lua", cmd, ...)
     end
@@ -123,8 +118,8 @@ end
 -- 2. 角色编号
 -- 3. 命令类型
 -- 4. 命令内容
-function COMMAND.usercall(source, uid, cmd, ...)
-    local u = onlines[uid]
+function COMMAND.usercall(source, pid, cmd, ...)
+    local u = onlines[pid]
     if u then
         local ok, retval = skynet.call(u.agent, "lua", cmd, ...)
         if ok ~= 0 then
@@ -153,16 +148,16 @@ function server.start_handler()
     -- 启动定时任务
     local interval = 5 * 60
     this.schedule(function()
-        for uid, u in pairs(onlines) do
-            save(uid, u.user)
+        for pid, u in pairs(onlines) do
+            save(pid, u.user)
         end
     end, interval, SCHEDULER_FOREVER)
 end
 
 -- 服务停止通知
 function server.stop_handler()
-    for uid, u in pairs(onlines) do
-        save(uid, u.user)
+    for pid, u in pairs(onlines) do
+        save(pid, u.user)
     end
 end
 

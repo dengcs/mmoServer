@@ -18,8 +18,7 @@ GLOBAL.SERVICE_NAME =
     SUMMD       = ".summd",
     GATED       = ".gated",
     RELAY       = ".relay",
-    DATABASED   = "DATABASE",
-    DATACACHED  = "DATACACHE",
+    DATAMONGOD  = "DATAMONGO",
     USERCENTERD = "USERCENTER",
     GAME        = ".game",
     ROOM        = ".room",
@@ -30,7 +29,7 @@ GAME =
     ---------------------------------------------
     -- 业务数据类型枚举
     ---------------------------------------------
-    META =
+    COLLECTIONS =
     {
         -- 角色相关数据类型
         PLAYER        = 10,    -- 角色信息

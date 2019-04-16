@@ -21,3 +21,4 @@ cluster = "./common/lualib/config/clustername.lua"
 
 datasource = "config.datasource"
 node = "logic"
+nodeid = 101
