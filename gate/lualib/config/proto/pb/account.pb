@@ -1,6 +1,7 @@
 
-¢
-src/account.protogame"A
+¨
+src/account.proto
+game.proto"A
 account_login
 account (	Raccount
 passwd (	Rpasswd"<

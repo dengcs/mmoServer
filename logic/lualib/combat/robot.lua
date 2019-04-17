@@ -15,7 +15,7 @@ end
 function robot.generate_robot()
 	local robot =
 	{
-		uid        = allocid(),
+		pid        = allocid(),
 		sex        = 1,
 		nickname   = "robot",
 		portrait   = "portrait",

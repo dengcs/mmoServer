@@ -2,7 +2,7 @@
 /// 游戏项目基础协议
 ///////////////////////////////////////////////////////////
 syntax = "proto3";
-package game;
+package game.proto;
 
 
 // 错误信息
@@ -14,7 +14,7 @@ message NetError
 // 协议头
 message NetHeader
 {
-	string uid   = 1;		// 用户编号
+	string pid   = 1;		// 用户编号
 	string proto = 2;		// 协议名称
 }
 

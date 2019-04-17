@@ -37,18 +37,18 @@ function M.pb_encode(name, data, errcode)
 		message.error = { code = errcode }
 	end
 	if data then
-		message.payload = protobuf.encode("game." .. name, data)
+		message.payload = protobuf.encode("game.proto." .. name, data)
 	end
-	return protobuf.encode("game.NetMessage", message)
+	return protobuf.encode("game.proto.NetMessage", message)
 end
 
 -- 游戏协议解码逻辑
 -- 1. 协议信息
 function M.pb_decode(data)
-	local message = protobuf.decode("game.NetMessage", data)
+	local message = protobuf.decode("game.proto.NetMessage", data)
 	if message.header then
 		if message.header.proto then
-			message.payload = protobuf.decode("game." .. message.header.proto, message.payload)
+			message.payload = protobuf.decode("game.proto." .. message.header.proto, message.payload)
 			return message
 		else
 			error(string.format("%s : incorrect payload!!!", message.header.proto))

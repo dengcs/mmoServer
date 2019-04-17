@@ -29,9 +29,9 @@ end
 function REQUEST:game_update()
 	local player  = self.user:get("Player")
 	if ENUM.inspect_player_game(player) then
-		local uid     = player.uid
+		local pid     = player.pid
 		local alias   = player.scene
-		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "on_game_update", alias, uid, self.proto.data)
+		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "on_game_update", alias, pid, self.proto.data)
 	end
 	return 0
 end
@@ -40,9 +40,9 @@ end
 function REQUEST:game_leave()
 	local player  = self.user:get("Player")
 	if ENUM.inspect_player_game(player) then
-		local uid     = player.uid
+		local pid     = player.pid
 		local alias   = player.scene
-		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "on_leave", alias, uid)
+		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "on_leave", alias, pid)
 	end
 	
 	self.response("game_leave_resp", { ret = 0 })

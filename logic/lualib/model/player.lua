@@ -19,9 +19,9 @@ function Player:on_create()
 end
 
 -- 角色登录操作
-function Player:on_login(uid)
-	if not self.uid then
-		self.uid = uid
+function Player:on_login(pid)
+	if not self.pid then
+		self.pid = pid
 		self:commit()
 	end
 
@@ -47,7 +47,7 @@ end
 function Player:get_snapshot()
 	local snapshot = 
 	{
-		uid = self.uid,
+		pid = self.pid,
 		nickname = self.nickname,
 		portrait = self.portrait,
 		level = self.level,

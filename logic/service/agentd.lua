@@ -25,7 +25,7 @@ local function unload()
 	if data_meta then
 		local player = data_meta:get("Player")
 		if player then
-			skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "unload", player.uid)
+			skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "unload", player.pid)
 		end
 	end
 end

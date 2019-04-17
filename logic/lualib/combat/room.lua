@@ -61,7 +61,7 @@ function Member.new(vdata)
 	setmetatable(member, Member)
 	-- 设置成员数据
 	member.agent			= vdata.agent			-- 角色句柄
-	member.uid             	= vdata.uid				-- 角色编号
+	member.pid             	= vdata.pid				-- 角色编号
 	member.sex             	= vdata.sex				-- 角色性别
 	member.nickname        	= vdata.nickname		-- 角色昵称
 	member.portrait        	= vdata.portrait		-- 角色头像
@@ -105,7 +105,7 @@ end
 -- 成员快照
 function Member:snapshot(type)
 	local snapshot = {}
-	snapshot.uid        		= self.uid
+	snapshot.pid        		= self.pid
 	snapshot.sex        		= self.sex
 	snapshot.nickname   		= self.nickname
 	snapshot.portrait   		= self.portrait
@@ -130,7 +130,7 @@ function Member:notify(name, data)
 	if self.agent ~= nil then
 		skynet.send(self.agent, "lua", "on_common_notify", name, data)
 	else
-		userdriver.usersend(self.uid, "on_common_notify", name, data)
+		userdriver.usersend(self.pid, "on_common_notify", name, data)
 	end
 end
 
@@ -161,7 +161,7 @@ function Team.new(vdata)
 
 	-- 设置队伍数据
 	team.id      	= allocid()					-- 队伍编号（顺序递增）
-	team.owner   	= vdata.uid					-- 领队编号
+	team.owner   	= vdata.pid					-- 领队编号
 	team.state   	= ESTATES.PREPARE			-- 队伍状态
 	team.xtime   	= 0							-- 匹配时间
 	team.count	 	= 0							-- 成员数量
@@ -234,8 +234,8 @@ function Team:size()
 end
 
 -- 指定成员
-function Team:get(uid)
-	return self.members[uid]
+function Team:get(pid)
+	return self.members[pid]
 end
 
 -- 加入队伍
@@ -251,7 +251,7 @@ function Team:join(vdata)
 	-- 成员加入队伍
 	local member = Member.new(vdata)
 	if member ~= nil then
-		self.members[member.uid] = member
+		self.members[member.pid] = member
 
 		self.count = self.count + 1
 		member.place = self.count
@@ -260,22 +260,22 @@ function Team:join(vdata)
 end
 
 -- 离开队伍
-function Team:quit(uid)
+function Team:quit(pid)
 	-- 移除队伍成员
 	local member = nil
 	for _, v in pairs(self.members) do
-		if (v.uid == uid) then
+		if (v.pid == pid) then
 			member            = v
-			self.members[uid] = nil
+			self.members[pid] = nil
 			self.count = self.count - 1
 			break
 		end
 	end
 
 	-- 转移队长权限
-	if (member ~= nil) and (member.uid == self.owner) then
+	if (member ~= nil) and (member.pid == self.owner) then
 		for _, v in pairs(self.members) do
-			self.owner = v.uid
+			self.owner = v.pid
 			if v:ready() then
 				v:convert(ESTATES.PREPARE)
 			end

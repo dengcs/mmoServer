@@ -2,7 +2,7 @@
 /// 用户登录验证相关协议
 ///////////////////////////////////////////////////////////
 syntax = "proto3";
-package game;
+package game.proto;
 
 // 登录请求
 message account_login

@@ -61,13 +61,13 @@ end
 -- 离开战场（成员强制离开）
 -- 1. 战场编号
 -- 2. 角色编号
-function COMMAND.on_leave(alias, uid)
+function COMMAND.on_leave(alias, pid)
 	local game = games[alias]
 	assert(game, "game.on_leave() : game not exists!!!")
 
-	local member = game:quit(uid)
+	local member = game:quit(pid)
 	if member ~= nil then
-		game:broadcast("game_quit__notify", {uid = member.uid})
+		game:broadcast("game_quit__notify", {pid = member.pid})
 		-- 清理战场
 		if game:empty() then
 			COMMAND.on_close(alias)
@@ -81,17 +81,17 @@ end
 -- 1. 战场编号
 -- 2. 角色编号
 -- 3. 战场数据
-function COMMAND.on_game_update(alias, uid, data)
+function COMMAND.on_game_update(alias, pid, data)
 	local game = games[alias]
 	assert(game, "on_game_update() : game not exists!!!")
 
 	-- 成员检查
-	local member = game:get(uid)
+	local member = game:get(pid)
 	if member == nil then
 		return ERRCODE.GAME_NOT_MEMBER
 	end
 
-	game:update(uid, data)
+	game:update(pid, data)
 
 	return 0
 end
@@ -125,22 +125,22 @@ end
 
 -- 成员掉线通知
 -- 1. 战场编号
-function COMMAND.on_disconnect(alias, uid)
+function COMMAND.on_disconnect(alias, pid)
 	local game = games[alias]
 	assert(game, "on_disconnect() : game not exists!!!")
 
-	game:disconnect(uid)
-	game:broadcast("game_disconnect_notify", {uid = uid})
+	game:disconnect(pid)
+	game:broadcast("game_disconnect_notify", {pid = pid})
 	return 0
 end
 
 -- 成员重连通知
 -- 1. 战场编号
-function COMMAND.on_reconnect(alias, uid)
+function COMMAND.on_reconnect(alias, pid)
 	local game = games[alias]
 	assert(game, "on_disconnect() : game not exists!!!")
 
-	local member = game:reconnect(uid)
+	local member = game:reconnect(pid)
 
 	if not member then
 		return ERRCODE.GAME_NOT_MEMBER

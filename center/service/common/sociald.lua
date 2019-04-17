@@ -89,12 +89,12 @@ end
 function CMD.search_friend(name)
 end
 
--- 获取uid包装成好友型的数据
+-- 获取pid包装成好友型的数据
 function CMD.get_friend_data(pid)
 end
 
 -- 获取指定用户数据
-function CMD.get_user_data_by_uid(pid)
+function CMD.get_user_data_by_pid(pid)
 end
 
 function CMD.search_pid_by_name(name)

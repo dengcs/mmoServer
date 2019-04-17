@@ -31,7 +31,7 @@ end
 -- 登录时，刷新数据
 function User:update(pid)
     if self.pid ~= pid then
-        LOG_ERROR("[chatd] User:update uid error! pid=%s,self.pid=%s",pid,self.pid)
+        LOG_ERROR("[chatd] User:update pid error! pid=%s,self.pid=%s",pid,self.pid)
         self.pid = pid
     end
 end
@@ -239,7 +239,7 @@ local command = {}
 -- 1. 指令来源
 -- 2. 角色编号
 function command.on_login(source, pid)
-    assert(pid>0,"[chatd]command.on_login uid is invalid!")
+    assert(pid>0,"[chatd]command.on_login pid is invalid!")
     local user = users[pid]
     if not user then
         user = User.new(pid)

@@ -82,10 +82,10 @@ end
 -- 1. 节点名称
 -- 2. 角色编号
 -- 3. 角色信息
-function COMMAND.on_login(nodename, uid, snapshot)
+function COMMAND.on_login(nodename, pid, snapshot)
 	assert(nodename)
-	assert(uid)
-	onlines[uid] = 
+	assert(pid)
+	onlines[pid] =
 	{
 		nodename = nodename,
 		snapshot = snapshot,
@@ -96,13 +96,13 @@ end
 -- 用户离线通知
 -- 1. 节点名称
 -- 2. 角色编号
-function COMMAND.on_logout(nodename, uid)
+function COMMAND.on_logout(nodename, pid)
 	assert(nodename)
-	assert(uid)
-	local u = onlines[uid]
+	assert(pid)
+	local u = onlines[pid]
 	if u then
 		assert(u.nodename == nodename)
-		onlines[uid] = nil
+		onlines[pid] = nil
 	end
 	return 0
 end
@@ -110,8 +110,8 @@ end
 -- 在线用户列表
 function COMMAND.onlines()
 	local keys = {}
-	for uid, _ in pairs(onlines) do
-		table.insert(keys, uid)
+	for pid, _ in pairs(onlines) do
+		table.insert(keys, pid)
 	end
 	return keys
 end
@@ -119,8 +119,8 @@ end
 -- 在线状态列表
 function COMMAND.onlines_status()
 	local status = {}
-	for uid, _ in pairs(onlines) do
-		status[uid] = true
+	for pid, _ in pairs(onlines) do
+		status[pid] = true
 	end
 	return status
 end
@@ -129,12 +129,12 @@ end
 -- 1. 角色编号
 -- 2. 命令名称
 -- 3. 命令参数
-function COMMAND.usercall(uid, cmd, ...)
-	local u = onlines[uid]
+function COMMAND.usercall(pid, cmd, ...)
+	local u = onlines[pid]
 	if u then
-		return cluster.call(u.nodename, GLOBAL.SERVICE_NAME.USERCENTERD, "usercall", uid, cmd, ...)
+		return cluster.call(u.nodename, GLOBAL.SERVICE_NAME.USERCENTERD, "usercall", pid, cmd, ...)
 	else
-		ERROR("onlined.usercall(%s) : user[%s] not exists!!!", cmd, uid)
+		ERROR("onlined.usercall(%s) : user[%s] not exists!!!", cmd, pid)
 	end
 end
 
@@ -142,10 +142,10 @@ end
 -- 1. 角色编号
 -- 2. 命令名称
 -- 3. 命令内容
-function COMMAND.usersend(uid, cmd, ...)
-	local u = onlines[uid]
+function COMMAND.usersend(pid, cmd, ...)
+	local u = onlines[pid]
 	if u then
-		cluster.send(u.nodename, GLOBAL.SERVICE_NAME.USERCENTERD, "usersend", uid, cmd, ...)
+		cluster.send(u.nodename, GLOBAL.SERVICE_NAME.USERCENTERD, "usersend", pid, cmd, ...)
 	end
 end
 
@@ -153,7 +153,7 @@ end
 -- 1. 命令名称
 -- 2. 命令内容
 function COMMAND.notice(cmd, ...)
-	for uid, u in pairs(onlines) do
+	for pid, u in pairs(onlines) do
 		clustrer.send(u.nodename, GLOBAL.SERVICE_NAME.USERCENTERD, "usersend", uid, cmd, ...)
 	end
 end

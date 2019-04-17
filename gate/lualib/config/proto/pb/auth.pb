@@ -1,6 +1,7 @@
 
-é
-src/auth.protogame"
+ï
+src/auth.proto
+game.proto"
 	heartbeat"
 heartbeat_resp"
 	ping_pong"

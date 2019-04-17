@@ -130,7 +130,7 @@ end
 -- 2. 房间编号
 -- 3. 角色编号
 -- 4. 目标编号
-function COMMAND.on_invite(cid, tid, source, uid)
+function COMMAND.on_invite(cid, tid, source, pid)
 	-- 获取频道
 	local channel = channels[cid]
 	if channel == nil then
@@ -155,10 +155,10 @@ function COMMAND.on_invite(cid, tid, source, uid)
 	{
 		channel  = cid,
 		roomid   = team.id,
-		uid      = member.uid,
+		pid      = member.pid,
 		nickname = member.nickname,
 	}
-	userdriver.usersend(uid, "on_common_invite", name, data)
+	userdriver.usersend(pid, "on_common_invite", name, data)
 	return 0
 end
 
@@ -187,7 +187,7 @@ end
 -- 1. 频道编号
 -- 2. 房间编号
 -- 3. 角色编号
-function COMMAND.on_cancel(cid, tid, uid)
+function COMMAND.on_cancel(cid, tid, pid)
 	-- 获取频道
 	local channel = channels[cid]
 	if channel == nil then
@@ -202,7 +202,7 @@ function COMMAND.on_cancel(cid, tid, uid)
 		return ERRCODE.ROOM_NOT_PERPARE
 	end
 	-- 成员检查
-	local member = team:get(uid)
+	local member = team:get(pid)
 	if member == nil then
 		return ERRCODE.ROOM_PERMISSION_DINIED
 	end

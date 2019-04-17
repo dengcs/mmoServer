@@ -21,8 +21,8 @@ local PLAY_EVENT		= ENUM.PLAY_EVENT
 -- 1. 角色编号
 -- 2. 战场别名
 -- 3. 强制标志
-local function enter_environment(uid, alias, force)
-	local errcode, retval = userdriver.usercall(uid, "on_enter_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias, force)
+local function enter_environment(pid, alias, force)
+	local errcode, retval = userdriver.usercall(pid, "on_enter_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias, force)
 	if not retval then
 		errcode = ERRCODE.GAME_ENTERENV_FAILED
 	end
@@ -32,8 +32,8 @@ end
 -- 离开战场服务
 -- 1. 角色编号
 -- 2. 战场别名
-local function leave_environment(uid, alias)
-	local errcode, retval = userdriver.usercall(uid, "on_leave_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias)
+local function leave_environment(pid, alias)
+	local errcode, retval = userdriver.usercall(pid, "on_leave_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias)
 	if not retval then
 		errcode = ERRCODE.GAME_LEAVEENV_FAILED
 	end
@@ -53,7 +53,7 @@ function Member.new(vdata)
 	setmetatable(member, Member)
 	-- 设置基础数据
 	member.agent      	= vdata.agent					-- 角色句柄
-	member.uid        	= vdata.uid						-- 角色编号
+	member.pid        	= vdata.pid						-- 角色编号
 	member.sex        	= vdata.sex						-- 角色性别
 	member.nickname   	= vdata.nickname				-- 角色昵称
 	member.portrait   	= vdata.portrait				-- 角色头像
@@ -88,14 +88,14 @@ function Member:notify(name, data)
 	if self.agent ~= nil then
 		skynet.send(self.agent, "lua", "on_common_notify", name, data)
 	else
-		userdriver.usersend(self.uid, "on_common_notify", name, data)
+		userdriver.usersend(self.pid, "on_common_notify", name, data)
 	end
 end
 
 -- 成员快照
 function Member:snapshot()
 	local snapshot = {}
-	snapshot.uid      	= self.uid
+	snapshot.pid      	= self.pid
 	snapshot.sex      	= self.sex
 	snapshot.nickname 	= self.nickname
 	snapshot.portrait 	= self.portrait
@@ -153,7 +153,7 @@ function Game:join(member)
 	if member ~= nil then
 		-- 加入服务
 		if not member.robot then
-			local errcode = enter_environment(member.uid, self.alias)
+			local errcode = enter_environment(member.pid, self.alias)
 			if errcode ~= 0 then
 				return nil
 			end
@@ -164,16 +164,16 @@ function Game:join(member)
 end
 
 -- 离开战场
-function Game:quit(uid)
+function Game:quit(pid)
 	local member = nil
 	for _, v in pairs(self.members) do
 		-- 成员离线处理
-		if v.uid == uid then
+		if v.pid == pid then
 			v.state = GAME_MEMBER_STATE.QUIT
 			-- 记录退出成员
 			member = v
 			if not v.robot then
-				leave_environment(uid, self.alias)
+				leave_environment(pid, self.alias)
 			end
 			break
 		end
@@ -182,9 +182,9 @@ function Game:quit(uid)
 end
 
 -- 指定成员
-function Game:get(uid)
+function Game:get(pid)
 	for _, member in pairs(self.members) do
-		if member.uid == uid then
+		if member.pid == pid then
 			return member
 		end
 	end
@@ -202,14 +202,14 @@ function Game:empty()
 end
 
 -- 成员掉线
-function Game:disconnect(uid)
+function Game:disconnect(pid)
 	local member = nil
 	for _, v in pairs(self.members) do
 		repeat
 			if v.state == GAME_MEMBER_STATE.QUIT then
 				break
 			end
-			if v.uid == uid then
+			if v.pid == pid then
 				member   = v
 				v.state = GAME_MEMBER_STATE.OFFLINE
 			end
@@ -219,11 +219,11 @@ function Game:disconnect(uid)
 end
 
 -- 成员重连
-function Game:reconnect(uid)
+function Game:reconnect(pid)
 	local member = nil
 	for _, v in pairs(self.members) do
 		if v.state ~= GAME_MEMBER_STATE.QUIT then
-			if v.uid == uid then
+			if v.pid == pid then
 				member = v
 			end
 			v.state = GAME_MEMBER_STATE.ONLINE
@@ -237,7 +237,7 @@ function Game:event(id, data)
 	if id == PLAY_EVENT.GAME_OVER then
 		for i, v in pairs(self.members) do
 			if not v.robot then
-				leave_environment(v.uid, self.alias)
+				leave_environment(v.pid, self.alias)
 			end
 		end
 		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "game_finish", self.alias, data)
@@ -257,7 +257,7 @@ function Game:notify(idx, name, data)
 	if member then
 		if member.robot then
 			if name == "game_update_notify" then
-				self:update(member.uid, data.data)
+				self:update(member.pid, data.data)
 			end
 		else
 			member:notify(name, data)
@@ -265,9 +265,9 @@ function Game:notify(idx, name, data)
 	end
 end
 
-function Game:uid_to_idx(uid)
+function Game:pid_to_idx(pid)
 	for idx, member in pairs(self.members) do
-		if member.uid == uid then
+		if member.pid == pid then
 			return idx
 		end
 	end
@@ -318,8 +318,8 @@ function Game:auth_functions_to_manager()
 	return functions
 end
 
-function Game:update(uid, data)
-	local idx = self:uid_to_idx(uid)
+function Game:update(pid, data)
+	local idx = self:pid_to_idx(pid)
 	if idx then
 		self.play_mgr:update(idx, data)
 	end

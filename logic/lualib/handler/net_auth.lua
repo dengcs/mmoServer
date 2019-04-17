@@ -59,7 +59,7 @@ function REQUEST:create_player()
 		}
 		
 		local result = player.insert(vdata)
-		
+
 		if result and result.n == 1 then
 			player_id = vdata.pid
 	    	ret = 0

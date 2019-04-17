@@ -1,9 +1,10 @@
 
-…
-src/game.protogame"Ï
+⁄
+src/game.proto
+game.proto"Ï
 
 GameMember
-uid (	Ruid
+pid (	Rpid
 place (Rplace
 sex (Rsex
 nickname (	Rnickname
@@ -15,26 +16,26 @@ GameMember
 game_update
 data (	Rdata"
 game_submit
-uid (	Ruid"
+pid (	Rpid"
 
 game_leave"#
 game_leave_resp
 ret (Rret"(
 game_update_notify
-data (	Rdata"%
-game_quit__notify
-uid (	Ruid",
+data (	Rdata"$
+game_quit_notify
+pid (	Rpid",
 game_complete_notify
-score (Rscore"ù
+score (Rscore"£
 game_start_notify
 teamid (Rteamid
 channel (Rchannel
 owner (	Rowner
-state (Rstate*
-members (2.game.GameMemberRmembers"£
+state (Rstate0
+members (2.game.proto.GameMemberRmembers"©
 room_synchronize_notify
 teamid (Rteamid
 channel (Rchannel
 owner (	Rowner
-state (Rstate*
-members (2.game.GameMemberRmembersbproto3
+state (Rstate0
+members (2.game.proto.GameMemberRmembersbproto3

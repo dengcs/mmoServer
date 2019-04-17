@@ -1,5 +1,5 @@
 syntax = "proto3";
-package game;
+package game.proto;
 
 
 ///////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@ package game;
 // 参赛者信息
 message GameMember
 {
-	string     uid			        = 1;	// 参赛者编号
+	string     pid			        = 1;	// 参赛者编号
 	uint32     place			    = 2;	// 参赛者座位
 	uint32     sex                  = 3;	// 参赛者性别
 	string     nickname	            = 4;	// 参赛者昵称
@@ -35,7 +35,7 @@ message game_update
 // 提交参赛者统计数据到服务器（这个请求不返回应答消息）
 message game_submit
 {
-	string         uid             = 1;	// 成员编号
+	string         pid             = 1;	// 成员编号
 }
 
 // 参赛者强制退出
@@ -54,9 +54,9 @@ message game_update_notify
     string         data             = 1;	// json格式数据
 }
 
-message game_quit__notify
+message game_quit_notify
 {
-    string         uid             = 1;	// 成员编号
+    string         pid             = 1;	// 成员编号
 }
 
 message game_complete_notify

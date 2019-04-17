@@ -1,6 +1,7 @@
 
-´
-src/room.protogame"'
+º
+src/room.proto
+game.proto"'
 room_create
 channel (Rchannel"$
 room_create_resp
@@ -13,6 +14,6 @@
 room_quit_resp
 ret (Rret"
 room_invite
-uid (	Ruid"$
+pid (	Rpid"$
 room_invite_resp
 ret (Rretbproto3

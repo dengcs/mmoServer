@@ -10,7 +10,7 @@ local dbname = "test"
 ---------------------------------------------------------------------
 
 local function check_account(account)
-	local sql = string.format("SELECT uid, state FROM account WHERE account = '%s'", account)
+	local sql = string.format("SELECT pid, state FROM account WHERE account = '%s'", account)
 	local ret = userdriver.select(dbname, sql)
 end
 
@@ -24,12 +24,12 @@ local COMMAND = {}
 
 -- 冻结指定用户（仅限GM调用）
 -- 1. 用户编号
-function COMMAND:freeze(uid)
+function COMMAND:freeze(pid)
 end
 
 -- 解冻指定用户（仅限GM调用）
 -- 1. 用户编号
-function COMMAND:unfreeze(uid)
+function COMMAND:unfreeze(pid)
 end
 
 -----------------------------------------------------------
