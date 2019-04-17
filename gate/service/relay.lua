@@ -21,6 +21,7 @@ local decode = pbhelper.pb_decode
 local channel = nil
 local reply_id = 1
 
+-- 客户端应答回调
 local function dispatch_reply(so)
     local len_reply	= so:read(2)
     len_reply = str_unpack(">H", len_reply)
@@ -40,6 +41,7 @@ local function dispatch_reply(so)
     return reply_id
 end
 
+-- 直接转发客户端数据
 function CMD.forward(fd, msg)
     if channel then
         local msgData = decode(msg)
@@ -55,7 +57,8 @@ function CMD.forward(fd, msg)
     end
 end
 
-function CMD.transmit(fd, protoName)
+-- 需要自己构造协议头
+function CMD.signal(fd, protoName)
     if channel then
         local msgData =
         {

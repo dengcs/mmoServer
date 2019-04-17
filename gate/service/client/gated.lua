@@ -16,7 +16,7 @@ function handler.on_connect(ws)
 		session.ws = ws
 	end
 
-	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "transmit", fd, "connect")
+	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "signal", fd, "connect")
 end
 
 function handler.on_disconnect(fd)
@@ -25,25 +25,19 @@ function handler.on_disconnect(fd)
         sessions[fd] = nil
     end
 
-	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "transmit", fd, "disconnect")
+	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "signal", fd, "disconnect")
 end
 
 function handler.on_message(fd, message)
     local session = sessions[fd]
     if session then
 		skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "forward", fd, message)
+		-- 需要记录账号信息（比如IP）
+		if session.sign then
+		else
+			session.sign = true
+		end
     end
-end
-
--- 关闭客户端
-function CMD.logout(fd)
-  local session = sessions[fd]
-  if session then
-  	  local ws = session.ws
-  	  if ws then
-	      ws:close()
-  	  end
-  end
 end
 
 -- 返回消息到客户端
