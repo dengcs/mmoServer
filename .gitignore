@@ -4,3 +4,4 @@
 .settings/org.eclipse.core.resources.prefs
 .buildpath
 common/lualib/config/datasource.lua
+/engine/3rd/
