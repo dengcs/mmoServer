@@ -7,9 +7,11 @@ M.list = {
         unique = true,
     },
     {
-     name = GLOBAL.SERVICE_NAME.RELAY,
-     module = "relay",
-     unique = true,
+        name = GLOBAL.SERVICE_NAME.RELAY,
+        module = "relay",
+        unique = true,
+        ip = "127.0.0.1",
+        port = 51001,
     },
 }
 

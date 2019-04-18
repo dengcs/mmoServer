@@ -57,7 +57,7 @@ function CMD.forward(fd, msg)
     end
 end
 
--- 需要自己构造协议头
+-- 客户端信号，需要自己构造协议头
 function CMD.signal(fd, protoName)
     if channel then
         local msgData =
@@ -77,12 +77,12 @@ function CMD.signal(fd, protoName)
     end
 end
 
-function server.init_handler()
+function server.init_handler(conf)
     pbhelper.register()
 
     channel = socketchannel.channel {
-        host        = "127.0.0.1",
-        port        = 51001,
+        host        = conf.ip,
+        port        = conf.port,
         nodelay     = false,
         response    = dispatch_reply,
     }

@@ -24,10 +24,10 @@ end
 
 function __init__()
     db = redis.connect {
-        host = "192.168.8.26",
-        port = 10002,
-        db   = 12,
-        auth = "888888"
+        host = "127.0.0.1",
+        port = 6300,
+        db   = 0,
+        auth = "foobared"
     }
     print("dbsize:", db:dbsize())
     local ok, msg = xpcall(add1, debug.traceback, "test1", 250000)

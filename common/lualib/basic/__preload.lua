@@ -1,5 +1,5 @@
 require "basic.macros"
-require "basic.global"
+require "basic.game"
 require "basic.errno"
 
 require "basic.ltypes"

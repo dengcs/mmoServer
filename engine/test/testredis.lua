@@ -2,10 +2,9 @@ local skynet = require "skynet"
 local redis = require "skynet.db.redis"
 
 local conf = {
-	host = "192.168.8.26" ,
-	port = 10002 ,
-	db = 11 ,
-	auth = "888888"
+	host = "127.0.0.1" ,
+	port = 6379 ,
+	db = 0
 }
 
 local function watching()
