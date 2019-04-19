@@ -2,18 +2,44 @@
 --- 游戏协议解析模块
 ---------------------------------------------------------------------
 local protobuf 	= require "protobuf"
-local pbs 		= require "config.pbs"
 local skynet	= require "skynet"
+local lfs      	= require "lfs"
+
+local assert	= assert
+local pairs		= pairs
+local tinsert 	= table.insert
+local strfmt	= string.format
+local ioopen	= io.open
+
+-- 遍历指定目录（递归）
+-- 1. 目录路径
+-- 2. 文件后缀
+-- 3. 文件集合
+local function traverse(root, collect)
+	collect = collect or {}
+	for element in lfs.dir(root) do
+		if (element ~= ".") and (element ~= "..") then
+			local path = strfmt("%s/%s", root, element)
+			local attr = lfs.attributes(path)
+			if attr.mode == "directory" then
+				traverse(path, collect)
+			else
+				tinsert(collect, path)
+			end
+		end
+	end
+	return collect
+end
 
 local M = {}
 
 -- 初始化
 function M.register()
-	local node = assert(skynet.getenv("node"),"getenv获取不到node值！")
-	for _,v in pairs(pbs) do
-		local filepath = "lualib/config/proto/pb"
-		local bp_file = string.format("./%s/%s/%s", node, filepath, v)
-		local f = assert(io.open(bp_file , "rb"))
+	local node 	= assert(skynet.getenv("node"),"getenv获取不到node值！")
+	local root 	= strfmt("./%s/lualib/config/proto/pb", node)
+	local pbs	= traverse(root)
+	for _,file in pairs(pbs) do
+		local f = assert(ioopen(file , "rb"))
 		local buffer = f:read "*a"
 		f:close()
 
@@ -51,7 +77,7 @@ function M.pb_decode(data)
 			message.payload = protobuf.decode("game.proto." .. message.header.proto, message.payload)
 			return message
 		else
-			error(string.format("%s : incorrect payload!!!", message.header.proto))
+			error(strfmt("%s : incorrect payload!!!", message.header.proto))
 		end
 	end
 	return message

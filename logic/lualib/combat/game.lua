@@ -2,7 +2,7 @@
 -- 对战组队模型
 --
 local skynet   		= require "skynet_ex"
-local ENUM    		= require "config.gameenum"
+local ENUM    		= require "config.enum"
 local play_manager	= require "pdk.play_manager"
 
 local tinsert 		= table.insert

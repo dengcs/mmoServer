@@ -1,11 +1,38 @@
 ---------------------------------------------------------------------
 --- 消息分发中间件
 ---------------------------------------------------------------------
+local lfs      		= require "lfs"
 local skynet 		= require "skynet"
-local handlers 		= require "config.handlers"
 local socketdriver 	= require "skynet.socketdriver"
 
-local strpack = string.pack
+local pairs		= pairs
+local xpcall	= xpcall
+local assert	= assert
+local strpack 	= string.pack
+local tinsert 	= table.insert
+local tconcat 	= table.concat
+local strfmt	= string.format
+
+-- 遍历指定目录（递归）
+-- 1. 目录路径
+-- 2. 文件后缀
+-- 3. 文件集合
+local function traverse(root, collect)
+	collect = collect or {}
+	for element in lfs.dir(root) do
+		if (element ~= ".") and (element ~= "..") then
+			local path = strfmt("%s/%s", root, element)
+			local attr = lfs.attributes(path)
+			if attr.mode == "directory" then
+				traverse(path, collect)
+			else
+				local file_name = element:match("(.+)%.%w+$")
+				tinsert(collect, file_name)
+			end
+		end
+	end
+	return collect
+end
 
 local M = {}
 M.HANDSHAKE 	= {}			-- 握手相关请求处理逻辑集合（确保'握手/重连'请求仅在指定状态有效）
@@ -25,8 +52,12 @@ function M.new()
 end
 
 function M:register_handle()
-    for _,v in pairs(handlers or {}) do
-        self:register(require(v))
+	local node = assert(skynet.getenv("node"),"getenv获取不到node值！")
+	local root = strfmt("./%s/lualib/handler", node)
+	local files = traverse(root)
+    for _,v in pairs(files or {}) do
+		local handler = require(strfmt("handler.%s", v))
+        self:register(handler)
     end
 end
 
@@ -51,7 +82,7 @@ function M:register(handler)
 	end
 	-- 注册事件触发处理逻辑
 	for _, v in pairs(handler.TRIGGER or {}) do
-		table.insert(self.TRIGGER, v)
+		tinsert(self.TRIGGER, v)
 	end
 end
 
@@ -89,7 +120,7 @@ function M:message_response(session, name, message, errno)
 	local msg_data = skynet.packstring(data)
 	local msg_len = strpack(">H", msg_data:len())
 	local compose_data = {msg_len, msg_data}
-	local packet_data = table.concat(compose_data)
+	local packet_data = tconcat(compose_data)
 
 	socketdriver.send(fd, packet_data)
 	return 0

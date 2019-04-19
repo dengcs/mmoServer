@@ -2,7 +2,7 @@
 -- 赛场服务接口
 --
 local skynet  = require "skynet"
-local ENUM    = require "config.gameenum"
+local ENUM    = require "config.enum"
 
 local handler = {}
 local REQUEST = {}

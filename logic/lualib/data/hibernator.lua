@@ -16,7 +16,8 @@ function hibernator.new(name, data, mode)
             __typename = name,
             __data = data,
         }
-        ret = setmetatable(obj, { __index = data })
+
+        ret = setmetatable(obj , { __index = data })
     end
 
     return ret

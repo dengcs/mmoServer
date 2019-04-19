@@ -68,13 +68,13 @@ end
 -- 2. 无效内容
 function mongo_connector:set(collection, key, value)
     local update = {['$set'] = value}
-    return self.connect[collection]:update(key, update, true)
+    return self.connect[collection]:safe_update(key, update, true)
 end
 
 -- 删除指定数据
 -- 1. SQL语句
 function mongo_connector:del(collection, key)
-    return self.connect[collection]:delete(key)
+    return self.connect[collection]:safe_delete(key)
 end
 
 -- 判断指定数据是否存在

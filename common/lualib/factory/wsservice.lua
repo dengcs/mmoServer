@@ -77,6 +77,10 @@ function wsService.start(handler)
                 end
             end
         end)
+
+        if handler.on_open then
+            handler.on_open(conf)
+        end
     end
 
     skynet.start(function()

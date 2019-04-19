@@ -20,11 +20,6 @@ end
 
 -- 角色登录操作
 function Player:on_login(pid)
-	if not self.pid then
-		self.pid = pid
-		self:commit()
-	end
-
 	self.state = 1
 end
 

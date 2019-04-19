@@ -3,7 +3,7 @@
 --- Created by dengcs.
 --- DateTime: 2018/11/5 17:06
 ---
-local ENUM = require("config.gameenum")
+local ENUM = require("config.enum")
 
 local PLAY_STATE = ENUM.PLAY_STATE
 

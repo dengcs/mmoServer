@@ -1,12 +1,11 @@
-local skynet = require "skynet_ex"
-local spconf = require "config.spconf"
+local skynet        = require "skynet_ex"
 local hibernaloader = require "data.hibernaloader"
 
 skynet.start(function()
   skynet.error("Server start")
   skynet.newservice("debug_console",41001)
 
-  hibernaloader.register(spconf)
+  hibernaloader.register()
   
   -- 启动公共服务
   local services = require("config.services")

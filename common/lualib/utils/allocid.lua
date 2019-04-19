@@ -31,7 +31,7 @@ local M = {}
 -- 1. 指令来源
 function M.generate()
     -- 更新时间戳
-    local ctime = math.floor(skynet.time() * 100)
+    local ctime = math.floor(skynet.time()*100)
     if xtime ~= ctime then
         xtime = ctime
         seqno = 0

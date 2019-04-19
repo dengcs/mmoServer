@@ -10,8 +10,17 @@ function userdata.new(mode)
         datatable   = {},
         command     = {},
     }
-    setmetatable(o, {__index = userdata})
-    return o
+
+    local mt = function(t, k)
+        for _, m in ipairs({userdata, t.datatable}) do
+            local v = m[k]
+            if v ~= nil then
+                return v
+            end
+        end
+    end
+
+    return setmetatable(o, { __index = mt })
 end
 
 -- 注册模块（角色由多个模块构成）

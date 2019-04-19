@@ -7,7 +7,7 @@ local skynet 		= require "skynet"
 local json_codec	= require("pdk.json_codec")
 local poker_type	= require("pdk.poker_type")
 local play_state	= require("pdk.play_state")
-local ENUM 			= require("config.gameenum")
+local ENUM 			= require("config.enum")
 
 local tb_insert		= table.insert
 local PLAY_STATE 	= ENUM.PLAY_STATE

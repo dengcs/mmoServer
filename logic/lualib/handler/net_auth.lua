@@ -19,10 +19,6 @@ local player_id 	= nil
 -----------------------------------------------------------
 --- 网络请求接口
 -----------------------------------------------------------
--- 请求选角状态
-function REQUEST:disconnect()
-	skynet.send(skynet.self(), "lua", "disconnect")
-end
 
 -- 请求选角状态
 function REQUEST:query_players()
@@ -60,7 +56,7 @@ function REQUEST:create_player()
 		
 		local result = player.insert(vdata)
 
-		if result and result.n == 1 then
+		if result then
 			player_id = vdata.pid
 	    	ret = 0
 		end
