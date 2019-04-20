@@ -8,7 +8,6 @@
 --- 6. on_collect : 垃圾回收回调接口
 ---------------------------------------------------------------------
 local skynet = require "skynet"
-local scheduler = require "scheduler"
 
 -- 系统服务框架
 local service = {}
@@ -38,7 +37,6 @@ function service.start(module)
         if handler.on_init then
             handler.on_init(config)
         end
-        DO_READY()
         if IS_TRUE(config.auto) then
             this.start(config)
         end
@@ -51,7 +49,6 @@ function service.start(module)
         if handler.on_exit then
             handler.on_exit()
         end
-        DO_FINISH()
     end
 
     -- 服务启动逻辑
@@ -61,17 +58,13 @@ function service.start(module)
         if handler.on_start then
             handler.on_start(...)
         end
-        DO_START()
     end
 
     -- 服务停止逻辑
     -- 1. 指令来源
     function command.stop(source)
-        if IS_RUNNING() then
-            DO_PAUSE()
-            if handler.on_stop then
-                handler.on_stop()
-            end
+        if handler.on_stop then
+            handler.on_stop()
         end
     end
 
@@ -82,32 +75,15 @@ function service.start(module)
         end
         collectgarbage("collect")
     end
-    
-    -- 定时器(主要是使用了'skynet.timeout'方法)
-    function command.schedule(_, func, interval, loop, args)
-        return scheduler.schedule(func, interval, loop, args)
-    end
-
-    function command.unschedule(_, session)
-        scheduler.unschedule(session)
-    end
-
-    function command.unschedule_all()
-        scheduler.unschedule_all()
-    end
 
     -- 业务指令转发
     local function do_command(source, ...)
-        if IS_RUNNING() then
-            return handler.on_command(source, ...)
-        else
-            ERROR("service isn't running!!!")
-        end
+        return handler.on_command(source, ...)
     end
 
     -- 启动目标服务
     skynet.start(function()
-        SERVICE_COMMAND_REGISTER("lua", function(session, source, cmd, ...)
+        skynet.dispatch("lua", function(session, source, cmd, ...)
             local safe_handler = SAFE_HANDLER(session)
 	        local f = command[cmd]
 	        if f then

@@ -1,5 +1,3 @@
-SCHEDULER_FOREVER 		= -1
-
 GLOBAL_POKER_MAX 		= 54 	-- 扑克数量
 GLOBAL_PLAYER_NUM		= 3		-- 玩家数量
 GLOBAL_POKER_NUM		= 17	-- 玩家扑克数量

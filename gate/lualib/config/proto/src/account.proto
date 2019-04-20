@@ -4,16 +4,27 @@
 syntax = "proto3";
 package game.proto;
 
-// 登录请求
-message account_login
+// 注册请求
+message register
 {
 	string account  = 1;		// 登录账号	
 	string passwd   = 2;		// 登录令牌（平台登录验证需要）
 }
 
 // 请求应答
-message account_login_resp
+message register_resp
 {
-	uint32 ret       = 1;		// 登录结果（0 - 成功， 否则失败）
-	uint32 token     = 2;       // 
+	uint32 token     = 1;       //
+}
+
+// 验证请求
+message verify
+{
+	uint32 token     = 1;       //
+}
+
+// 请求应答
+message verify_resp
+{
+	uint32 ret     = 1;       //
 }

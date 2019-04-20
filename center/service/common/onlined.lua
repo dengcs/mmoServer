@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------
 --- 角色在线管理服务（区服公共服务）
 ---------------------------------------------------------------------
-local service = require "service"
+local service = require "factory.service"
 local skynet  = require "skynet.manager"
 local cluster = require "skynet.cluster"
 local json    = require "cjson"

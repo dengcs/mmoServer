@@ -80,7 +80,6 @@ function M.pb_decode(data)
 			error(strfmt("%s : incorrect payload!!!", message.header.proto))
 		end
 	end
-	return message
 end
 
 -- 返回协议解析模块

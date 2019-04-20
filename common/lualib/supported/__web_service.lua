@@ -1,7 +1,7 @@
-local skynet = require "skynet_ex"
-local socket = require "skynet.socket"
-local sockethelper = require "http.sockethelper"
-local httpd = require "http.httpd"
+local skynet        = require "skynet_ex"
+local socket        = require "skynet.socket"
+local httpd         = require "http.httpd"
+local sockethelper  = require "http.sockethelper"
 
 local table = table
 local string = string
@@ -71,8 +71,6 @@ local function launch_slave(conf)
             handler.exit_handler()
         end
 
-        DO_FINISH()
-
         return 0
     end
 
@@ -100,7 +98,7 @@ local function launch_slave(conf)
         do_request(fd, handler.message_handler)
     end
 
-	SERVICE_COMMAND_REGISTER("lua", function(session, source, cmd, ...)
+    skynet.dispatch("lua", function(session, source, cmd, ...)
 	    local safe_handler = SAFE_HANDLER(session)
 	    local f = CMD[cmd]
 	    if f then
@@ -152,7 +150,6 @@ local function launch_master(conf)
             local s = slave[i]
             skynet.call(s, "lua", "init", conf)
         end
-		DO_READY()
         -- 启动服务逻辑
         if IS_TRUE(conf.auto) then
             this.start(conf)
@@ -169,8 +166,6 @@ local function launch_master(conf)
         if handler.exit_handler then
             handler.exit_handler()
         end
-
-        DO_FINISH()
 
         return 0
     end
@@ -204,19 +199,11 @@ local function launch_master(conf)
             skynet.send(s, "lua", "start", ...)
         end
 
-        DO_START()
-
         return 0
     end
 
     -- 服务停止逻辑
     function CMD.stop()
-        if not IS_RUNNING() then
-            return 0
-        end
-
-        DO_PAUSE()
-
         for i = 1, #slave do
             local s = slave[i]
             skynet.send(s, "lua", "stop")
@@ -243,7 +230,7 @@ local function launch_master(conf)
         collectgarbage("collect")
     end
 
-    SERVICE_COMMAND_REGISTER("lua", function(session, source, cmd, ...)
+    skynet.dispatch("lua", function(session, source, cmd, ...)
         local safe_handler = SAFE_HANDLER(session)
         local f = CMD[cmd]
         if f then

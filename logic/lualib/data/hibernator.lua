@@ -12,12 +12,12 @@ function hibernator.new(name, data, mode)
     elseif mode == "w" then
         ret = sharemap.writer(name, data)
     elseif mode == "v" then --访客模式
-        local obj = {
+        ret = {
             __typename = name,
             __data = data,
         }
 
-        ret = setmetatable(obj , { __index = data })
+        setmetatable(ret , { __index = data })
     end
 
     return ret

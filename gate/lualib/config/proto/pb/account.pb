@@ -1,10 +1,13 @@
 
-¨
+Í
 src/account.proto
-game.proto"A
-account_login
+game.proto"<
+register
 account (	Raccount
-passwd (	Rpasswd"<
-account_login_resp
-ret (Rret
-token (Rtokenbproto3
+passwd (	Rpasswd"%
+register_resp
+token (Rtoken"
+verify
+token (Rtoken"
+verify_resp
+ret (Rretbproto3

@@ -1,11 +1,11 @@
 ---------------------------------------------------------------------
 --- 用户管理服务（因为共享内存的关系，仅能管理所在节点用户）
 ---------------------------------------------------------------------
-local service = require "factory.service"
-local skynet   = require "skynet_ex"
-local userdata = require "data.userdata"
-local configure = require "config.usermeta"
-local dbproxy = require "dbproxy"
+local service   = require "factory.service"
+local skynet    = require "skynet_ex"
+local userdata  = require "data.userdata"
+local models    = require "config.models"
+local dbproxy   = require "dbproxy"
 
 ---------------------------------------------------------------------
 --- 内部变量/内部逻辑
@@ -31,8 +31,8 @@ end
 -- 2. 配置信息
 local function ucreate()
     local user = userdata.new("r")
-    if configure then
-        user:register(configure)
+    if models then
+        user:register(models)
     end
     return user
 end

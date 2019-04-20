@@ -1,7 +1,7 @@
 --
 -- 支付服务
 --
-local service  = require "service"
+local service  = require "factory.service"
 local nova     = require "nova"
 local md5      = require "md5"
 local utility  = require "common.utility"

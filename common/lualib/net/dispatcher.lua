@@ -95,7 +95,7 @@ local function command_execute(commands, cmd, ...)
 	if fn then
 		return fn(...)
 	else
-		ERROR("execute : command[%s] not found!!!", tostring(cmd))
+		LOG_ERROR("execute : command[%s] not found!!!", tostring(cmd))
 	end
 end
 
@@ -154,7 +154,7 @@ function M:user_context(session, extra)
 	-- 构造用户上下文
 	local context = 
 	{
-		user     = session.data,
+		user     = session.model_data,
 		response = __message_response,
 		call     = __command_execute,
 		trigger  = __event_trigger,
@@ -179,7 +179,7 @@ local function message_request(self, session, message, commands)
 	-- 协议解析
 	local head, proto = message.header, message.payload
 	if not head then
-		ERROR("request : message unpack error!!!")
+		LOG_ERROR("request : message unpack error!!!")
 	end
 	-- 请求转发
 	local ok, retval = xpcall(command_execute, traceback, commands, head.proto, self:user_context(session, {proto = proto}))
