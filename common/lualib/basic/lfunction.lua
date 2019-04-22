@@ -1,4 +1,5 @@
-local string = string
+local string    = string
+local error     = LOG_ERROR
 
 function EXCEPTION_MESSAGE(errno, fmt, ...)
     fmt = "[%d] " .. fmt

@@ -64,7 +64,7 @@ function userdata:init(name, data)
     -- 构造模块实例
     local inst = hibernator.new(name, data, m)
     if not inst then
-        error("hibernator object instance failed")
+        LOG_ERROR("hibernator object instance failed")
     end
 
     -- 绑定模块实例

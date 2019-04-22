@@ -77,7 +77,7 @@ function M.pb_decode(data)
 			message.payload = protobuf.decode("game.proto." .. message.header.proto, message.payload)
 			return message
 		else
-			error(strfmt("%s : incorrect payload!!!", message.header.proto))
+            LOG_ERROR(strfmt("%s : incorrect payload!!!", message.header.proto))
 		end
 	end
 end

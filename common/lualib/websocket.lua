@@ -4,6 +4,8 @@ local httpd = require "http.httpd"
 local sockethelper = require "http.sockethelper"
 local urllib = require "http.url"
 
+local error = LOG_ERROR
+
 local ws = {}
 
 local function response(id, ...)

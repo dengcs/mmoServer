@@ -63,11 +63,6 @@ local function __exception_traceback(level, top, clr, msg)
     return __exception_traceback(level, top, clr, msg)
 end
 
-local function __record_format(head, info)
-    info = __caption(head) .. info
-    return info
-end
-
 function LOG_DEBUG(fmt, ...)
     local msg = string.format(fmt, ...)
     msg = __exception_info("DEBUG", msg, KDG)

@@ -1,6 +1,6 @@
 setmetatable(_G, {
     __index = function (_, k)
-        error("Attempt to read undeclared variable " .. k)
+        LOG_ERROR("Attempt to read undeclared variable " .. k)
     end,
 })
 

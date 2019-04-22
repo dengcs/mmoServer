@@ -17,6 +17,11 @@ local REQUEST 		= {}
 -----------------------------------------------------------
 --- 网络请求接口
 -----------------------------------------------------------
+-- 重复登陆
+function REQUEST:connect()
+	print("dcs------connect")
+end
+
 -- 请求断开连接
 function REQUEST:disconnect()
 	skynet.send(skynet.self(), "lua", "disconnect")

@@ -1,5 +1,5 @@
 
-Ô
+ù
 src/auth.proto
 game.proto"
 	heartbeat"
@@ -18,4 +18,6 @@ game.proto"
 ret (Rret"
 player_login"%
 player_login_resp
-ret (Rretbproto3
+ret (Rret",
+player_kick_notify
+reason (Rreasonbproto3

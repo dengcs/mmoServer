@@ -9,7 +9,7 @@ local scheduler = {}
 local SESSION_SEQUENCE = 100000
 
 local function timeout(interval, func)
-    skynet.timeout(interval * TIMER.MILLISECOND_UNIT, func)
+    skynet.timeout(interval * MILLISECOND_UNIT, func)
 end
 
 local function worker(t)

@@ -25,6 +25,11 @@ local function response(message)
 			local errCode   = message.error.code
 			local msgData 	= encode(protoName, data, errCode)
 			web_socket:send_binary(msgData)
+
+			if errCode == ENETRESET then
+				web_socket:close()
+				sessions[fd] = nil
+			end
 		end
 	end
 end

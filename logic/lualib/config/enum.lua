@@ -71,7 +71,7 @@ function ENUM.get_pstate_type(alias)
 	if retval ~= 0 then
 		return retval
 	else
-		error(string.format("enum.get_pstate_type(%s) : illegal alias", alias))
+		LOG_ERROR(string.format("enum.get_pstate_type(%s) : illegal alias", alias))
 	end
 end
 

@@ -47,9 +47,12 @@ local COMMAND = {}
 -- 2. 角色编号
 -- 3. 配置信息
 function COMMAND.load(source, pid)
-    -- 防止重复加载
-    if onlines[pid] then
-        ERROR("usercenterd : user[%s] already exists!!!", pid)
+    -- 重复登陆需要踢下线
+    local u = onlines[pid]
+    if u then
+        skynet.call(u.agent, "lua", "response", "player_kick_notify", {reason = 0}, ENETRESET)
+        skynet.send(u.agent, "lua", "disconnect", true)
+        COMMAND.unload(source, pid)
     end
     -- 加载角色数据
     local user = ucreate()

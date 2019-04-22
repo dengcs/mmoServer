@@ -2,8 +2,11 @@ local skynet 		= require "skynet"
 local dispatcher 	= require "net.dispatcher"
 local userdata 		= require "data.userdata"
 local models 		= require "config.models"
+local socketdriver 	= require "skynet.socketdriver"
 
-local sky_unpack = skynet.unpack
+local sky_unpack    = skynet.unpack
+local str_pack 	    = string.pack
+local tb_concat     = table.concat
 
 local fd_sz = string.pack(">J", 1):len()
 
@@ -44,8 +47,10 @@ function CMD.connect(source, fd, client_fd)
 	session.model_data 	= model_data
 end
 
-function CMD.disconnect()
-	unload()
+function CMD.disconnect(source, unloaded)
+	if not unloaded then
+		unload()
+	end
 
 	if session then
 		local fd 		= session.fd
@@ -66,6 +71,28 @@ function CMD.load_data(source, name, data)
 	local result = ret_val:copy()
 
 	return result
+end
+
+-- 回复客户端消息
+function CMD.response(source, proto, message, errorCode)
+    if session then
+        local fd 		= session.fd
+        local client_fd = session.client_fd
+
+        local data =
+        {
+            header = {fd = client_fd, proto = proto},
+            error = {code = errorCode or 0},
+            payload = message or {},
+        }
+
+        local msg_data = skynet.packstring(data)
+        local msg_len = str_pack(">H", msg_data:len())
+        local compose_data = {msg_len, msg_data}
+        local packet_data = tb_concat(compose_data)
+
+        socketdriver.send(fd, packet_data)
+    end
 end
 
 -- 内部命令转发
