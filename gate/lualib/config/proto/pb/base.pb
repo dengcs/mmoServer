@@ -1,14 +1,12 @@
 
-˝
+ 
 src/base.proto
-game.proto"
-NetError
-code (Rcode"3
+game.proto"M
 	NetHeader
-pid (	Rpid
-proto (	Rproto"Å
+pid (	Rpid
+errcode (Rerrcode
+proto (	Rproto"U
 
 NetMessage-
-header (2.game.proto.NetHeaderRheader*
-error (2.game.proto.NetErrorRerror
-payload (Rpayloadbproto3
+header (2.game.proto.NetHeaderRheader
+payload (Rpayloadbproto3

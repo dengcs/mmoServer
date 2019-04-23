@@ -22,7 +22,7 @@ local function response(message)
 		if web_socket then
 			local protoName = message.header.proto
 			local data      = message.payload
-			local errCode   = message.error.code
+			local errCode   = message.header.errcode
 			local msgData 	= encode(protoName, data, errCode)
 			web_socket:send_binary(msgData)
 
@@ -39,9 +39,6 @@ local function resp_msg(fd, proto, data)
 		header = {
 			fd		= fd,
 			proto 	= proto,
-		},
-		error = {
-			code = 0
 		},
 		payload = data
 	}
@@ -75,7 +72,7 @@ function handler.on_connect(web_socket)
 		session.web_socket = web_socket
 	end
 
-	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "signal", fd, "connect")
+	skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "signal", fd, "connect")
 end
 
 function handler.on_disconnect(fd)
@@ -84,7 +81,7 @@ function handler.on_disconnect(fd)
         sessions[fd] = nil
     end
 
-	skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "signal", fd, "disconnect")
+	skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "signal", fd, "disconnect")
 end
 
 function handler.on_message(fd, message)
@@ -93,7 +90,7 @@ function handler.on_message(fd, message)
 		local msg = decode(message)
 		if msg then
 			if session.state == MSG_STATE.REQUEST then
-				skynet.send(GLOBAL.SERVICE_NAME.RELAY, "lua", "forward", fd, msg)
+				skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "forward", fd, msg)
 			else
 				local proto 	= msg.header.proto
 				local message	= msg.payload

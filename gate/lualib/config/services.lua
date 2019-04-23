@@ -7,8 +7,8 @@ M.list = {
         unique = true,
     },
     {
-        name = GLOBAL.SERVICE_NAME.RELAY,
-        module = "relay",
+        name = GLOBAL.SERVICE_NAME.LOGICPROXY,
+        module = "logicproxy",
         unique = true,
         ip = "127.0.0.1",
         port = 51001,

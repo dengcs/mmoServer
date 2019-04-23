@@ -57,11 +57,11 @@ function M.pb_encode(name, data, errcode)
 	assert(name, "protocol is nil!!!")
 	local message = 
 	{
-		header = { proto = name },
+		header = {
+			proto 	= name,
+			errcode	= errcode,
+		},
 	}
-	if errcode then
-		message.error = { code = errcode }
-	end
 	if data then
 		message.payload = protobuf.encode("game.proto." .. name, data)
 	end

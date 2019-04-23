@@ -81,9 +81,12 @@ function CMD.response(source, proto, message, errorCode)
 
         local data =
         {
-            header = {fd = client_fd, proto = proto},
-            error = {code = errorCode or 0},
-            payload = message or {},
+            header = {
+				fd = client_fd,
+				proto = proto,
+				errcode = errorCode
+			},
+            payload = message,
         }
 
         local msg_data = skynet.packstring(data)

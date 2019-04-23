@@ -17,7 +17,7 @@ GLOBAL.SERVICE_NAME =
 {
     SUMMD       = ".summd",
     GATED       = ".gated",
-    RELAY       = ".relay",
+    LOGICPROXY  = ".logicproxy",
     DATAMONGOD  = "DATAMONGO",
     USERCENTERD = "USERCENTER",
     GAME        = ".game",

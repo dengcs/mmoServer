@@ -4,24 +4,17 @@
 syntax = "proto3";
 package game.proto;
 
-
-// 错误信息
-message NetError
-{
-	uint32 code  = 1;		// 错误码
-}
-
 // 协议头
 message NetHeader
 {
-	string pid   = 1;		// 用户编号
-	string proto = 2;		// 协议名称
+	string pid          = 1;		// 用户编号
+    uint32 errcode      = 2;		// 错误码
+	string proto        = 3;		// 协议名称
 }
 
 // 游戏消息封装结构
 message NetMessage
 {
 	NetHeader header  = 1;
-	NetError  error   = 2;
-	bytes     payload = 3;
+	bytes     payload = 2;
 }

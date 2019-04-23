@@ -112,8 +112,11 @@ function M:message_response(session, name, message, errno)
 
 	local data =
 	{
-		header = {fd = session.client_fd, proto = name},
-		error = {code = errno},
+		header = {
+			fd = session.client_fd,
+			proto = name,
+			errcode = errno
+		},
 		payload = message,
 	}
 
