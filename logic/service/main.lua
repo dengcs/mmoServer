@@ -18,7 +18,7 @@ skynet.start(function()
   skynet.call(gated, "lua", "open", {
     port = 51001,
     maxclient = 100,
-    nodelay = true,
+    nodelay = false,
   })
   
   -- 启动控制后台

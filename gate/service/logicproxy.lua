@@ -23,7 +23,6 @@ local function dispatch_reply(so)
     local len_reply	= so:read(2)
     len_reply = str_unpack(">H", len_reply)
     local reply	= so:read(len_reply)
-
     local result = skynet.unpack(reply)
 
     if result then

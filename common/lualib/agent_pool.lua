@@ -16,7 +16,8 @@ function agent_pool.new()
 end
 
 function agent_pool:init(count)
-    local add_count = count or init_count
+    local max_add = init_count - #self.agent_queue
+    local add_count = math.min((count or init_count), max_add)
     for i=1, add_count do
         local agent = skynet.newservice("agentd")
         skynet.call(agent, "lua", "init")
