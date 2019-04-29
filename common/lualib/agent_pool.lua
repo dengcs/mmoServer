@@ -26,7 +26,7 @@ function agent_pool:init(count)
 end
 
 function agent_pool:inc()
-    skynet.fork(function()
+    skynet.timeout(0,function()
         local count = random.Get(init_count)
         self:init(count)
     end)

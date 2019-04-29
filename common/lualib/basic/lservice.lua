@@ -15,7 +15,7 @@ SCHEDULER_FOREVER 		= -1
 ---------------------------------------------------------------------
 local function __DO_COMMAND(f, ...)
     local ok, result = xpcall(f, function (message)
-        skynet.error(debug.traceback())
+        LOG_ERROR(debug.traceback(message))
         return message
     end, ...)
     if not ok then
@@ -27,25 +27,23 @@ end
 
 local function __SAFE_SEND(f, ...)
     local ok, result = xpcall(f, function (message)
-        skynet.error(debug.traceback())
+        LOG_ERROR(debug.traceback(message))
         return message
     end, ...)
-    if not ok then
-        LOG_ERROR(result)
-    end
+
+    skynet.ret()
 end
 
 local function __SAFE_CALL(f, ...)
     local ok, result = xpcall(f, function (message)
-        LOG_ERROR(message)
-        skynet.error(debug.traceback())
+        LOG_ERROR(debug.traceback(message))
         return message
     end, ...)
     if not ok then
-        return skynet.ret(skynet.pack(ok, result))
+        return skynet.retpack(ok, result)
     end
 
-    return skynet.ret(skynet.pack(0, result))
+    return skynet.retpack(0, result)
 end
 
 function SAFE_HANDLER(session)

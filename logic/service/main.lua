@@ -1,4 +1,5 @@
 local skynet        = require "skynet_ex"
+local cluster       = require "skynet.cluster"
 local hibernaloader = require "data.hibernaloader"
 
 skynet.start(function()
@@ -29,6 +30,9 @@ skynet.start(function()
     auto    = true,
     router  = { "router.cmd" },
   })
+
+  -- 开启集群
+  cluster.open(skynet.getenv("node"))
 
   skynet.error("Server end")
   skynet.exit()

@@ -30,7 +30,7 @@ local function close_fd(fd)
     end
 end
 
-local function fork_msg(fd, msg)
+local function fetch_agent(fd, msg)
     local clients = connection[fd]
     if clients then
         local fd_data = skynet.tostring(msg, fd_sz)
@@ -60,7 +60,7 @@ function handler.connect(fd, addr)
 end
 
 function handler.message(fd, msg, sz)
-    local agent = fork_msg(fd, msg)
+    local agent = fetch_agent(fd, msg)
     if agent then
         skynet.rawsend(agent, "client", msg, sz)
     end

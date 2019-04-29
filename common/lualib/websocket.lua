@@ -178,6 +178,10 @@ function ws:send_pong(data)
     self:send_frame(true, 0xA, data)
 end
 
+function ws:is_alive()
+    return self.server_terminated == false
+end
+
 function ws:close_fd()
     socket.close(self.id)
     self.handler.disconnect(self.id)
@@ -201,9 +205,7 @@ function ws:close(code, reason)
         self.server_terminated = true
     end
 
-    if self.client_terminated then
-        self:close_fd()
-    end
+    self:close_fd()
 end
 
 function ws:recv()
@@ -339,7 +341,7 @@ function ws:start()
         local ok, message = self:recv()
         if not ok then
             print('recv eror:', message)
-            self:close_fd()
+            self:close()
             return
         end
     end

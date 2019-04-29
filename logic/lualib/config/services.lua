@@ -21,6 +21,11 @@ M.list = {
          module = "combat.room",
          unique = true,
      },
+     {
+         name = GLOBAL.SERVICE_NAME.TOKEN,
+         module = "client.token",
+         unique = true,
+     },
 }
 
 return M

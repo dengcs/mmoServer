@@ -18,10 +18,11 @@ GLOBAL.SERVICE_NAME =
     SUMMD       = ".summd",
     GATED       = ".gated",
     LOGICPROXY  = ".logicproxy",
-    DATAMONGOD  = "DATAMONGO",
-    USERCENTERD = "USERCENTER",
+    DATAMONGOD  = ".datamongo",
+    USERCENTERD = ".usercenter",
     GAME        = ".game",
     ROOM        = ".room",
+    TOKEN       = ".token",
 }
 
 GAME = 
