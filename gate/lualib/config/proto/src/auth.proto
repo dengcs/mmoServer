@@ -64,9 +64,3 @@ message player_login_resp
 {
     uint32 ret    = 1;          // 应答结果  （0 : 成功，否则失败）
 }
-
-// 被踢出
-message player_kick_notify
-{
-    uint32 reason   = 1;        // 被踢原因（0：重复登陆）
-}

@@ -50,7 +50,8 @@ function COMMAND.load(source, pid)
     -- 重复登陆需要踢下线
     local u = onlines[pid]
     if u then
-        COMMAND.unload(source, pid)
+        u.agent = source
+        return 0
     end
     -- 加载角色数据
     local user = ucreate()

@@ -28,3 +28,9 @@ message verify_resp
 {
 	uint32 ret     = 1;       //
 }
+
+// 被踢出
+message kick_notify
+{
+    uint32 reason   = 1;        // 被踢原因（0：重复登陆）
+}

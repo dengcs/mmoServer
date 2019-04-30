@@ -30,7 +30,7 @@ local function response(message)
 		local session = token_data.session
 		if session then
 			local web_socket = session.web_socket
-			if web_socket and web_socket.is_alive() then
+			if web_socket and web_socket:is_alive() then
 				local protoName = message.header.proto
 				local data      = message.payload
 				local errCode   = message.header.errcode
@@ -54,13 +54,13 @@ local function resp_msg(token, proto, data)
 end
 
 local function clean_token()
-	print("clean_token")
 	local now = skynet.now()
 
 	local clear_list = {}
 	for token, v in pairs(token_data_map) do
 		if v.expiry then
 			if v.expiry > 0 and now > v.expiry then
+				-- 跟逻辑服断开虚拟连接
 				skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "signal", token, "disconnect")
 				tb_insert(clear_list, token)
 			end
@@ -120,6 +120,7 @@ function handler.on_disconnect(fd)
 		if token_data then
 			local expiry = skynet.now() + interval
 			token_data.expiry 	= expiry
+			token_data.session	= nil
 		end
 	end
 
@@ -146,10 +147,10 @@ function handler.on_message(fd, message)
 							if ret == 0 then
 								local token_data = token_data_map[token]
 								if token_data then
-									local old_session = token_data.session
-									if old_session then
-										old_session.state = MSG_STATE.PREPARE
-										resp_msg(token, "player_kick_notify", {reason = 0})
+									local pre_session = token_data.session
+									if pre_session then
+										pre_session.state = MSG_STATE.PREPARE
+										resp_msg(token, "kick_notify", {reason = 0})
 									end
 								else
 									token_data = {}
@@ -170,7 +171,7 @@ function handler.on_message(fd, message)
 							if session.token and session.token == message.token then
 								session.state = MSG_STATE.REQUEST
 								ret = 0
-								-- 跟逻辑服建立虚拟连接
+								-- 和逻辑服建立虚拟连接
 								skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "signal", session.token, "connect")
 								resp_msg(session.token, "verify_resp", {ret = ret})
 							end

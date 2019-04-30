@@ -185,25 +185,23 @@ end
 function ws:close_fd()
     socket.close(self.id)
     self.handler.disconnect(self.id)
+    self.server_terminated = true
 end
 
 function ws:close(code, reason)
     -- 1000  "normal closure" status code
-    if not self.server_terminated then
-        if code == nil and reason ~= nil then
-            code = 1000
-        end
-        local data = ""
-        if code ~= nil then
-            data = string.pack(">H", code)
-        end
-        if reason ~= nil then
-            data = data .. reason
-        end
-        self:send_frame(true, 0x8, data)
-
-        self.server_terminated = true
+    if code == nil and reason ~= nil then
+        code = 1000
     end
+    local data = ""
+    if code ~= nil then
+        data = string.pack(">H", code)
+    end
+    if reason ~= nil then
+        data = data .. reason
+    end
+
+    self:send_frame(true, 0x8, data)
 
     self:close_fd()
 end
@@ -341,7 +339,7 @@ function ws:start()
         local ok, message = self:recv()
         if not ok then
             print('recv eror:', message)
-            self:close()
+            self:close_fd()
             return
         end
     end

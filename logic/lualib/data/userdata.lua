@@ -57,26 +57,28 @@ function userdata:init(name, data)
     -- 获取模块配置
     local conf = self.configure[name]
     assert(conf, string.format("Unknow config name %s", name))
-    assert(not self.datatable[name], "Already exist hibernator object")
-    -- 绑定模型
-    local m         = self.mode     -- 可读标志
 
-    -- 构造模块实例
-    local inst = hibernator.new(name, data, m)
-    if not inst then
-        LOG_ERROR("hibernator object instance failed")
+    if not self.datatable[name] then
+        -- 绑定模型
+        local m         = self.mode     -- 可读标志
+
+        -- 构造模块实例
+        local inst = hibernator.new(name, data, m)
+        if not inst then
+            LOG_ERROR("hibernator object instance failed")
+        end
+
+        -- 绑定模块实例
+        self.datatable[name] = inst
+
+        if m == "w" then
+            self.command[name] = load_cb(conf)
+            -- 初始模块实例
+            self:call(name, "on_init")
+        end
     end
 
-    -- 绑定模块实例
-    self.datatable[name] = inst
-
-    if m == "w" then
-        self.command[name] = load_cb(conf)
-        -- 初始模块实例
-        self:call(name, "on_init")
-    end
-
-    return inst
+    return self.datatable[name]
 end
 
 function userdata:get(name)

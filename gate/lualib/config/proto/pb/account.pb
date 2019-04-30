@@ -1,5 +1,5 @@
 
-Í
+ô
 src/account.proto
 game.proto"<
 register
@@ -10,4 +10,6 @@ game.proto"<
 verify
 token (Rtoken"
 verify_resp
-ret (Rretbproto3
+ret (Rret"%
+kick_notify
+reason (Rreasonbproto3
