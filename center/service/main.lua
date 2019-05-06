@@ -10,8 +10,16 @@ skynet.start(function()
   local summdriver = skynet.summdriver()
   summdriver.start()
   summdriver.autoload(services.list)
+
+  local gated = skynet.newservice("client/gated")
+  skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
+  skynet.call(gated, "lua", "open", {
+    port = 52001,
+    maxclient = 100,
+    nodelay = false,
+  })
   
-  cluster.open "center"
+  cluster.open(skynet.getenv("node"))
   
   skynet.error("Server end")
   skynet.exit()

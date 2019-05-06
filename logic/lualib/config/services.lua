@@ -23,7 +23,7 @@ M.list = {
      },
      {
          name = GLOBAL.SERVICE_NAME.TOKEN,
-         module = "client.token",
+         module = "token",
          unique = true,
      },
 }

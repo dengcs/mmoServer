@@ -23,6 +23,7 @@ GLOBAL.SERVICE_NAME =
     GAME        = ".game",
     ROOM        = ".room",
     TOKEN       = ".token",
+    SOCIAL      = ".social",
 }
 
 GAME = 
@@ -34,5 +35,6 @@ GAME =
     {
         -- 角色相关数据类型
         PLAYER        = 10,    -- 角色信息
+        SOCIAL        = 11,    -- 社交信息
     },
 }

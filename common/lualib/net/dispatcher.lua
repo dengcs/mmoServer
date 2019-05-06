@@ -35,8 +35,6 @@ local function traverse(root, collect)
 end
 
 local M = {}
-M.HANDSHAKE 	= {}			-- 握手相关请求处理逻辑集合（确保'握手/重连'请求仅在指定状态有效）
-M.PREPARE   	= {}			-- 选角相关请求处理逻辑集合（确保'选角/创角'请求仅在指定状态有效）
 M.REQUEST   	= {}			-- 普通请求
 M.COMMAND   	= {}			-- 内部命令
 M.TRIGGER   	= {}			-- 事件处理
@@ -64,14 +62,6 @@ end
 -- 注册消息处理逻辑
 -- 1. 配置参数
 function M:register(handler)
-	-- 注册'握手/重连'相关请求处理逻辑
-	for k, v in pairs(handler.HANDSHAKE or {}) do
-		self.HANDSHAKE[k] = v
-	end
-	-- 注册'选角/创角'相关请求处理逻辑
-	for k, v in pairs(handler.PREPARE or {}) do
-		self.PREPARE[k] = v
-	end
 	-- 注册正常状态网络数据处理逻辑
 	for k, v in pairs(handler.REQUEST or {}) do
 		self.REQUEST[k] = v
@@ -194,20 +184,6 @@ local function message_request(self, session, message, commands)
 		self:message_response(session, head.proto, nil, retval)
 	end
 	return retval
-end
-
--- 握手相关请求分发
--- 1. 用户信息
--- 2. 请求内容
-function M:handshake_dispatch(session, message)
-	return message_request(self, session, message, self.HANDSHAKE)
-end
-
--- 选角相关请求分发
--- 1. 用户信息
--- 2. 请求内容
-function M:prepare_dispatch(session, message)
-	return message_request(self, session, message, self.PREPARE)
 end
 
 -- 普通请求分发逻辑
