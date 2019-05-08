@@ -7,16 +7,16 @@
 local skynet = require "skynet"
 
 -- 序号部分常量定义
-local SERVICE_SEQNO_BITS = 13
+local SERVICE_SEQNO_BITS = 10
 local SERVICE_SEQNO_MASK = ~(-1 << SERVICE_SEQNO_BITS)
 
 -- 时间部分常量定义
-local SERVICE_XTIME_BITS = 40
+local SERVICE_XTIME_BITS = 30
 
 -- 获取节点编号
-local xnode = tonumber(skynet.getenv("nodeid"))
-if (xnode == nil) or xnode > 1024 then
-    ERROR("node[%s] is illegal!!!", xnode)
+local nodeid = tonumber(skynet.getenv("nodeid"))
+if (nodeid == nil) or nodeid > 1024 then
+    ERROR("node[%s] is illegal!!!", nodeid)
 end
 
 -- 时间戳
@@ -31,18 +31,18 @@ local M = {}
 -- 1. 指令来源
 function M.generate()
     -- 更新时间戳
-    local ctime = math.floor(skynet.time()*100)
+    local ctime = math.floor(skynet.time()*100) - 155730000000
     if xtime ~= ctime then
         xtime = ctime
         seqno = 0
     end
     -- 生成序列号
     if seqno >= SERVICE_SEQNO_MASK then
-        skynet.sleep(1)
+        skynet.sleep(0)
         return M.generate()
     else
         seqno = seqno + 1
-        return (seqno | ((xnode << SERVICE_XTIME_BITS) | xtime) << SERVICE_SEQNO_BITS)
+        return (seqno | ((nodeid << SERVICE_XTIME_BITS) | xtime) << SERVICE_SEQNO_BITS)
     end
 end
 
