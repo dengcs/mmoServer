@@ -27,10 +27,10 @@ table.deep_clone = function (t, nometa)
 end
 
 -- check the table include target value
-table.contains = function (t, nometa)
+table.contains = function (t, o)
     if t then
         for _, v in pairs(t) do
-            if v == nometa then
+            if v == o then
                 return true
             end
         end
@@ -39,7 +39,7 @@ table.contains = function (t, nometa)
 end
 
 -- append value to the end of the original table
-table.append = function (t, o)
+table.replace = function (t, o)
     if t then
         for k, v in pairs(o) do
             t[k] = v
@@ -110,6 +110,8 @@ local function __dump_table(t, depth)
             buffer = buffer .. __dump_tab(depth) .. tostring(k) .. " = "
             if type(v) == "table" then
                 buffer = buffer .. __dump_table(v, depth)
+            elseif type(v) == "string" then
+                buffer = buffer .. "\""..v.."\""
             else
                 buffer = buffer .. tostring(v)
             end

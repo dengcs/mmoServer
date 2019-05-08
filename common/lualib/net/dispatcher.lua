@@ -147,7 +147,7 @@ function M:user_context(session, extra)
 	-- 构造用户上下文
 	local context = 
 	{
-		user     = session.model_data,
+		user     = session.user_data,
 		response = __message_response,
 		call     = __command_execute,
 		trigger  = __event_trigger,

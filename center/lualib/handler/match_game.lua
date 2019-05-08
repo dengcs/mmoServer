@@ -27,7 +27,7 @@ end
 
 -- 比赛数据更新（无返回）
 function REQUEST:game_update()
-	local player  = self.user:get("Player")
+	local player  = self.user
 	if ENUM.inspect_player_game(player) then
 		local pid     = player.pid
 		local alias   = player.scene
@@ -38,7 +38,7 @@ end
 
 -- 参赛者离线通知（强制离开比赛）
 function REQUEST:game_leave()
-	local player  = self.user:get("Player")
+	local player  = self.user
 	if ENUM.inspect_player_game(player) then
 		local pid     = player.pid
 		local alias   = player.scene

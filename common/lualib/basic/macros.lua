@@ -18,6 +18,7 @@ GLOBAL.SERVICE_NAME =
     SUMMD       = ".summd",
     GATED       = ".gated",
     LOGICPROXY  = ".logicproxy",
+    GAMEPROXY   = ".gameproxy",
     DATAMONGOD  = ".datamongo",
     USERCENTERD = ".usercenter",
     GAME        = ".game",

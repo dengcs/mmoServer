@@ -14,14 +14,23 @@ local REQUEST = {}
 function REQUEST:room_create()
     local resp = "room_create_resp"
     local ret = 0
-    
-    local vdata = self.user:call("Player", "get_snapshot")
+    local pid = self.user.pid
 
-    vdata.agent = skynet.self()
-    local ok = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", 1, vdata)
-    if ok ~= 0 then
-        ret = ERRCODE.ROOM_CREATE_FAILED
-    end
+    repeat
+        local ok, vdata = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "get_user_data", pid)
+        if ok ~= 0 or vdata == nil then
+            ret = ERRCODE.ROOM_CREATE_FAILED
+            break
+        end
+
+        vdata.agent = skynet.self()
+        local ok = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", 1, vdata)
+        if ok ~= 0 then
+            ret = ERRCODE.ROOM_CREATE_FAILED
+            break
+        end
+
+    until(true)
 
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)
@@ -31,7 +40,7 @@ end
 function REQUEST:room_qkjoin()
 	local resp = "room_qkjoin_resp"
     local ret = 0
-    
+
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)
 end
@@ -40,7 +49,7 @@ end
 function REQUEST:room_quit()
 	local resp = "room_quit_resp"
     local ret = 0
-    
+
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)
 end
@@ -49,7 +58,7 @@ end
 function REQUEST:room_invite()
 	local resp = "room_invite_resp"
     local ret = 0
-    
+
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)
 end

@@ -11,21 +11,6 @@ M.list = {
          module = "usercenterd",
          unique = true,
      },
-     {
-         name = GLOBAL.SERVICE_NAME.GAME,
-         module = "combat.instance.game",
-         unique = true,
-     },
-     {
-         name = GLOBAL.SERVICE_NAME.ROOM,
-         module = "combat.room",
-         unique = true,
-     },
-     {
-         name = GLOBAL.SERVICE_NAME.TOKEN,
-         module = "token",
-         unique = true,
-     },
 }
 
 return M

@@ -29,6 +29,7 @@ function CMD.connect(source, fd, client_fd)
 	session 			= {}
 	session.fd 			= fd
 	session.client_fd 	= client_fd
+	session.user_data 	= {}
 end
 
 function CMD.disconnect(source)
@@ -39,6 +40,15 @@ function CMD.disconnect(source)
 		session = nil
 	end
 	skynet.exit()
+end
+
+function CMD.load_data(source, pid)
+	local user_data = session.user_data
+	if user_data then
+		user_data.pid 	= pid
+		user_data.state	= 1
+		user_data.scene = nil
+	end
 end
 
 -- 回复客户端消息

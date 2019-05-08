@@ -17,12 +17,13 @@ local sessions 			= {}
 local token_data_map	= {}
 
 -- 每分钟清理下session
-local interval = 6000
+local interval = 60
 
 ---------------------------------------------------------------------
 --- 内部函数
 ---------------------------------------------------------------------
 
+-- 回复消息
 local function response(message)
 	local token	= message.header.fd
 	local token_data = token_data_map[token]
@@ -41,6 +42,7 @@ local function response(message)
 	end
 end
 
+-- 返回客户端消息
 local function resp_msg(token, proto, data)
 	local message = {
 		header = {
@@ -53,6 +55,13 @@ local function resp_msg(token, proto, data)
 	response(message)
 end
 
+-- 推送消息的代理
+local function send_to_proxy(cmd, token, msg)
+	skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", cmd, token, msg)
+	skynet.send(GLOBAL.SERVICE_NAME.GAMEPROXY, "lua", cmd, token, msg)
+end
+
+-- 清理过期token
 local function clean_token()
 	local now = skynet.now()
 
@@ -61,7 +70,7 @@ local function clean_token()
 		if v.expiry then
 			if v.expiry > 0 and now > v.expiry then
 				-- 跟逻辑服断开虚拟连接
-				skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "signal", token, "disconnect")
+				send_to_proxy("signal", token, "disconnect")
 				tb_insert(clear_list, token)
 			end
 		end
@@ -70,6 +79,17 @@ local function clean_token()
 	for i, v in pairs(clear_list) do
 		token_data_map[v] = nil
 	end
+end
+
+-- 游戏服协议匹配
+local function game_proto_find(proto)
+	local prefix_list = {"^game_%a+", "^room_%a+"}
+	for _, prefix in pairs(prefix_list) do
+		if proto:find(prefix) then
+			return true
+		end
+	end
+	return false
 end
 
 ---------------------------------------------------------------------
@@ -90,11 +110,7 @@ local handler = {}
 function handler.on_open(conf)
 	pbhelper.register()
 
-	local function schedule()
-		clean_token()
-		pcall(skynet.timeout, interval, schedule)
-	end
-	pcall(skynet.timeout, interval, schedule)
+	this.schedule(clean_token , interval, SCHEDULER_FOREVER)
 end
 
 function handler.on_connect(web_socket)
@@ -132,10 +148,14 @@ function handler.on_message(fd, message)
     if session then
 		local msg = decode(message)
 		if msg then
+			local proto 	= msg.header.proto
 			if session.state == MSG_STATE.REQUEST then
-				skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "forward", session.token, msg)
+				if game_proto_find(proto) then
+					skynet.send(GLOBAL.SERVICE_NAME.GAMEPROXY, "lua", "forward", session.token, msg)
+				else
+					skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "forward", session.token, msg)
+				end
 			else
-				local proto 	= msg.header.proto
 				local message	= msg.payload
 
 				if message then
@@ -143,7 +163,7 @@ function handler.on_message(fd, message)
 						-- 需要记录账号信息（比如IP）
 						if proto == "register" then
 							-- 记录token
-							local ret, token = cluster.call("logic", GLOBAL.SERVICE_NAME.TOKEN, "generate", message.account)
+							local ret, token = cluster.call("center", GLOBAL.SERVICE_NAME.TOKEN, "generate", message.account)
 							if ret == 0 then
 								local token_data = token_data_map[token]
 								if token_data then
@@ -172,7 +192,7 @@ function handler.on_message(fd, message)
 								session.state = MSG_STATE.REQUEST
 								ret = 0
 								-- 和逻辑服建立虚拟连接
-								skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "signal", session.token, "connect")
+								send_to_proxy("signal", session.token, "connect")
 								resp_msg(session.token, "verify_resp", {ret = ret})
 							end
 						end

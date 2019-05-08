@@ -1,5 +1,7 @@
+local skynet    = require "skynet"
 local string    = string
-local error     = LOG_ERROR
+
+local error = skynet.error
 
 function EXCEPTION_MESSAGE(errno, fmt, ...)
     fmt = "[%d] " .. fmt

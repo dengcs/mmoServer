@@ -4,8 +4,6 @@ function class(cname, super)
     if super then
         clazz.super = super
         setmetatable(clazz, {__index = super})
-    else
-        clazz.ctor = nil
     end
     function clazz.new(...)
         local instance = setmetatable({}, {__index = clazz})

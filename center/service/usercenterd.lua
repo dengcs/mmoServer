@@ -3,9 +3,6 @@
 ---------------------------------------------------------------------
 local service   = require "factory.service"
 local skynet    = require "skynet"
-local userdata  = require "data.userdata"
-local models    = require "config.models"
-local dbproxy   = require "dbproxy"
 
 ---------------------------------------------------------------------
 --- 内部变量/内部逻辑
@@ -13,35 +10,6 @@ local dbproxy   = require "dbproxy"
 
 -- 在线用户列表
 local onlines = {}
-
--- 保存角色数据
--- 1. 角色编号
--- 2. 角色信息
-local function save(pid, user)
-    for name, c in pairs(user.configure) do
-        local data = user:get(name)
-        if data:update() then
-            dbproxy.set(c.mode,pid,data.__data)
-        end
-    end
-end
-
-local function save_all()
-    for pid, u in pairs(onlines) do
-        save(pid, u.user)
-    end
-end
-
--- 构造'userdata'只读实例
--- 1. 用户编号
--- 2. 配置信息
-local function ucreate()
-    local user = userdata.new("r")
-    if models then
-        user:register(models)
-    end
-    return user
-end
 
 ---------------------------------------------------------------------
 --- 服务导出接口
@@ -59,25 +27,16 @@ function COMMAND.load(source, pid)
         u.agent = source
         return 0
     end
-    -- 加载角色数据
-    local user = ucreate()
-    for name, c in pairs(user.configure) do
-        -- 加载角色组件数据
-        -- name : 组件名称
-        -- c    : 组件描述        
-        local retval = dbproxy.get(c.mode, pid)
-        
-        local ok, objcpy = skynet.call(source, "lua", "load_data", name, retval)
-        if ok ~= 0 then
-            ERROR("usercenterd : model[%s] load_data failed!!!", name)
-        end
-        user:init(name, objcpy)
+
+    local ok = skynet.call(source, "lua", "load_data", pid)
+    if ok ~= 0 then
+        ERROR("usercenterd[%s] : load_data failed!!!", pid)
     end
+
     -- 记录在线角色
     onlines[pid] =
     {
         agent = source,
-        user  = user,
     }
     return 0
 end
@@ -88,8 +47,6 @@ end
 function COMMAND.unload(source, pid)
     local u = onlines[pid]
     if u then
-        save(pid, u.user)
-        u.user:cleanup_all()
         onlines[pid] = nil
     else
         ERROR("usercenterd : user[%s] not found!!!", pid)
@@ -149,20 +106,6 @@ end
 
 -- 服务退出通知
 function server.exit_handler()
-end
-
--- 服务启动通知
-function server.start_handler()
-    -- 启动定时任务
-    local interval = 5 * 60
-    this.schedule(save_all, interval, SCHEDULER_FOREVER)
-end
-
--- 服务停止通知
-function server.stop_handler()
-    for pid, u in pairs(onlines) do
-        save(pid, u.user)
-    end
 end
 
 -- 内部命令分发

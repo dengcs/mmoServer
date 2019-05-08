@@ -14,14 +14,22 @@ local REQUEST 		= {}
 -----------------------------------------------------------
 --- 网络请求接口
 -----------------------------------------------------------
--- 断线重连
-function REQUEST:connect()
-	print("dcs------connect")
-end
 
--- 请求断开连接
-function REQUEST:disconnect()
-	skynet.send(skynet.self(), "lua", "disconnect")
+
+-- 登录
+function REQUEST:game_login()
+	local resp = "game_login_resp"
+	local ret = 1
+
+	local pid = tonumber(self.proto.pid)
+	
+	local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", pid)
+	if ok == 0 then
+		ret = 0
+	end
+
+    local ret_msg = {ret = ret}
+    self.response(resp, ret_msg)
 end
 
 HANDLER.REQUEST   	= REQUEST

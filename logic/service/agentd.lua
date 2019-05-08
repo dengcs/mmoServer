@@ -3,6 +3,7 @@ local dispatcher 	= require "net.dispatcher"
 local userdata 		= require "data.userdata"
 local models 		= require "config.models"
 local socketdriver 	= require "skynet.socketdriver"
+local cluster		= require "skynet.cluster"
 
 local sky_unpack    = skynet.unpack
 local str_pack 	    = string.pack
@@ -44,7 +45,7 @@ function CMD.connect(source, fd, client_fd)
 	session 			= {}
 	session.fd 			= fd
 	session.client_fd 	= client_fd
-	session.model_data 	= model_data
+	session.user_data 	= model_data
 end
 
 function CMD.disconnect(source, unloaded)
