@@ -3,6 +3,7 @@
 ---------------------------------------------------------------------
 local service   = require "factory.service"
 local skynet    = require "skynet"
+local db_friend	= require "db.mongo.friend"
 
 -----------------------------------------------------------
 --- 常量表
@@ -30,41 +31,36 @@ local udata = class("udata")
 
 -- 构建模型实例
 -- 1. 角色编号
-function udata:ctor(pid)
+function udata.ctor(pid)
     self.dirty              = false                         -- 数据脏标记
     self.pid                = pid                           -- 角色编号
     self.friend             = { len = 0, list = {} }        -- 好友信息
     self.enemy              = { len = 0, list = {} }        -- 敌人信息
     self.applicant          = { len = 0, list = {} }        -- 申请信息（申请成为目标好友）
-    self.authorize          = { len = 0, list = {} }        -- 申请信息（目标申请等待批准
+    self.authorize          = { len = 0, list = {} }        -- 申请信息（目标申请等待批准）
 end
 
 -- 序列化
 function udata:serialize()
-    return skynet.packstring(
-            {
-                friend          = self.friend,
-                enemy           = self.enemy,
-                applicant       = self.applicant,
-                authorize       = self.authorize,
-                friendly_send   = self.friendly_send,
-                friendly_recive = self.friendly_recive,
-                group           = self.group,
-                subscribe       = self.subscribe,
-            })
+    local vdata =
+    {
+        pid             = self.pid,
+        friend          = self.friend,
+        enemy           = self.enemy,
+        applicant       = self.applicant,
+        authorize       = self.authorize,
+    }
+    return vdata
 end
 
 -- 反序列化
-function udata:unserialize(v)
-    if v then
-        local vdata = skynet.unpack(v)
+function udata:unserialize(vdata)
+    if vdata then
+        self.pid                = vdata.pid
         self.friend             = vdata.friend
         self.enemy              = vdata.enemy
         self.applicant          = vdata.applicant
         self.authorize          = vdata.authorize
-        self.friendly_send      = vdata.friendly_send
-        self.friendly_recive    = vdata.friendly_recive
-        self.group              = vdata.group
     end
 end
 
@@ -238,50 +234,56 @@ end
 -----------------------------------------------------------
 --- 好友缓存对象
 -----------------------------------------------------------
--- 数据加载逻辑
--- 1. 数据键值
-local function load(key)
-    local udata = udata.new(key)
-    local vdata = skynet.call(GLOBAL.SERVICE.DATACACHE, "lua", "get", "friend", key)
-    if vdata then
-        udata:unserialize(vdata)
-    end
-    return udata
+
+local cache = {}
+
+function cache:init()
+    self.queue          = {}
+    self.cache_count  	= 0
+    self.cache_max  	= 1000
 end
 
--- 数据移除逻辑
--- 1. 数据键值
--- 2. 数据内容
-local function save(key, udata)
-    if udata then
-        if (udata:check_dirty()) then
-            skynet.send(GLOBAL.SERVICE.DATACACHE, "lua", "set", "friend", key, udata:serialize())
-            udata:clear_dirty()
+function cache:load(pid)
+    local vdata = db_friend.get(pid)
+    if vdata then
+        local tdata = udata.new(pid)
+        tdata:unserialize(vdata)
+        return tdata
+    end
+end
+
+function cache:get(pid)
+    local tdata = self.queue[pid]
+    if not tdata then
+        tdata = self:load(pid)
+        self.queue[pid] = tdata
+        self.cache_count = self.cache_count + 1
+    end
+    return tdata
+end
+
+function cache:save(pid, clean)
+    local tdata = self.queue[pid]
+    if tdata then
+        if tdata:check_dirty() then
+            db_friend.set(pid, tdata:serialize())
+            tdata:clear_dirty()
+        end
+
+        if clean then
+            if self.cache_count > self.cache_max then
+                self.queue[pid] = nil
+                self.cache_count = self.cache_count - 1
+            end
         end
     end
 end
 
-function dCache:ctor()
-    self.queue = {}
-end
-
-function dCache:get(pid)
-    local udata = self.queue[pid]
-    if not udata then
-        udata = load(pid)
-        self.queue[pid] = udata
-    end
-    return udata
-end
-
-function dCache:clear()
-    for i, v in pairs(self.queue) do
-        save(i, v)
+function cache:save_all()
+    for pid in pairs(self.queue) do
+        self:save(pid)
     end
 end
-
--- 构建缓存对象
-local cache = dCache.new()
 
 -----------------------------------------------------------
 --- 服务业务接口
