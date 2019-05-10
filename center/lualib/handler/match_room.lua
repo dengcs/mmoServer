@@ -1,7 +1,9 @@
 --
 -- 房间战组队
 --
-local skynet  = require "skynet"
+local skynet    = require "skynet"
+local social    = require "social"
+
 local handler = {}
 local REQUEST = {}
 
@@ -17,8 +19,8 @@ function REQUEST:room_create()
     local pid = self.user.pid
 
     repeat
-        local ok, vdata = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "get_user_data", pid)
-        if ok ~= 0 or vdata == nil then
+        local vdata = social.get_user_data(pid)
+        if vdata == nil then
             ret = ERRCODE.ROOM_CREATE_FAILED
             break
         end

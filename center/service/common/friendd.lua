@@ -4,6 +4,7 @@
 local service   = require "factory.service"
 local skynet    = require "skynet"
 local db_friend	= require "db.mongo.friend"
+local social    = require "social"
 
 -----------------------------------------------------------
 --- 常量表
@@ -99,7 +100,7 @@ function udata:add_friend(pid)
         self.friend.len = self.friend.len + 1
         self:set_dirty()
 
-        local data = social.get_data("get_friend_data", pid)
+        local data = social.get_friend_data(pid)
         if data then
             this.usersend(self.pid, "response_message", "social_add_friend_notice", {data = data})
         end
@@ -179,7 +180,7 @@ function udata:add_authorize(pid, message)
         self.authorize.len = self.authorize.len + 1
         self:set_dirty()
 
-        local data = social.get_data("get_friend_data", pid)
+        local data = social.get_friend_data(pid)
         data.msg = message
         data.ctime  = ctime
         this.usersend(self.pid, "response_message", "social_authorize_notice", {data = data})
@@ -291,10 +292,10 @@ end
 local command= {}
 
 
-function command.load_data(source, type_list)
+function command.load_data(source)
     local u1 = cache:get(source)
     if u1 then
-        return social.get_all_friend_data(u1, type_list)
+        return social.get_all_friend_data(u1)
     end
 end
 
@@ -313,18 +314,18 @@ function command.submit_application(source, target, message)
     end
     -- 检查是否好友
     if u1:is_friend(target) then
-        return ERRCODE.SOCIAL_ALREADY_FRIEND
+        return ERRCODE.FRIEND_ALREADY_FRIEND
     end
     -- 检查是否申请
     if u1:has_applied(target) then
-        return ERRCODE.SOCIAL_ALREADY_APPLIED
+        return ERRCODE.FRIEND_ALREADY_APPLIED
     end
     -- 检查申请上限
     if u1:applicant_has_full() then
-        return ERRCODE.SOCIAL_APPLIED_FULL
+        return ERRCODE.FRIEND_APPLIED_FULL
     end
     if u2:authorize_has_full() then
-        return ERRCODE.SOCIAL_AUTHORIZE_FULL
+        return ERRCODE.FRIEND_AUTHORIZE_FULL
     end
     -- 提交好友申请
     u1:add_applicant(target)
@@ -347,7 +348,7 @@ function command.agree_application(source, target)
     end
     -- 检查好友容量
     if u1:friend_has_full() or u2:friend_has_full() then
-        return ERRCODE.SOCIAL_FRIEND_FULL
+        return ERRCODE.FRIEND_FRIEND_FULL
     end
     -- 同意好友申请
     u1:del_authorize(target)
@@ -411,7 +412,7 @@ function command.append_enemy(source, target)
     end
     -- 检查敌人容量
     if u1:enemy_has_full() then
-        return ERRCODE.SOCIAL_ENEMY_FULL
+        return ERRCODE.FRIEND_ENEMY_FULL
     end
     -- 添加敌人（敌人无需双向确认）
     if u1:is_friend(target) then
@@ -440,26 +441,24 @@ end
 local server = {}
 
 -- 服务启动通知
-function server.on_init()
-    -- 每小时更新社交数据到数据库
-    local interval = 360000
-    local function schedule()
-        cache:clear()
-        pcall(skynet.timeout, interval, schedule)
+function server.init_handler()
+    cache:init()
+    local function save_all()
+        cache:save_all()
     end
-    pcall(skynet.timeout, interval, schedule)
+    this.schedule(save_all , 60*60, SCHEDULER_FOREVER)
 end
 
 -- 服务结束通知
-function server.on_exit()
-    cache:clear()
+function server.exit_handler()
+    cache:save_all()
 end
 
 -- 内部指令通知
 -- 1. 指令来源
 -- 2. 指令名称
 -- 3. 执行参数
-function server.on_command(source, cmd, ...)
+function server.command_handler(source, cmd, ...)
     local fn = command[cmd]
     if fn then
         return fn(...)

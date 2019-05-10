@@ -295,7 +295,7 @@ end
 
 -- 开始匹配（快速状态转换）
 function Team:start()
-	self.state = ESTATES.READY
+	self.state = ESTATES.RUNNING
 	self.xtime = this.time()
 	return true
 end
