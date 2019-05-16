@@ -181,9 +181,11 @@ function udata:add_authorize(pid, message)
         self:set_dirty()
 
         local data = social.get_friend_data(pid)
-        data.msg = message
-        data.ctime  = ctime
-        this.usersend(self.pid, "response_message", "social_authorize_notice", {data = data})
+        if data then
+            data.msg = message
+            data.ctime  = ctime
+            this.usersend(self.pid, "response_message", "social_authorize_notice", {data = data})
+        end
     end
 end
 
