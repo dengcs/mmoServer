@@ -1,0 +1,23 @@
+///////////////////////////////////////////////////////////
+/// 测试协议
+///////////////////////////////////////////////////////////
+syntax = "proto3";
+package game.proto;
+
+message cmd_test
+{
+	string cmd_str  = 1;		//
+}
+
+message cmd_test_resp
+{
+}
+
+message game_cmd_test
+{
+	string cmd_str  = 1;		//
+}
+
+message game_cmd_test_resp
+{
+}
