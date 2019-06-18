@@ -35,19 +35,8 @@ function MailBox:ctor(pid, sid)
 end
 
 -- 邮箱迭代
-function MailBox:iterator()
-	local index = nil
-	local value = nil
-	return function()
-		local i, v = next(self.mails, index)
-		if v == nil then
-			return nil
-		else
-			index = i
-			value = v
-			return index, value
-		end
-	end
+function MailBox:pairs()
+	return pairs(self.mails)
 end
 
 -- 新增邮件
@@ -211,7 +200,7 @@ function command.load(sid, pid)
 		local ctime = this.time()
 		local maxid = 0
 		local mails = {}
-		for _, v in madmin:iterator() do
+		for _, v in madmin:pairs() do
 			repeat
 				-- 过滤已投递系统邮件
 				if v.mid <= mailbox.sid then
@@ -239,7 +228,7 @@ function command.load(sid, pid)
 	end
 	-- 邮件分页返回
 	local mails   = {}
-	for _, mail in mailbox:iterator() do
+	for _, mail in mailbox:pairs() do
 		table.insert(mails, mail)
 	end
 	return { sid = mailbox.sid, mails = mails }

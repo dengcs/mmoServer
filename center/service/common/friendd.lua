@@ -96,7 +96,7 @@ end
 -- 增加好友
 function udata:add_friend(pid)
     if (self.friend.list[pid] == nil) then
-        self.friend.list[pid] = {ctime = this.time()}
+        self.friend.list[pid] = this.time()
         self.friend.len = self.friend.len + 1
         self:set_dirty()
 
@@ -130,7 +130,7 @@ end
 -- 增加敌人
 function udata:add_enemy(pid)
     if (self.enemy.list[pid] == nil) then
-        self.enemy.list[pid] = {ctime = this.time()}
+        self.enemy.list[pid] = this.time()
         self.enemy.len = self.enemy.len + 1
         self:set_dirty()
     end
@@ -175,15 +175,13 @@ end
 -- 增加申请（待批准申请）
 function udata:add_authorize(pid, message)
     if (self.authorize.list[pid] == nil) then
-        local ctime = this.time()
-        self.authorize.list[pid] = {ctime = ctime, msg = message}
+        self.authorize.list[pid] = {msg = message}
         self.authorize.len = self.authorize.len + 1
         self:set_dirty()
 
         local data = social.get_friend_data(pid)
         if data then
             data.msg = message
-            data.ctime  = ctime
             this.usersend(self.pid, "response_message", "social_authorize_notice", {data = data})
         end
     end
