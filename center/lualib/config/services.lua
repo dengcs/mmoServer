@@ -7,11 +7,6 @@ M.list = {
         unique = true,
     },
     {
-        name = GLOBAL.SERVICE_NAME.USERCENTERD,
-        module = "usercenterd",
-        unique = true,
-    },
-    {
         name = GLOBAL.SERVICE_NAME.SOCIAL,
         module = "sociald",
         unique = true,
