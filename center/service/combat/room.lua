@@ -4,7 +4,6 @@
 local skynet  = require "skynet"
 local service = require "factory.service"
 local model = require "combat.room"
-local utils = require "combat.utils"
 local robot = require "combat.robot"
 -- 底层驱动加载
 local userdriver = require "driver.userdriver"
@@ -41,15 +40,12 @@ local function schedule()
 	local function fn()
 		for id, channel in pairs(channels) do
 			for _, team in pairs(channel.teams) do
-				if team:prepare() then
-					if team:is_full() then
-						utils.start(1,1,team:snapshot())
-						team:start()
-						team:convert("RUNNING")
-					else
-						local member = robot.generate_robot()
-						team:join(member)
-					end
+				if team:can_start() then
+					print("dcs---start")
+					team:start()
+				else
+					local member = robot.generate_robot()
+					team:join(member)
 				end
 			end
 		end

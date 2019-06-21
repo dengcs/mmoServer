@@ -30,7 +30,7 @@ function social:update(pid, data)
 		self.cache_count = self.cache_count + 1
 	end
 
-	for k,v in pairs(data) do
+	for k,v in pairs(data or {}) do
 		if v ~= cdata[k] then
 			cdata[k] = v
 			cdata.dirty = true

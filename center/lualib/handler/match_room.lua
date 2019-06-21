@@ -26,12 +26,13 @@ function REQUEST:room_create()
         end
 
         vdata.agent = skynet.self()
-        local ok = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", 1, vdata)
+        local ok,ret_code = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", 1, vdata)
         if ok ~= 0 then
             ret = ERRCODE.ROOM_CREATE_FAILED
             break
         end
 
+        ret = ret_code or ret
     until(true)
 
     local ret_msg = {ret = ret}

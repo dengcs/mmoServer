@@ -1,7 +1,9 @@
 --
 -- 对战房间模型
 --
-local skynet   		= require "skynet_ex"
+local skynet   	= require "skynet_ex"
+local utils 	= require "combat.utils"
+
 local tinsert 		= table.insert
 local userdriver 	= skynet.userdriver()
 
@@ -57,22 +59,24 @@ Member.__index = Member
 
 -- 构造成员对象
 function Member.new(vdata)
-	local member = {}
-	setmetatable(member, Member)
-	-- 设置成员数据
-	member.agent			= vdata.agent			-- 角色句柄
-	member.pid             	= vdata.pid				-- 角色编号
-	member.sex             	= vdata.sex				-- 角色性别
-	member.nickname        	= vdata.nickname		-- 角色昵称
-	member.portrait        	= vdata.portrait		-- 角色头像
-	member.portrait_box_id 	= vdata.portrait_box_id	-- 角色像框
-	member.ulevel          	= vdata.ulevel			-- 角色等级
-	member.vlevel          	= vdata.vlevel			-- 贵族等级
-	member.score           	= vdata.score			-- 角色积分
-	member.state           	= ESTATES.PREPARE		-- 角色状态
-	member.robot		   	= vdata.robot			-- 机器人标识
-	member.place		   	= vdata.place			-- 角色座次
-	return member
+	if vdata and next(vdata) then
+		local member = {}
+		setmetatable(member, Member)
+		-- 设置成员数据
+		member.agent			= vdata.agent			-- 角色句柄
+		member.pid             	= vdata.pid				-- 角色编号
+		member.sex             	= vdata.sex				-- 角色性别
+		member.nickname        	= vdata.nickname		-- 角色昵称
+		member.portrait        	= vdata.portrait		-- 角色头像
+		member.portrait_box_id 	= vdata.portrait_box_id	-- 角色像框
+		member.ulevel          	= vdata.ulevel			-- 角色等级
+		member.vlevel          	= vdata.vlevel			-- 贵族等级
+		member.score           	= vdata.score			-- 角色积分
+		member.state           	= ESTATES.PREPARE		-- 角色状态
+		member.robot		   	= vdata.robot			-- 机器人标识
+		member.place		   	= vdata.place			-- 角色座次
+		return member
+	end
 end
 
 -- 判断成员是否准备中
@@ -203,9 +207,17 @@ function Team:running()
 	end
 end
 
--- 队伍是否满员
-function Team:is_full()
-	return self.count >= ROOM_MAX_MEMBERS
+-- 队伍是否可以开始
+function Team:can_start()
+	if self.count >= ROOM_MAX_MEMBERS then
+		for _, member in pairs(self.members) do
+			if member:ready() == false then
+				return false
+			end
+		end
+		return true
+	end
+	return false
 end
 
 -- 队伍快照（用于推送到战场）
@@ -240,7 +252,7 @@ end
 
 -- 加入队伍
 function Team:join(vdata)
-	if self:is_full() then
+	if self.count >= ROOM_MAX_MEMBERS then
 		return
 	end
 
@@ -255,6 +267,11 @@ function Team:join(vdata)
 
 		self.count = self.count + 1
 		member.place = self.count
+		member:convert("READY")
+
+		if self.count == ROOM_MAX_MEMBERS then
+			self.state = ESTATES.READY
+		end
 	end
 	return member
 end
@@ -277,7 +294,7 @@ function Team:quit(pid)
 		for _, v in pairs(self.members) do
 			self.owner = v.pid
 			if v:ready() then
-				v:convert(ESTATES.PREPARE)
+				v:convert("PREPARE")
 			end
 			break
 		end
@@ -295,14 +312,17 @@ end
 
 -- 开始匹配（快速状态转换）
 function Team:start()
-	self.state = ESTATES.RUNNING
+	self:convert("RUNNING")
 	self.xtime = this.time()
+
+	utils.start(1,1,self:snapshot())
+
 	return true
 end
 
 -- 通知匹配（快速状态转换）
 function Team:stop()
-	self.state = ESTATES.PREPARE
+	self:convert("PREPARE")
 	self.xtime = 0
 	return true
 end
@@ -319,6 +339,9 @@ function Team:convert(alias)
 	if (self.state ~= state) then
 		if convertible(self.state, state) then
 			self.state = state
+			for _, member in pairs(self.members) do
+				member:convert(alias)
+			end
 		else
 			assert(nil, string.format("team.convert(%s) failed!!!", alias))
 		end
