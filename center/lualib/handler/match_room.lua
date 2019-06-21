@@ -21,7 +21,7 @@ function REQUEST:room_create()
     repeat
         local vdata = social.get_user_data(pid)
         if vdata == nil then
-            ret = ERRCODE.ROOM_CREATE_FAILED
+            ret = ERRCODE.ROOM_NOT_PLAYERDATA
             break
         end
 
