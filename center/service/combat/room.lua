@@ -41,7 +41,6 @@ local function schedule()
 		for id, channel in pairs(channels) do
 			for _, team in pairs(channel.teams) do
 				if team:can_start() then
-					print("dcs---start")
 					team:start()
 				else
 					local member = robot.generate_robot()
