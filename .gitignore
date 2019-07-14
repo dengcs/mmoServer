@@ -5,3 +5,5 @@
 .buildpath
 common/lualib/config/datasource.lua
 /engine/3rd/
+config/config.game.common
+.idea/workspace.xml
