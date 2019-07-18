@@ -28,11 +28,6 @@ function COMMAND.load(source, pid)
         return 0
     end
 
-    local ok = skynet.call(source, "lua", "load_data", pid)
-    if ok ~= 0 then
-        ERROR("usercenterd[%s] : load_data failed!!!", pid)
-    end
-
     -- 记录在线角色
     onlines[pid] =
     {

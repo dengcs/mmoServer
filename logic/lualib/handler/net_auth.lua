@@ -91,6 +91,7 @@ end
 -----------------------------------------------------------
 
 function COMMAND:player_create(pid)
+	self.user:call("Player", "on_create")
 	cluster.call("center", GLOBAL.SERVICE_NAME.SOCIAL, "load", pid)
 end
 

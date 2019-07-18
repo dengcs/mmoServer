@@ -22,10 +22,12 @@ function REQUEST:game_login()
 	local ret = ERRCODE.COMMON_SYSTEM_ERROR
 
 	local pid = tonumber(self.proto.pid)
+
+	this.call("load_data", pid)
 	
 	local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", pid)
-	if ok == 0 then
-		ret = 0
+	if ok ~= 0 then
+		ret = ERRCODE.COMMON_SYSTEM_ERROR
 	end
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)
