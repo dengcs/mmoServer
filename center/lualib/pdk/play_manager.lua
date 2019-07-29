@@ -92,8 +92,9 @@ end
 function play_manager:shuffle()
 	-- 1次随机洗牌
 	local poker_max = GLOBAL_POKER_MAX
+	local random_count = poker_max + random.Get(poker_max)
 	local temp_poker = 0
-	for i = 1, poker_max do
+	for i = 1, random_count do
 		local random_idx = random.Get(poker_max)
 		local cur_idx = (i % poker_max) + 1
 		if random_idx ~= cur_idx then
