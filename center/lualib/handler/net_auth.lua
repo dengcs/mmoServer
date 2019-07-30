@@ -19,7 +19,7 @@ local REQUEST 		= {}
 -- 登录
 function REQUEST:game_login()
 	local resp = "game_login_resp"
-	local ret = ERRCODE.COMMON_SYSTEM_ERROR
+	local ret = 0
 
 	local pid = tonumber(self.proto.pid)
 
