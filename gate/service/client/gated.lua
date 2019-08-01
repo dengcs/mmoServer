@@ -83,7 +83,7 @@ end
 
 -- 游戏服协议匹配
 local function game_proto_find(proto)
-	local prefix_list = {"game_", "room_"}
+	local prefix_list = {"game_", "room_", "center_"}
 	for _, prefix in pairs(prefix_list) do
 		if proto:find(prefix)==1 then
 			return true

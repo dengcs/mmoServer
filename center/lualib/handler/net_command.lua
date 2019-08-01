@@ -41,6 +41,23 @@ function REQUEST:game_cmd_test()
 		mail.deliver_mail(pid, title, content)
 	end
 
+	function handler.send_msg(name)
+		local payload = {}
+
+		local message = {
+			header = {
+				proto 	= name,
+			},
+			payload = payload
+		}
+
+		local byte_fd 	= string.pack(">J", 1)
+		local msg_data 	= skynet.packstring(message)
+
+		local compose_data = {byte_fd, msg_data}
+		skynet.rawsend(skynet.self(), "client", table.concat(compose_data))
+	end
+
 	local fn = handler[cmd]
 	if IS_FUNCTION(fn) then
 		fn(table.unpack(params))

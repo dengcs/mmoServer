@@ -1,0 +1,102 @@
+///------------------------------------------------------------------
+/// 邮件相关协议
+///------------------------------------------------------------------
+syntax = "proto3";
+package game.proto;
+
+// 邮件结构描述
+message mail
+{
+    // 附件结构描述
+    message attachment
+    {
+        uint32 id          = 1;        // 物品编号
+        uint32 count       = 2;        // 物品数量（时效道具则表示有效小时数）
+    }
+
+    // 发送者结构描述
+    message member
+    {
+        string pid         = 1;        // 发送者编号(0 - 系统发送)
+        string nickname    = 2;        // 发送者昵称
+        uint32 portrait    = 3;        // 发送者头像
+    }
+
+    //-----------------------------------------------------
+    // 邮件结构描述
+    //-----------------------------------------------------
+    string     mid         = 1;        // 邮件编号
+    uint32     category    = 2;        // 邮件类别
+    member     source      = 3;        // 邮件来源
+    uint32     status      = 4;        // 邮件状态(按位判断)
+    string     subject     = 5;        // 邮件标题
+    string     content     = 6;        // 邮件正文
+    uint32     ctime       = 7;        // 创建时间
+    uint32     deadline    = 8;        // 删除时间
+    repeated   attachment attachments = 9;        // 附件列表
+}
+
+///------------------------------------------------------------------
+/// 请求/应答
+///------------------------------------------------------------------
+
+// 请求邮箱信息
+message center_mail_access
+{
+}
+
+// 应答
+message center_mail_access_resp
+{
+    repeated mail mails             = 1;        // 邮件列表
+}
+
+// 打开指定邮件(设置为已读状态)
+message center_mail_open
+{
+    repeated string ids             = 1;        // 邮件编号列表
+}
+
+// 应答
+message center_mail_open_resp
+{
+    uint32          ret             = 1;        // 操作结果（0-成功，否则失败）
+    repeated string ids             = 2;        // 邮件编号列表
+}
+
+// 领取邮件附件
+message center_mail_receive
+{
+    repeated string ids             = 1;        // 邮件编号列表
+}
+
+// 应答
+message center_mail_receive_resp
+{
+    uint32                      ret             = 1;        // 操作结果（0-成功，否则失败）
+    repeated string             ids             = 2;        // 编号列表（成功领取邮件列表）
+    repeated mail.attachment    attachments     = 3;        // 获得道具列表
+}
+
+// 移除指定邮件
+message center_mail_remove
+{
+    repeated string ids             = 1;        // 邮件编号列表
+}
+
+// 应答
+message center_mail_remove_resp
+{
+    uint32 ret                      = 1;        // 操作结果（0-成功，否则失败）
+    repeated string ids             = 2;        // 编号列表（成功删除邮件列表）
+}
+
+///------------------------------------------------------------------
+/// 系统通知
+///------------------------------------------------------------------
+
+// 邮件新增通知
+message mail_append_notice
+{
+    repeated mail mails             = 1;        // 新增邮件列表
+}

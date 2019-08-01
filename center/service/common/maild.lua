@@ -52,8 +52,8 @@ end
 -- 9. 创建时间
 -- 0. 到期时间
 function MailBox:add(mid, category, source, subject, content, attachments, status, exdata, ctime, deadline)
-	if mid > self.maxId then
-		self.maxId = mid
+	if tonumber(mid) > tonumber(self.maxId) then
+		self.maxId = tonumber(mid)
 	end
 
 	self.mails[mid] =
@@ -107,7 +107,8 @@ local function allocId()
 	end
 	local xtime = this.time()
 
-	return (xtime << 20) | seqNo
+	local result = (xtime << 20) | seqNo
+	return tostring(result)
 end
 
 -- 邮件数据操作逻辑
@@ -227,7 +228,7 @@ function command.load(pid)
 		for _, v in madmin:pairs() do
 			repeat
 				-- 过滤已投递系统邮件
-				if v.mid <= mailbox.sid then
+				if tonumber(v.mid) <= mailbox.maxId then
 					break
 				end
 				-- 过滤已过期系统邮件
@@ -289,10 +290,11 @@ end
 -- 1. 角色编号
 -- 2. 邮件列表
 function command.open(pid, mids)
+	local ret_ids = {}
 	-- 获取角色邮箱
 	local mailbox = onlines[pid]
 	if mailbox == nil then
-		return ERRCODE.COMMON_SYSTEM_ERROR
+		return
 	end
 	-- 变更邮件状态
 	for _, mid in pairs(mids) do
@@ -300,9 +302,10 @@ function command.open(pid, mids)
 		if mail and ((mail.status & ESYMBOL.READ) == 0) then
 			mail.status = (mail.status | ESYMBOL.READ)
 			db.update(pid, mid, mail.status)
+			tb_insert(ret_ids, mid)
 		end
 	end
-	return 0
+	return ret_ids
 end
 
 -- 领取附件(仅仅变更邮件状态)
@@ -316,14 +319,14 @@ function command.receive(pid, mids)
 	end
 	local ctime = this.time()
 	-- 变更邮件状态
-	local retval = {}
+	local result = {}
 	for _, mid in pairs(mids) do
 		local mail = mailbox:get(mid)
 		if mail and ((mail.status & ESYMBOL.RECEIVE) == 0) then
 			if mail.deadline >= ctime then
 				if mail.attachments and next(mail.attachments) then
 					-- 记录可领取邮件
-					tb_insert(retval, { mid = mail.mid, attachments = mail.attachments })
+					tb_insert(result, { mid = mail.mid, attachments = mail.attachments })
 					-- 删除可领取邮件
 					mail.status = (mail.status | ESYMBOL.RECEIVE | ESYMBOL.REMOVED)
 					mailbox:del(mid)
@@ -332,17 +335,18 @@ function command.receive(pid, mids)
 			end
 		end
 	end
-	return retval
+	return result
 end
 
 -- 移除邮件(设置邮件移除标记)
 -- 1. 角色编号
 -- 2. 邮件列表
 function command.remove(pid, mids)
+	local ret_ids = {}
 	-- 获取角色邮箱
 	local mailbox = onlines[pid]
 	if mailbox == nil then
-		return ERRCODE.COMMON_SYSTEM_ERROR
+		return
 	end
 	-- 移除指定邮件
 	for _, mid in pairs(mids) do
@@ -350,9 +354,10 @@ function command.remove(pid, mids)
 		if (mail ~= nil) then
 			mail.status =  (mail.status | ESYMBOL.REMOVED)
 			db.update(pid, mid, mail.status)
+			tb_insert(ret_ids, mid)
 		end
 	end
-	return 0
+	return ret_ids
 end
 
 -- 增加系统邮件
