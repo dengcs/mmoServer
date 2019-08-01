@@ -1,17 +1,16 @@
 ---------------------------------------------------------------------
---- 角色信息存储逻辑
+--- 郵件存储逻辑
 ---------------------------------------------------------------------
 local skynet = require "skynet"
 
 local dbName = "poker"
-local dtName = "friend"
+local dtName = "mail"
 
 local M = {}
 
 -- 数据查询操作
 -- 1. 数据键值
-function M.get(key)
-	local query = {pid = key}
+function M.get(query)
 	local ok,ret = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGO, "lua", "get", dbName, dtName, query)
 
     if ok ~= 0 then
@@ -27,8 +26,7 @@ end
 -- 数据更新操作
 -- 1. 数据键值
 -- 2. 数据内容
-function M.set(key, value)
-    local query = {pid = key}
+function M.set(query, value)
 	local ok,suc = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGO, "lua", "set", dbName, dtName, query, value)
     if ok ~= 0 then
         ERROR("'%s[%s]' execute failed['%s']!!!", dbName, dtName, key)

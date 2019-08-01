@@ -2,7 +2,7 @@ local M = {}
 
 M.list = {
     {
-        name = GLOBAL.SERVICE_NAME.DATAMONGOD,
+        name = GLOBAL.SERVICE_NAME.DATAMONGO,
         module = "db.datamongod",
         unique = true,
     },

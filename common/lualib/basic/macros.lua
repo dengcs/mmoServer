@@ -19,12 +19,14 @@ GLOBAL.SERVICE_NAME =
     GATED       = ".gated",
     LOGICPROXY  = ".logicproxy",
     GAMEPROXY   = ".gameproxy",
-    DATAMONGOD  = ".datamongo",
-    USERCENTERD = ".usercenter",
+    DATAMONGO   = ".datamongo",
+    USERCENTER  = ".usercenter",
     GAME        = ".game",
     ROOM        = ".room",
     TOKEN       = ".token",
     SOCIAL      = ".social",
+    FRIEND      = ".friend",
+    MAIL        = ".mail",
 }
 
 GAME = 

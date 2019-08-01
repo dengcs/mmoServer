@@ -75,7 +75,7 @@ function REQUEST:player_login()
 	local msg_data = {ret = 1}
 
 	if player_id then
-	    local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", player_id)
+	    local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "load", player_id)
 	    if ok == 0 then
 			this.call("player_login", player_id)
 			msg_data.ret = 0

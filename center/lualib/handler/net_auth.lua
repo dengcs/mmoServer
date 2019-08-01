@@ -25,7 +25,7 @@ function REQUEST:game_login()
 
 	this.call("load_data", pid)
 	
-	local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "load", pid)
+	local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "load", pid)
 	if ok ~= 0 then
 		ret = ERRCODE.COMMON_SYSTEM_ERROR
 	end

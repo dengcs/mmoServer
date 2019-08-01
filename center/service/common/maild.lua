@@ -1,10 +1,11 @@
 ---------------------------------------------------------------------
 --- 邮件服务
 ---------------------------------------------------------------------
-local service  = require "factory.service"
-local database = require "common.database"
-local skynet   = require "skynet.manager"
-local mysqlaux = require "skynet.mysqlaux.c"
+local skynet   	= require "skynet"
+local service  	= require "factory.service"
+local db_mail	= require "db.mongo.mail"
+
+local tb_insert = table.insert
 
 ---------------------------------------------------------------------
 --- 邮箱数据模型
@@ -28,10 +29,10 @@ local ESYMBOL =
 
 -- 构建邮箱对象
 -- 1. 系统邮件编号
-function MailBox:ctor(pid, sid)
-	self.pid   = pid
-	self.sid   = sid
-	self.mails = {}
+function MailBox:ctor(pid)
+	self.pid   	= pid
+	self.maxId	= 0
+	self.mails 	= {}
 end
 
 -- 邮箱迭代
@@ -51,6 +52,10 @@ end
 -- 9. 创建时间
 -- 0. 到期时间
 function MailBox:add(mid, category, source, subject, content, attachments, status, exdata, ctime, deadline)
+	if mid > self.maxId then
+		self.maxId = mid
+	end
+
 	self.mails[mid] =
 	{
 		mid         = mid,
@@ -92,6 +97,19 @@ local onlines  = {}     -- 在线邮箱
 -- 默认邮件生命时长(秒)
 local duration = 604800
 
+-- 序列号
+local seqNo = 0
+
+local function allocId()
+	seqNo = seqNo + 1
+	if seqNo >= 1000000 then
+		seqNo = 0
+	end
+	local xtime = this.time()
+
+	return (xtime << 20) | seqNo
+end
+
 -- 邮件数据操作逻辑
 local db =
 {
@@ -107,20 +125,24 @@ local db =
 	--  9. 创建时间
 	-- 10. 到期时间
 	['insert'] = function(pid, category, source, subject, content, attachments, status, exdata, ctime, deadline)
-		local sql = string.format("INSERT INTO mail(pid, category, source, subject, content, attachments, status, exdata, ctime, deadline) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-				pid,
-				category,
-				source,
-				mysqlaux.quote_sql_str(subject),
-				mysqlaux.quote_sql_str(content),
-				mysqlaux.quote_sql_str(skynet.packstring(attachments)),
-				status,
-				mysqlaux.quote_sql_str(skynet.packstring(exdata)),
-				ctime,
-				deadline)
-		local ret = database.set("db.mysql", sql)
-		if ret then
-			return ret.insert_id
+		local insert_id = allocId()
+		local data =
+		{
+			pid			= pid,
+			mid 		= insert_id,
+			category 	= category,
+			source		= source,
+			subject		= subject,
+			content		= content,
+			attachments	= attachments,
+			status		= status,
+			exdata		= exdata,
+			ctime		= ctime,
+			deadline	= deadline,
+		}
+		local ok = db_mail.insert(data)
+		if ok then
+			return insert_id
 		else
 			return nil
 		end
@@ -131,19 +153,22 @@ local db =
 	-- 2. 邮件编号
 	-- 3. 邮件状态
 	['update'] = function(pid, mid, status)
-		local sql = string.format("UPDATE mail SET status = %s WHERE pid = %s AND mid = %s", status, pid, mid)
-		return database.exec("db.mysql", sql)
+		local query = {pid = pid, mid = mid}
+		local data	= {status = status}
+		return db_mail.set(query, data)
 	end,
 
 	-- 加载角色邮件
 	-- 1. 角色编号
 	['select'] = function(pid)
 		-- 邮件加载方法
-		local sql = string.format("SELECT * FROM mail WHERE pid = %s AND (status & %s) = 0 AND (deadline = 0 OR deadline > %s)",
-				pid,
-				ESYMBOL.REMOVED,
-				this.time())
-		return database.exec("db.mysql", sql)
+		local query =
+		{
+			pid 		= pid,
+			status		= {['$lt'] = ESYMBOL.REMOVED},
+			['$or'] = {{deadline = 0}, {deadline = {['$gt'] = this.time()}}}
+		}
+		return db_mail.keys(query)
 	end,
 }
 
@@ -156,7 +181,7 @@ local db =
 -- 6. 附件信息
 -- 7. 附加信息
 -- 8. 生存时长
-local function deliver(pid, category, source, subject, content, attachments, exdata, duration)
+local function deliver(pid, category, source, subject, content, attachments, exdata, delay)
 	-- 选择邮箱
 	local mailbox = madmin
 	if pid ~= 0 then
@@ -166,8 +191,8 @@ local function deliver(pid, category, source, subject, content, attachments, exd
 	local status   = 0
 	local ctime    = this.time()
 	local deadline = 0
-	if duration ~= nil then
-		deadline = ctime + duration
+	if delay then
+		deadline = ctime + delay
 	end
 	local mid = db.insert(pid, category, source, subject, content, (attachments or {}), status, (exdata or {}), ctime, deadline)
 	if mailbox then
@@ -186,19 +211,18 @@ local command = {}
 -- 2. 角色编号
 -- 3. 邮件偏移
 -- 4. 邮件数量
-function command.load(sid, pid)
+function command.load(pid)
 	-- 获取角色邮箱
 	local mailbox = onlines[pid]
 	if mailbox == nil then
-		mailbox = MailBox.new(pid, sid)
+		mailbox = MailBox.new(pid)
 		onlines[pid] = mailbox
 		-- 加载用户邮件
 		for _, v in pairs(db.select(pid)) do
-			mailbox:add(v.mid, v.category, v.source, v.subject, v.content, skynet.unpack(v.attachments), v.status, skynet.unpack(v.exdata), v.ctime, v.deadline)
+			mailbox:add(v.mid, v.category, v.source, v.subject, v.content, v.attachments, v.status, v.exdata, v.ctime, v.deadline)
 		end
 		-- 投递系统邮件
 		local ctime = this.time()
-		local maxid = 0
 		local mails = {}
 		for _, v in madmin:pairs() do
 			repeat
@@ -210,40 +234,26 @@ function command.load(sid, pid)
 				if (v.deadline ~= 0) and (v.deadline < ctime) then
 					break
 				end
-				-- 记录可投递系统邮件
-				if maxid <= v.mid then
-					maxid = v.mid
-				end
-				table.insert(mails, v)
+				tb_insert(mails, v)
 			until(true)
 		end
-		if next(mails) then
-			if maxid > 0 then
-				mailbox.sid = maxid
-			end
-			for _, v in pairs(mails) do
-				deliver(pid, v.category, v.source, v.subject, v.content, v.attachments, v.exdata, duration)
-			end
+
+		for _, v in pairs(mails) do
+			deliver(pid, v.category, v.source, v.subject, v.content, v.attachments, v.exdata, duration)
 		end
 	end
 	-- 邮件分页返回
 	local mails   = {}
 	for _, mail in mailbox:pairs() do
-		table.insert(mails, mail)
+		tb_insert(mails, mail)
 	end
-	return { sid = mailbox.sid, mails = mails }
+	return mails
 end
 
 -- 卸载邮箱(角色登出时触发)
 -- 1. 角色编号
 function command.unload(pid)
-	local mailbox = onlines[pid]
-	if not mailbox then
-		return nil
-	else
-		onlines[pid] = nil
-		return mailbox.sid
-	end
+	onlines[pid] = nil
 end
 
 -- 投递邮件(普通邮件)
@@ -263,11 +273,11 @@ function command.deliver(pids, category, source, subject, content, attachments, 
 			end
 			-- 投递指定用户邮箱
 			local mailbox = onlines[pid]
-			local mid     = deliver(pid, category, source, subject, content, attachments, exdata, duration)
 			if mailbox then
-				local mail = mailbox:get(mid)
+				local mid	= deliver(pid, category, source, subject, content, attachments, exdata, duration)
+				local mail 	= mailbox:get(mid)
 				if mail then
-					this.usersend(pid, "mail_append_notice", mailbox.sid, { mail })
+					this.usersend(pid, "mail_append_notice", { mail })
 				end
 			end
 		until(true)
@@ -287,7 +297,7 @@ function command.open(pid, mids)
 	-- 变更邮件状态
 	for _, mid in pairs(mids) do
 		local mail = mailbox:get(mid)
-		if (mail ~= nil) and ((mail.status & ESYMBOL.READ) == 0) then
+		if mail and ((mail.status & ESYMBOL.READ) == 0) then
 			mail.status = (mail.status | ESYMBOL.READ)
 			db.update(pid, mid, mail.status)
 		end
@@ -302,18 +312,18 @@ function command.receive(pid, mids)
 	-- 获取角色邮箱
 	local mailbox = onlines[pid]
 	if mailbox == nil then
-		return ERRCODE.COMMON_SYSTEM_ERROR
+		return
 	end
 	local ctime = this.time()
 	-- 变更邮件状态
 	local retval = {}
 	for _, mid in pairs(mids) do
 		local mail = mailbox:get(mid)
-		if (mail ~= nil) and ((mail.status & ESYMBOL.RECEIVE) == 0) then
+		if mail and ((mail.status & ESYMBOL.RECEIVE) == 0) then
 			if mail.deadline >= ctime then
-				if next(mail.attachments) then
+				if mail.attachments and next(mail.attachments) then
 					-- 记录可领取邮件
-					table.insert(retval, { mid = mail.mid, attachments = mail.attachments })
+					tb_insert(retval, { mid = mail.mid, attachments = mail.attachments })
 					-- 删除可领取邮件
 					mail.status = (mail.status | ESYMBOL.RECEIVE | ESYMBOL.REMOVED)
 					mailbox:del(mid)
@@ -358,8 +368,7 @@ function command.gm_append_mail(subject, content, attachments, exdata, ttl)
 		for pid, mailbox in pairs(onlines) do
 			local m = mailbox:get(deliver(pid, mail.category, 0, subject, content, attachments, exdata, duration))
 			if m ~= nil then
-				mailbox.sid = math.max(m.mid, mail.mid)
-				this.usersend(pid, "mail_append_notice", mailbox.sid, { m })
+				this.usersend(pid, "mail_append_notice", { m })
 			end
 		end
 	end
@@ -386,11 +395,10 @@ local server = {}
 
 -- 服务构造通知
 -- 1. 构造配置
-function server.on_init(config)
+function server.init_handler(config)
 	madmin = MailBox.new(0, 0)
-	for _, v in pairs(db.select(0)) do
-		madmin.sid = math.max(madmin.sid, v.mid)
-		madmin:add(v.mid, v.category, v.source, v.subject, v.content, skynet.unpack(v.attachments), v.status, skynet.unpack(v.exdata), v.ctime, v.deadline)
+	for _, v in pairs(db.select(0) or {}) do
+		madmin:add(v.mid, v.category, v.source, v.subject, v.content, v.attachments, v.status, v.exdata, v.ctime, v.deadline)
 	end
 end
 
@@ -398,12 +406,12 @@ end
 -- 1. 指令来源
 -- 2. 指令名称
 -- 3. 执行参数
-function server.on_command(source, cmd, ...)
+function server.command_handler(source, cmd, ...)
 	local fn = command[cmd]
 	if fn then
 		return fn(...)
 	else
-		ERROR("mail : command[%s] not found!!!", cmd)
+		LOG_ERROR("mail : command[%s] not found!!!", cmd)
 	end
 end
 

@@ -12,7 +12,7 @@ local M = {}
 -- 1. 数据键值
 function M.get(key)
 	local query = {pid = key}
-	local ok,ret = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGOD, "lua", "get", dbName, dtName, query)
+	local ok,ret = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGO, "lua", "get", dbName, dtName, query)
 
     if ok ~= 0 then
         ERROR("'%s[%s]' execute failed['%s']!!!", dbName, dtName, key)
@@ -29,7 +29,7 @@ end
 -- 2. 数据内容
 function M.set(key, value)
     local query = {pid = key}
-	local ok,suc = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGOD, "lua", "set", dbName, dtName, query, value)
+	local ok,suc = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGO, "lua", "set", dbName, dtName, query, value)
     if ok ~= 0 then
         ERROR("'%s[%s]' execute failed['%s']!!!", dbName, dtName, key)
     end
@@ -52,7 +52,7 @@ end
 -- 获取键值集合
 -- 1. 数据键值
 function M.keys(key)
-    local ok,ret = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGOD, "lua", "keys", dbName, dtName, key)
+    local ok,ret = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGO, "lua", "keys", dbName, dtName, key)
 
     if ok ~= 0 then
         ERROR("'%s[%s]' execute failed['%s']!!!", dbName, dtName, table.tostring(key))
@@ -64,7 +64,7 @@ end
 -- 添加记录
 -- 1. 数据值
 function M.insert(value)
-    local ok, suc = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGOD, "lua", "insert", dbName, dtName, value)
+    local ok, suc = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGO, "lua", "insert", dbName, dtName, value)
     if ok ~= 0 then
         ERROR("'%s[%s]' execute failed!!!", dbName, dtName)
     end

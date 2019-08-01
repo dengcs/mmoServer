@@ -11,11 +11,11 @@ local function __comm_call(addr, command, ...)
 end
 
 local function __uc_send(command, ...)
-    __comm_send(GLOBAL.SERVICE_NAME.USERCENTERD, command, ...)
+    __comm_send(GLOBAL.SERVICE_NAME.USERCENTER, command, ...)
 end
 
 local function __uc_call(command, ...)
-    return __comm_call(GLOBAL.SERVICE_NAME.USERCENTERD, command, ...)
+    return __comm_call(GLOBAL.SERVICE_NAME.USERCENTER, command, ...)
 end
 
 function userdriver.userdata(pid, name)

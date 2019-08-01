@@ -67,11 +67,11 @@ end
 this = {}
 
 function this.usercall(pid, command, ...)
-    return skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "usercall", pid, command, ...)
+    return skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "usercall", pid, command, ...)
 end
 
 function this.usersend(pid, command, ...)
-    return skynet.send(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "usersend", pid, command, ...)
+    return skynet.send(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "usersend", pid, command, ...)
 end
 
 function this.call(command, ...)

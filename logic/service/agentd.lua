@@ -29,7 +29,7 @@ local function unload()
 	if model_data then
 		local player = model_data.Player
 		if player then
-			skynet.call(GLOBAL.SERVICE_NAME.USERCENTERD, "lua", "unload", player.pid)
+			skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "unload", player.pid)
 		end
 	end
 end
