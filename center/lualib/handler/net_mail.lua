@@ -10,7 +10,6 @@ local skynet = require "skynet"
 -- 去除没用的字段，不然协议不能编码
 local function filter_mail(mail)
     mail.exdata = nil
-    mail.mid = "邮件编号"
 end
 
 -- 去除没用的字段，不然协议不能编码
