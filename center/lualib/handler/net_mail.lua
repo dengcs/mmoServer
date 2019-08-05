@@ -49,7 +49,6 @@ function request:center_mail_access()
         mails = {}
     end
     filter_mails(mails)
-    print("mails--", table.tostring(mails))
     self.response("mail_append_notice", { mails = mails })
 end
 

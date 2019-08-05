@@ -89,8 +89,7 @@ end
 
 -- 获取指定用户数据
 function CMD.get_user_data(pid)
-	local cdata = social:get(pid)
-	return cdata
+	return social:get(pid)
 end
 
 function CMD.search_pid_by_name(name)
@@ -98,12 +97,6 @@ end
 
 -- 搜索玩家
 function CMD.search_friend(name)
-end
-
--- 获取pid包装成好友型的数据
-function CMD.get_friend_data(pid)
-	local cdata = social:get(pid)
-	return cdata
 end
 
 -----------------------------------------------------------
@@ -121,7 +114,7 @@ function server.init_handler(arguments)
 	local function save_all()
 		social:save_all()
 	end
-	this.schedule(save_all , 60*60, SCHEDULER_FOREVER)
+	this.schedule(save_all, 3600, SCHEDULER_FOREVER)
 end
 
 -- 服务退出通知

@@ -42,7 +42,7 @@ function REQUEST:game_cmd_test()
 	end
 
 	function handler.send_msg(name)
-		local payload = {}
+		local payload = { ids = {"1640665824886785"} }
 
 		local message = {
 			header = {

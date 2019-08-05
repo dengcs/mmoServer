@@ -1,8 +1,8 @@
 ---------------------------------------------------------------------
 --- 好友服务
 ---------------------------------------------------------------------
-local service   = require "factory.service"
 local skynet    = require "skynet"
+local service   = require "factory.service"
 local db_friend	= require "db.mongo.friend"
 local social    = require "social"
 
@@ -28,11 +28,11 @@ local MAX_ENEMIES_VALUE    = 100
 -----------------------------------------------------------
 
 -- 好友数据模型
-local udata = class("udata")
+local FriendData = class("FriendData")
 
 -- 构建模型实例
 -- 1. 角色编号
-function udata.ctor(pid)
+function FriendData.ctor(pid)
     self.dirty              = false                         -- 数据脏标记
     self.pid                = pid                           -- 角色编号
     self.friend             = { len = 0, list = {} }        -- 好友信息
@@ -42,7 +42,7 @@ function udata.ctor(pid)
 end
 
 -- 序列化
-function udata:serialize()
+function FriendData:serialize()
     local vdata =
     {
         pid             = self.pid,
@@ -55,7 +55,7 @@ function udata:serialize()
 end
 
 -- 反序列化
-function udata:unserialize(vdata)
+function FriendData:unserialize(vdata)
     if vdata then
         self.pid                = vdata.pid
         self.friend             = vdata.friend
@@ -66,7 +66,7 @@ function udata:unserialize(vdata)
 end
 
 -- 检查脏标记
-function udata:check_dirty()
+function FriendData:check_dirty()
     if self.dirty then
         return true
     else
@@ -75,17 +75,17 @@ function udata:check_dirty()
 end
 
 -- 设置脏标记
-function udata:set_dirty()
+function FriendData:set_dirty()
     self.dirty = true
 end
 
 -- 清理脏标记
-function udata:clear_dirty()
+function FriendData:clear_dirty()
     self.dirty = false
 end
 
 -- 好友判断
-function udata:is_friend(pid)
+function FriendData:is_friend(pid)
     if self.friend.list[pid] then
         return true
     else
@@ -94,7 +94,7 @@ function udata:is_friend(pid)
 end
 
 -- 增加好友
-function udata:add_friend(pid)
+function FriendData:add_friend(pid)
     if (self.friend.list[pid] == nil) then
         self.friend.list[pid] = this.time()
         self.friend.len = self.friend.len + 1
@@ -102,24 +102,24 @@ function udata:add_friend(pid)
 
         local data = social.get_friend_data(pid)
         if data then
-            this.usersend(self.pid, "response_message", "social_add_friend_notice", {data = data})
+            this.usersend(self.pid, "response_message", "friend_add_notice", {data = data})
         end
     end
 end
 
 -- 删除好友
-function udata:del_friend(pid)
+function FriendData:del_friend(pid)
     if (self.friend.list[pid] ~= nil) then
         self.friend.list[pid] = nil
         self.friend.len = self.friend.len - 1
         self:set_dirty()
 
-        this.usersend(self.pid, "response_message", "social_del_friend_notice", {pid = pid})
+        this.usersend(self.pid, "response_message", "friend_del_notice", {pid = pid})
     end
 end
 
 -- 敌人判断
-function udata:is_enemy(pid)
+function FriendData:is_enemy(pid)
     if self.enemy.list[pid] then
         return true
     else
@@ -128,7 +128,7 @@ function udata:is_enemy(pid)
 end
 
 -- 增加敌人
-function udata:add_enemy(pid)
+function FriendData:add_enemy(pid)
     if (self.enemy.list[pid] == nil) then
         self.enemy.list[pid] = this.time()
         self.enemy.len = self.enemy.len + 1
@@ -137,7 +137,7 @@ function udata:add_enemy(pid)
 end
 
 -- 删除敌人
-function udata:del_enemy(pid)
+function FriendData:del_enemy(pid)
     if (self.enemy.list[pid] ~= nil) then
         self.enemy.list[pid] = nil
         self.enemy.len = self.enemy.len - 1
@@ -146,7 +146,7 @@ function udata:del_enemy(pid)
 end
 
 -- 申请判断
-function udata:has_applied(pid)
+function FriendData:has_applied(pid)
     if self.applicant.list[pid] then
         return true
     else
@@ -155,16 +155,16 @@ function udata:has_applied(pid)
 end
 
 -- 增加申请
-function udata:add_applicant(pid)
+function FriendData:add_applicant(pid)
     if (self.applicant.list[pid] == nil) then
-        self.applicant.list[pid] = 1
+        self.applicant.list[pid] = this.time()
         self.applicant.len = self.applicant.len + 1
         self:set_dirty()
     end
 end
 
 -- 删除申请
-function udata:del_applicant(pid)
+function FriendData:del_applicant(pid)
     if (self.applicant.list[pid] ~= nil) then
         self.applicant.list[pid] = nil
         self.applicant.len = self.applicant.len - 1
@@ -173,7 +173,7 @@ function udata:del_applicant(pid)
 end
 
 -- 增加申请（待批准申请）
-function udata:add_authorize(pid, message)
+function FriendData:add_authorize(pid, message)
     if (self.authorize.list[pid] == nil) then
         self.authorize.list[pid] = {msg = message}
         self.authorize.len = self.authorize.len + 1
@@ -182,13 +182,13 @@ function udata:add_authorize(pid, message)
         local data = social.get_friend_data(pid)
         if data then
             data.msg = message
-            this.usersend(self.pid, "response_message", "social_authorize_notice", {data = data})
+            this.usersend(self.pid, "response_message", "friend_authorize_notice", {data = data})
         end
     end
 end
 
 -- 删除申请（待批准申请）
-function udata:del_authorize(pid)
+function FriendData:del_authorize(pid)
     if (self.authorize.list[pid] ~= nil) then
         self.authorize.list[pid] = nil
         self.authorize.len = self.authorize.len - 1
@@ -197,7 +197,7 @@ function udata:del_authorize(pid)
 end
 
 -- 判断朋友是否已满
-function udata:friend_has_full()
+function FriendData:friend_has_full()
     if self.friend.len >= MAX_FRIENDS_VALUE then
         return true
     else
@@ -206,7 +206,7 @@ function udata:friend_has_full()
 end
 
 -- 判断敌人是否已满
-function udata:enemy_has_full()
+function FriendData:enemy_has_full()
     if self.enemy.len >= MAX_ENEMIES_VALUE then
         return true
     else
@@ -215,7 +215,7 @@ function udata:enemy_has_full()
 end
 
 -- 判断申请是否已满
-function udata:applicant_has_full()
+function FriendData:applicant_has_full()
     if self.applicant.len >= MAX_APPLICANTS_VALUE then
         return true
     else
@@ -224,7 +224,7 @@ function udata:applicant_has_full()
 end
 
 -- 判断申请是否已满（待批准申请）
-function udata:authorize_has_full()
+function FriendData:authorize_has_full()
     if self.authorize.len >= MAX_APPLICANTS_VALUE then
         return true
     else
@@ -247,28 +247,28 @@ end
 function cache:load(pid)
     local vdata = db_friend.get(pid)
     if vdata then
-        local tdata = udata.new(pid)
-        tdata:unserialize(vdata)
-        return tdata
+        local friendData = FriendData.new(pid)
+        friendData:unserialize(vdata)
+        return friendData
     end
 end
 
 function cache:get(pid)
-    local tdata = self.queue[pid]
-    if not tdata then
-        tdata = self:load(pid)
-        self.queue[pid] = tdata
+    local friendData = self.queue[pid]
+    if not friendData then
+        friendData = self:load(pid)
+        self.queue[pid] = friendData
         self.cache_count = self.cache_count + 1
     end
-    return tdata
+    return friendData
 end
 
 function cache:save(pid, clean)
-    local tdata = self.queue[pid]
-    if tdata then
-        if tdata:check_dirty() then
-            db_friend.set(pid, tdata:serialize())
-            tdata:clear_dirty()
+    local friendData = self.queue[pid]
+    if friendData then
+        if friendData:check_dirty() then
+            db_friend.set(pid, friendData:serialize())
+            friendData:clear_dirty()
         end
 
         if clean then
@@ -446,7 +446,7 @@ function server.init_handler()
     local function save_all()
         cache:save_all()
     end
-    this.schedule(save_all , 60*60, SCHEDULER_FOREVER)
+    this.schedule(save_all, 3600, SCHEDULER_FOREVER)
 end
 
 -- 服务结束通知

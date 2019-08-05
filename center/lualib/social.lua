@@ -5,24 +5,53 @@
 ---
 local skynet = require "skynet"
 
-local social = {}
+local tb_insert = table.insert
 
-function social.get_user_data(pid)
+local function get_user_data(pid)
     local ok, result = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "get_user_data", pid)
     if ok == 0 then
         return result
     end
 end
 
-function social.get_friend_data(pid)
-    local ok, result = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "get_friend_data", pid)
-    if ok == 0 then
-        return result
+local function load_social_data(data_list, result_list)
+    for pid in pairs(data_list or {}) do
+        local udata = get_user_data(pid)
+        if udata then
+            tb_insert(result_list, udata)
+        end
     end
 end
 
-function social.get_all_friend_data()
+local social = {}
 
+function social.get_user_data(pid)
+    return get_user_data(pid)
+end
+
+function social.get_friend_data(pid)
+    return get_user_data(pid)
+end
+
+function social.get_friend_byName(name)
+
+end
+
+function social.get_all_friend_data(data)
+    local result =
+    {
+        friend_list = {},
+        black_list  = {},
+    }
+
+    load_social_data(data.friend.list, result.friend_list)
+    load_social_data(data.enemy.list, result.black_list)
+
+    return result
+end
+
+function social.update(pid, data)
+    skynet.send(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "update", pid, data)
 end
 
 return social

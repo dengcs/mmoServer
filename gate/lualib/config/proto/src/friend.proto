@@ -1,0 +1,141 @@
+///------------------------------------------------------------------
+/// 好友相关协议
+///------------------------------------------------------------------
+syntax = "proto3";
+package game.proto;
+
+message friend
+{
+    string         pid             = 1;        // 角色编号
+    uint32         sex             = 2;        // 角色性别(1 : 男性， 2 : 女性， 3 : 第三性别)
+    string         nickname        = 3;        // 角色昵称
+    uint32         portrait        = 4;        // 头像模块
+    uint32         level           = 5;        // 角色等级
+}
+
+///------------------------------------------------------------------
+/// 请求/应答
+///------------------------------------------------------------------
+message center_friend_access
+{
+}
+
+message center_friend_access_resp
+{
+	repeated friend      friend_list            = 1;    // 好友列表
+    repeated friend      black_list             = 2;    // 黑名单列表
+}
+
+message center_friend_search
+{
+    string name = 1;   //
+}
+
+message center_friend_search_resp
+{
+    uint32 ret          = 1;            //返回（0 - 成功， 否则失败）
+    friend data         = 2;
+}
+
+// 提交好友申请
+message center_friend_submit_application
+{
+    string pid     = 1;            // 目标编号
+    string msg     = 2;            // 申请留言
+}
+
+message center_friend_submit_application_resp
+{
+    uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
+    string pid     = 2;            // 目标编号
+}
+
+// 同意好友申请
+message center_friend_agree_application
+{
+    string pid     = 1;            // 目标编号
+}
+
+message center_friend_agree_application_resp
+{
+    uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
+    string pid     = 2;            // 目标编号
+}
+
+// 拒绝好友申请
+message center_friend_reject_application
+{
+    string pid     = 1;            // 目标编号
+}
+
+message center_friend_reject_application_resp
+{
+    uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
+    string pid     = 2;            // 目标编号
+}
+
+// 移除好友
+message center_friend_delete
+{
+    string pid     = 1;            // 好友编号
+}
+
+message center_friend_delete_resp
+{
+    uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
+    string pid     = 2;            // 好友编号
+}
+
+// 添加敌人
+message center_friend_append_enemy
+{
+    string pid     = 1;            // 敌人编号
+}
+
+message center_friend_append_enemy_resp
+{
+    uint32  ret     = 1;    // 返回（0 - 成功， 否则失败）
+    friend  data    = 2;    // 目标信息
+}
+
+// 移除敌人
+message center_friend_remove_enemy
+{
+    string pid     = 1;            // 敌人编号
+}
+
+message center_friend_remove_enemy_resp
+{
+    uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
+    string pid     = 2;            // 好友编号
+}
+
+
+//============================= 通知相关 ====================================
+
+// 好友申请通知
+message friend_authorize_notice
+{
+    friend data     = 1;            // 好友信息
+}
+
+// 添加好友通知
+message friend_add_notice
+{
+    friend data     = 1;            // 好友信息
+}
+
+// 删除好友
+message friend_del_notice
+{
+    string pid     = 1;                // 好友编号
+}
+
+// 实时状态通知
+message friend_state_notice
+{
+    string     pid     = 1;            // 玩家编号
+    string     name    = 2;            // 字段名
+    uint32     type    = 3;            // 1:int; 2:string; 3:boolean; 4:table
+    string     value   = 4;            // 字段值
+}
