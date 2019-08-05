@@ -17,7 +17,7 @@ local request = {}
 
 function request:center_friend_access()
     local source = self.user.pid
-    local ok, msg_data = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "load_data", source)
+    local ok, msg_data = skynet.call(GLOBAL.SERVICE_NAME.FRIEND, "lua", "load_data", source)
     if ok ~= 0 then
         msg_data = {}
     end
@@ -66,7 +66,7 @@ function request:center_friend_submit_application()
     local ret = 0
     repeat
         local source = self.user.pid
-        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "submit_application", source, pid, msg)
+        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.FRIEND, "lua", "submit_application", source, pid, msg)
         if ok ~= 0 then
             ret = ERRCODE.COMMON_SYSTEM_ERROR
             break
@@ -85,7 +85,7 @@ function request:center_friend_agree_application()
     local ret = 0
     repeat
         local source = self.user.pid
-        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "agree_application", source, pid)
+        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.FRIEND, "lua", "agree_application", source, pid)
         if ok ~= 0 then
             ret = ERRCODE.COMMON_SYSTEM_ERROR
             break
@@ -104,7 +104,7 @@ function request:center_friend_reject_application()
     local ret = 0
     repeat
         local source = self.user.pid
-        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "reject_application", source, pid)
+        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.FRIEND, "lua", "reject_application", source, pid)
         if ok ~= 0 then
             ret = ERRCODE.COMMON_SYSTEM_ERROR
             break
@@ -123,7 +123,7 @@ function request:center_friend_delete()
     local ret = 0
     repeat
         local source = self.user.pid
-        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "delete_friend", source, pid)
+        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.FRIEND, "lua", "delete_friend", source, pid)
         if ok ~= 0 then
             ret = ERRCODE.COMMON_SYSTEM_ERROR
             break
@@ -142,7 +142,7 @@ function request:center_friend_append_enemy()
     local msg_data = {ret = 0}
     repeat
         local source = self.user.pid
-        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "append_enemy", source, pid)
+        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.FRIEND, "lua", "append_enemy", source, pid)
         if ok ~= 0 then
             ret = ERRCODE.COMMON_SYSTEM_ERROR
             break
@@ -163,7 +163,7 @@ function request:center_friend_remove_enemy()
     local ret = 0
     repeat
         local source = self.user.pid
-        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "remove_enemy", source, pid)
+        local ok, retVal = skynet.call(GLOBAL.SERVICE_NAME.FRIEND, "lua", "remove_enemy", source, pid)
         if ok ~= 0 then
             ret = ERRCODE.COMMON_SYSTEM_ERROR
             break

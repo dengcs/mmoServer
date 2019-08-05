@@ -32,7 +32,7 @@ local FriendData = class("FriendData")
 
 -- 构建模型实例
 -- 1. 角色编号
-function FriendData.ctor(pid)
+function FriendData:ctor(pid)
     self.dirty              = false                         -- 数据脏标记
     self.pid                = pid                           -- 角色编号
     self.friend             = { len = 0, list = {} }        -- 好友信息
@@ -245,12 +245,12 @@ function cache:init()
 end
 
 function cache:load(pid)
+    local friendData = FriendData.new(pid)
     local vdata = db_friend.get(pid)
     if vdata then
-        local friendData = FriendData.new(pid)
         friendData:unserialize(vdata)
-        return friendData
     end
+    return friendData
 end
 
 function cache:get(pid)
@@ -293,9 +293,9 @@ local command= {}
 
 
 function command.load_data(source)
-    local u1 = cache:get(source)
-    if u1 then
-        return social.get_all_friend_data(u1)
+    local ud = cache:get(source)
+    if ud then
+        return social.get_all_friend_data(ud)
     end
 end
 

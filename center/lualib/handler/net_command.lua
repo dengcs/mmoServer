@@ -41,8 +41,8 @@ function REQUEST:game_cmd_test()
 		mail.deliver_mail(pid, title, content)
 	end
 
-	function handler.send_msg(name)
-		local payload = { ids = {"1640665824886785"} }
+	function handler.send_msg(name, pid)
+		local payload = { pid = pid }
 
 		local message = {
 			header = {

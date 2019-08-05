@@ -131,7 +131,7 @@ function server.command_handler(source, cmd, ...)
 	if fn then
 		return fn(...)
 	else
-		ERROR("svcmanager : command[%s] can't find!!!", cmd)
+		ERROR("social : command[%s] can't find!!!", cmd)
 	end
 end
 

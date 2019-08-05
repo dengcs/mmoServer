@@ -30,6 +30,10 @@ M.list = {
         name = GLOBAL.SERVICE_NAME.MAIL,
         module = "common.maild",
     },
+    {
+        name = GLOBAL.SERVICE_NAME.FRIEND,
+        module = "common.friend",
+    },
 }
 
 return M
