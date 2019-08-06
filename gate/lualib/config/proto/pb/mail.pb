@@ -1,5 +1,5 @@
 
-Ú
+¢
 src/mail.proto
 game.proto"ª
 mail
@@ -19,24 +19,24 @@ attachment
 member
 pid (	Rpid
 nickname (	Rnickname
-portrait (Rportrait"
-center_mail_access"A
-center_mail_access_resp&
-mails (2.game.proto.mailRmails"$
-center_mail_open
-ids (	Rids";
-center_mail_open_resp
+portrait (Rportrait"
+mail_access":
+mail_access_resp&
+mails (2.game.proto.mailRmails"
+	mail_open
+ids (	Rids"4
+mail_open_resp
 ret (Rret
-ids (	Rids"'
-center_mail_receive
-ids (	Rids"}
-center_mail_receive_resp
+ids (	Rids" 
+mail_receive
+ids (	Rids"v
+mail_receive_resp
 ret (Rret
 ids (	Rids=
-attachments (2.game.proto.mail.attachmentRattachments"&
-center_mail_remove
-ids (	Rids"=
-center_mail_remove_resp
+attachments (2.game.proto.mail.attachmentRattachments"
+mail_remove
+ids (	Rids"6
+mail_remove_resp
 ret (Rret
 ids (	Rids"<
 mail_append_notice&

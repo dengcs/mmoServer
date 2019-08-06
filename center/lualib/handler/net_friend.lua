@@ -15,17 +15,17 @@ local tb_insert   = table.insert
 ---------------------------------------------------------------------
 local request = {}
 
-function request:center_friend_access()
+function request:friend_access()
     local source = self.user.pid
     local ok, msg_data = skynet.call(GLOBAL.SERVICE_NAME.FRIEND, "lua", "load_data", source)
     if ok ~= 0 then
         msg_data = {}
     end
-    self.response("center_friend_access_resp", msg_data)
+    self.response("friend_access_resp", msg_data)
 end
 
 -- 查找好友
-function request:center_friend_search()
+function request:friend_search()
     local msg_data = {ret = 0}
     local name  = self.proto.name
 
@@ -56,11 +56,11 @@ function request:center_friend_search()
         msg_data.data = datas
     until(true)
 
-    self.response("center_friend_search_resp", msg_data)
+    self.response("friend_search_resp", msg_data)
 end
 
 -- 提交好友申请
-function request:center_friend_submit_application()
+function request:friend_submit_application()
     local pid = tonumber(self.proto.pid)
     local msg = self.proto.msg
     local ret = 0
@@ -76,11 +76,11 @@ function request:center_friend_submit_application()
             break
         end
     until(true)
-    self.response("center_friend_submit_application_resp", {ret = ret, pid = pid})
+    self.response("friend_submit_application_resp", {ret = ret, pid = pid})
 end
 
 -- 同意好友申请
-function request:center_friend_agree_application()
+function request:friend_agree_application()
     local pid = tonumber(self.proto.pid)
     local ret = 0
     repeat
@@ -95,11 +95,11 @@ function request:center_friend_agree_application()
             break
         end
     until(true)
-    self.response("center_friend_agree_application_resp", {ret = ret, pid = pid})
+    self.response("friend_agree_application_resp", {ret = ret, pid = pid})
 end
 
 -- 拒绝好友申请
-function request:center_friend_reject_application()
+function request:friend_reject_application()
     local pid = tonumber(self.proto.pid)
     local ret = 0
     repeat
@@ -114,11 +114,11 @@ function request:center_friend_reject_application()
             break
         end
     until(true)
-    self.response("center_friend_reject_application_resp", {ret = ret, pid = pid})
+    self.response("friend_reject_application_resp", {ret = ret, pid = pid})
 end
 
 -- 移除好友
-function request:center_friend_delete()
+function request:friend_delete()
     local pid = tonumber(self.proto.pid)
     local ret = 0
     repeat
@@ -133,11 +133,11 @@ function request:center_friend_delete()
             break
         end
     until(true)
-    self.response("center_friend_delete_resp", {ret = ret, pid = pid})
+    self.response("friend_delete_resp", {ret = ret, pid = pid})
 end
 
 -- 添加敌人
-function request:center_friend_append_enemy()
+function request:friend_append_enemy()
     local pid = tonumber(self.proto.pid)
     local msg_data = {ret = 0}
     repeat
@@ -154,11 +154,11 @@ function request:center_friend_append_enemy()
 
         msg_data.data = social.get_friend_data(pid)
     until(true)
-    self.response("center_friend_append_enemy_resp", msg_data)
+    self.response("friend_append_enemy_resp", msg_data)
 end
 
 -- 移除敌人
-function request:center_friend_remove_enemy()
+function request:friend_remove_enemy()
     local pid = tonumber(self.proto.pid)
     local ret = 0
     repeat
@@ -173,7 +173,7 @@ function request:center_friend_remove_enemy()
             break
         end
     until(true)
-    self.response("center_friend_remove_enemy_resp", {ret = ret, pid = pid})
+    self.response("friend_remove_enemy_resp", {ret = ret, pid = pid})
 end
 
 ---------------------------------------------------------------------

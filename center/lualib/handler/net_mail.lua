@@ -40,7 +40,7 @@ end
 local request = {}
 
 -- 请求邮箱数据
-function request:center_mail_access()
+function request:mail_access()
     local pid = self.user.pid
     -- 分页读取邮箱数据
     local ok, mails = skynet.call(GLOBAL.SERVICE_NAME.MAIL, "lua", "load", pid)
@@ -53,7 +53,7 @@ function request:center_mail_access()
 end
 
 -- 打开指定邮件(设置为已读标记)
-function request:center_mail_open()
+function request:mail_open()
     local pid    = self.user.pid
     local ids    = self.proto.ids
     local ret       = 0
@@ -64,11 +64,11 @@ function request:center_mail_open()
     else
         ret = ERRCODE.COMMON_SYSTEM_ERROR
     end
-    self.response("center_mail_open_resp", { ret = ret, ids = ret_ids})
+    self.response("mail_open_resp", { ret = ret, ids = ret_ids})
 end
 
 -- 移除指定邮件(设置为移除标记)
-function request:center_mail_remove()
+function request:mail_remove()
     local pid    = self.user.pid
     local ids    = self.proto.ids
     local ret       = 0
@@ -79,11 +79,11 @@ function request:center_mail_remove()
     else
         ret = ERRCODE.COMMON_SYSTEM_ERROR
     end
-    self.response("center_mail_remove_resp", { ret = ret , ids = ret_ids})
+    self.response("mail_remove_resp", { ret = ret , ids = ret_ids})
 end
 
 -- 领取邮件附件
-function request:center_mail_receive()
+function request:mail_receive()
     local pid    = self.user.pid
     local ids    = self.proto.ids
     local ret       = 0
@@ -97,7 +97,7 @@ function request:center_mail_receive()
     else
         ret = ERRCODE.COMMON_SYSTEM_ERROR
     end
-    self.response("center_mail_receive_resp", { ret = ret, ids = ret_ids, attachments = ret_items })
+    self.response("mail_receive_resp", { ret = ret, ids = ret_ids, attachments = ret_items })
 end
 
 ---------------------------------------------------------------------

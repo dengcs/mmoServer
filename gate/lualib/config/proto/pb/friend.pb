@@ -1,5 +1,6 @@
 
-Ù
+è
+
 src/friend.proto
 game.proto"z
 friend
@@ -7,47 +8,47 @@ game.proto"z
 sex (Rsex
 nickname (	Rnickname
 portrait (Rportrait
-level (Rlevel"
-center_friend_access"ƒ
-center_friend_access_resp3
+level (Rlevel"
+friend_access"|
+friend_access_resp3
 friend_list (2.game.proto.friendR
 friendList1
 
-black_list (2.game.proto.friendR	blackList"*
-center_friend_search
-name (	Rname"U
-center_friend_search_resp
+black_list (2.game.proto.friendR	blackList"#
+friend_search
+name (	Rname"N
+friend_search_resp
 ret (Rret&
-data (2.game.proto.friendRdata"F
- center_friend_submit_application
+data (2.game.proto.friendRdata"?
+friend_submit_application
 pid (	Rpid
-msg (	Rmsg"K
-%center_friend_submit_application_resp
+msg (	Rmsg"D
+friend_submit_application_resp
 ret (Rret
-pid (	Rpid"3
-center_friend_agree_application
-pid (	Rpid"J
-$center_friend_agree_application_resp
+pid (	Rpid",
+friend_agree_application
+pid (	Rpid"C
+friend_agree_application_resp
 ret (Rret
-pid (	Rpid"4
- center_friend_reject_application
-pid (	Rpid"K
-%center_friend_reject_application_resp
+pid (	Rpid"-
+friend_reject_application
+pid (	Rpid"D
+friend_reject_application_resp
 ret (Rret
-pid (	Rpid"(
-center_friend_delete
-pid (	Rpid"?
-center_friend_delete_resp
+pid (	Rpid"!
+friend_delete
+pid (	Rpid"8
+friend_delete_resp
 ret (Rret
-pid (	Rpid".
-center_friend_append_enemy
-pid (	Rpid"[
-center_friend_append_enemy_resp
+pid (	Rpid"'
+friend_append_enemy
+pid (	Rpid"T
+friend_append_enemy_resp
 ret (Rret&
-data (2.game.proto.friendRdata".
-center_friend_remove_enemy
-pid (	Rpid"E
-center_friend_remove_enemy_resp
+data (2.game.proto.friendRdata"'
+friend_remove_enemy
+pid (	Rpid">
+friend_remove_enemy_resp
 ret (Rret
 pid (	Rpid"A
 friend_authorize_notice&

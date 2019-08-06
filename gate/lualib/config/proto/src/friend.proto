@@ -16,95 +16,95 @@ message friend
 ///------------------------------------------------------------------
 /// 请求/应答
 ///------------------------------------------------------------------
-message center_friend_access
+message friend_access
 {
 }
 
-message center_friend_access_resp
+message friend_access_resp
 {
 	repeated friend      friend_list            = 1;    // 好友列表
     repeated friend      black_list             = 2;    // 黑名单列表
 }
 
-message center_friend_search
+message friend_search
 {
     string name = 1;   //
 }
 
-message center_friend_search_resp
+message friend_search_resp
 {
     uint32 ret          = 1;            //返回（0 - 成功， 否则失败）
     friend data         = 2;
 }
 
 // 提交好友申请
-message center_friend_submit_application
+message friend_submit_application
 {
     string pid     = 1;            // 目标编号
     string msg     = 2;            // 申请留言
 }
 
-message center_friend_submit_application_resp
+message friend_submit_application_resp
 {
     uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
     string pid     = 2;            // 目标编号
 }
 
 // 同意好友申请
-message center_friend_agree_application
+message friend_agree_application
 {
     string pid     = 1;            // 目标编号
 }
 
-message center_friend_agree_application_resp
+message friend_agree_application_resp
 {
     uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
     string pid     = 2;            // 目标编号
 }
 
 // 拒绝好友申请
-message center_friend_reject_application
+message friend_reject_application
 {
     string pid     = 1;            // 目标编号
 }
 
-message center_friend_reject_application_resp
+message friend_reject_application_resp
 {
     uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
     string pid     = 2;            // 目标编号
 }
 
 // 移除好友
-message center_friend_delete
+message friend_delete
 {
     string pid     = 1;            // 好友编号
 }
 
-message center_friend_delete_resp
+message friend_delete_resp
 {
     uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
     string pid     = 2;            // 好友编号
 }
 
 // 添加敌人
-message center_friend_append_enemy
+message friend_append_enemy
 {
     string pid     = 1;            // 敌人编号
 }
 
-message center_friend_append_enemy_resp
+message friend_append_enemy_resp
 {
     uint32  ret     = 1;    // 返回（0 - 成功， 否则失败）
     friend  data    = 2;    // 目标信息
 }
 
 // 移除敌人
-message center_friend_remove_enemy
+message friend_remove_enemy
 {
     string pid     = 1;            // 敌人编号
 }
 
-message center_friend_remove_enemy_resp
+message friend_remove_enemy_resp
 {
     uint32 ret     = 1;            // 返回（0 - 成功， 否则失败）
     string pid     = 2;            // 好友编号

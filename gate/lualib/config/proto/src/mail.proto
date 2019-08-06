@@ -41,37 +41,37 @@ message mail
 ///------------------------------------------------------------------
 
 // 请求邮箱信息
-message center_mail_access
+message mail_access
 {
 }
 
 // 应答
-message center_mail_access_resp
+message mail_access_resp
 {
     repeated mail mails             = 1;        // 邮件列表
 }
 
 // 打开指定邮件(设置为已读状态)
-message center_mail_open
+message mail_open
 {
     repeated string ids             = 1;        // 邮件编号列表
 }
 
 // 应答
-message center_mail_open_resp
+message mail_open_resp
 {
     uint32          ret             = 1;        // 操作结果（0-成功，否则失败）
     repeated string ids             = 2;        // 邮件编号列表
 }
 
 // 领取邮件附件
-message center_mail_receive
+message mail_receive
 {
     repeated string ids             = 1;        // 邮件编号列表
 }
 
 // 应答
-message center_mail_receive_resp
+message mail_receive_resp
 {
     uint32                      ret             = 1;        // 操作结果（0-成功，否则失败）
     repeated string             ids             = 2;        // 编号列表（成功领取邮件列表）
@@ -79,13 +79,13 @@ message center_mail_receive_resp
 }
 
 // 移除指定邮件
-message center_mail_remove
+message mail_remove
 {
     repeated string ids             = 1;        // 邮件编号列表
 }
 
 // 应答
-message center_mail_remove_resp
+message mail_remove_resp
 {
     uint32 ret                      = 1;        // 操作结果（0-成功，否则失败）
     repeated string ids             = 2;        // 编号列表（成功删除邮件列表）

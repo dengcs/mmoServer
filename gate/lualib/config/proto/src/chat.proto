@@ -1,0 +1,35 @@
+
+syntax = "proto3";
+package game.proto;
+
+/////////////////////////////////////////////////////////////////////
+// 聊天系统相关消息
+/////////////////////////////////////////////////////////////////////
+
+//聊天发送信息
+message chat_msg
+{
+	uint32 channel      = 1; //频道id
+	string receive_pid  = 2; //用于私聊频道，接受者pid，必须填
+	string content      = 3; //内容
+}
+
+//聊天信息应答
+message chat_msg_resp
+{
+	//chat_msg 发送返回结果，0-成功，非0-错误代码
+	uint32 ret          = 1;
+}
+
+//服务端通知聊天消息
+message chat_msg_notice
+{
+	uint32 channel          = 1;    //频道id
+	string send_pid         = 2;    //发送者pid
+	string send_name        = 3;    //发送者昵称
+	uint32 send_level       = 4;    //发送者等级
+	uint32 send_portrait    = 5;    //发送者头像
+	string receive_pid      = 6;    //用于私聊频道
+	string content          = 7;    //内容
+	uint32 send_time        = 8;    //发送时的时间戳
+}
