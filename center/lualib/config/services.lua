@@ -33,6 +33,10 @@ M.list = {
         name = GLOBAL.SERVICE_NAME.FRIEND,
         module = "common.friend",
     },
+    {
+        name = GLOBAL.SERVICE_NAME.CHAT,
+        module = "common.chat",
+    },
 }
 
 return M

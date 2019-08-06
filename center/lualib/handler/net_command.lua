@@ -42,7 +42,7 @@ function REQUEST:game_cmd_test()
 	end
 
 	function handler.send_msg(name, pid)
-		local payload = { pid = pid }
+		local payload = { receive_pid = pid, channel = 2, content = "测试发送" }
 
 		local message = {
 			header = {

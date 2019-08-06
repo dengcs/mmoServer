@@ -27,6 +27,11 @@ local request = {}
 function request:chat_msg()
     local ret = 0
     repeat
+        if utf8.len(self.proto.content) > 140 then
+            ret = ERRCODE.COMMON_PARAMS_ERROR
+            break
+        end
+
         local params =
         {
             source      = self.user.pid,
