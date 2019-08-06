@@ -74,6 +74,10 @@ function this.usersend(pid, command, ...)
     return skynet.send(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "usersend", pid, command, ...)
 end
 
+function this.broadcast(command, ...)
+    return skynet.send(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "broadcast", command, ...)
+end
+
 function this.call(command, ...)
     return skynet.call(skynet.self(), "lua", command, ...)
 end

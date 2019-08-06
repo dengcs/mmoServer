@@ -27,6 +27,7 @@ GLOBAL.SERVICE_NAME =
     SOCIAL      = ".social",
     FRIEND      = ".friend",
     MAIL        = ".mail",
+    CHAT        = ".chat",
 }
 
 GAME = 

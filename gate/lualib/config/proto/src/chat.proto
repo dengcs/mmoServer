@@ -28,7 +28,7 @@ message chat_msg_notice
 	string send_pid         = 2;    //发送者pid
 	string send_name        = 3;    //发送者昵称
 	uint32 send_level       = 4;    //发送者等级
-	uint32 send_portrait    = 5;    //发送者头像
+	string send_portrait    = 5;    //发送者头像
 	string receive_pid      = 6;    //用于私聊频道
 	string content          = 7;    //内容
 	uint32 send_time        = 8;    //发送时的时间戳

@@ -9,7 +9,7 @@ message friend
     string         pid             = 1;        // 角色编号
     uint32         sex             = 2;        // 角色性别(1 : 男性， 2 : 女性， 3 : 第三性别)
     string         nickname        = 3;        // 角色昵称
-    uint32         portrait        = 4;        // 头像模块
+    string         portrait        = 4;        // 头像模块
     uint32         level           = 5;        // 角色等级
 }
 

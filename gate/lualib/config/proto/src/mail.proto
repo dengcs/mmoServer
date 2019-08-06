@@ -19,7 +19,7 @@ message mail
     {
         string pid         = 1;        // 发送者编号(0 - 系统发送)
         string nickname    = 2;        // 发送者昵称
-        uint32 portrait    = 3;        // 发送者头像
+        string portrait    = 3;        // 发送者头像
     }
 
     //-----------------------------------------------------
