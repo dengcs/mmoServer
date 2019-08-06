@@ -97,18 +97,6 @@ function COMMAND.unload(source, pid)
     return 0
 end
 
--- 获取角色句柄
--- 1. 命令来源
--- 2. 角色编号
-function COMMAND.useragent(source, pid)
-    local u = onlines[pid]
-    if u then
-        return u.agent
-    else
-        return nil
-    end
-end
-
 -- 发送消息到指定角色
 -- 1. 消息来源
 -- 2. 角色编号
@@ -134,6 +122,16 @@ function COMMAND.usercall(source, pid, cmd, ...)
             ERROR("usercenterd : command[%s] failed!!!", cmd)
         end
         return retval
+    end
+end
+
+-- 在线消息广播
+-- 1. 指令来源
+-- 2. 消息类型
+-- 3. 消息内容
+function COMMAND.broadcast(source, cmd, ...)
+    for _, u in pairs(onlines or {}) do
+        skynet.send(u.agent, "lua", cmd, ...)
     end
 end
 

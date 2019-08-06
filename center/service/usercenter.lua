@@ -77,6 +77,16 @@ function COMMAND.usercall(source, pid, cmd, ...)
     end
 end
 
+-- 在线消息广播
+-- 1. 指令来源
+-- 2. 消息类型
+-- 3. 消息内容
+function COMMAND.broadcast(source, cmd, ...)
+    for _, u in pairs(onlines or {}) do
+        skynet.send(u.agent, "lua", cmd, ...)
+    end
+end
+
 ---------------------------------------------------------------------
 --- 服务事件回调（底层事件通知）
 ---------------------------------------------------------------------
