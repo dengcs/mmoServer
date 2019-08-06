@@ -14,8 +14,8 @@ skynet.start(function()
   summdriver.start()
   summdriver.autoload(services.list)
 
-  local gated = skynet.newservice("client/gated")
-  skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
+  local gated = skynet.newservice("client/gate")
+  skynet.name(GLOBAL.SERVICE_NAME.GATE,gated)
   skynet.call(gated, "lua", "open", {
     port = 51001,
     maxclient = 100,
@@ -23,7 +23,7 @@ skynet.start(function()
   })
   
   -- 启动控制后台
-  local cmd = skynet.newservice("httpd", "logic.cmd", 1)
+  local cmd = skynet.newservice("http", "logic.cmd", 1)
   skynet.call(cmd, "lua", "init", {
     address = "0.0.0.0",
     port    = 41002,

@@ -19,7 +19,7 @@ function agent_pool:init(count)
     local max_add = init_count - #self.agent_queue
     local add_count = math.min((count or init_count), max_add)
     for i=1, add_count do
-        local agent = skynet.newservice("agentd")
+        local agent = skynet.newservice("agent")
         skynet.call(agent, "lua", "init")
         tb_insert(self.agent_queue, agent)
     end
@@ -43,7 +43,7 @@ function agent_pool:pop()
     else
         self:inc()
 
-        local agent = skynet.newservice("agentd")
+        local agent = skynet.newservice("agent")
         skynet.call(agent, "lua", "init")
         return agent
     end

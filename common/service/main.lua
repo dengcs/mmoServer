@@ -20,8 +20,8 @@ skynet.start(function()
 --  userdriver.dc_del(10,"1001")
 --  userdriver.dc_del(11,"1001")
 
-  local gated = skynet.newservice("client/gated")
-  skynet.name(GLOBAL.SERVICE_NAME.GATED,gated)
+  local gated = skynet.newservice("client/gate")
+  skynet.name(GLOBAL.SERVICE_NAME.GATE,gated)
 
   skynet.error("Server end")
   skynet.exit()

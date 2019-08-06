@@ -3,8 +3,7 @@ local M = {}
 M.list = {
     {
         name = GLOBAL.SERVICE_NAME.DATAMONGO,
-        module = "db.datamongod",
-        unique = true,
+        module = "db.datamongo",
     },
     {
         name = GLOBAL.SERVICE_NAME.LOGICPROXY,

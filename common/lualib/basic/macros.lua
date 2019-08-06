@@ -15,8 +15,8 @@ GLOBAL.DB =
 
 GLOBAL.SERVICE_NAME =
 {
-    SUMMD       = ".summd",
-    GATED       = ".gated",
+    SUMMARY     = ".summary",
+    GATE        = ".gated",
     LOGICPROXY  = ".logicproxy",
     GAMEPROXY   = ".gameproxy",
     DATAMONGO   = ".datamongo",

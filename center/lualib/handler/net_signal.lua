@@ -21,8 +21,10 @@ end
 
 -- 请求断开连接
 function REQUEST:disconnect()
+	local pid = self.user.pid
 	skynet.send(skynet.self(), "lua", "disconnect")
-	skynet.send(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "save", self.user.pid)
+	skynet.send(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "save", pid)
+	skynet.send(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "unload", pid)
 end
 
 HANDLER.REQUEST   	= REQUEST

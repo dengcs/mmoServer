@@ -49,18 +49,6 @@ function COMMAND.unload(source, pid)
     return 0
 end
 
--- 获取角色句柄
--- 1. 命令来源
--- 2. 角色编号
-function COMMAND.useragent(source, pid)
-    local u = onlines[pid]
-    if u then
-        return u.agent
-    else
-        return nil
-    end
-end
-
 -- 发送消息到指定角色
 -- 1. 消息来源
 -- 2. 角色编号
@@ -81,11 +69,11 @@ end
 function COMMAND.usercall(source, pid, cmd, ...)
     local u = onlines[pid]
     if u then
-        local ok, retval = skynet.call(u.agent, "lua", cmd, ...)
+        local ok, result = skynet.call(u.agent, "lua", cmd, ...)
         if ok ~= 0 then
             ERROR("usercenterd : command[%s] failed!!!", cmd)
         end
-        return retval
+        return result
     end
 end
 

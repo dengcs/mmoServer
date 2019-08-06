@@ -26,7 +26,7 @@ local function dispatch_reply(so)
     local result = skynet.unpack(reply)
 
     if result then
-        skynet.send(GLOBAL.SERVICE_NAME.GATED, "lua", "response", result)
+        skynet.send(GLOBAL.SERVICE_NAME.GATE, "lua", "response", result)
     end
 
     return reply_id

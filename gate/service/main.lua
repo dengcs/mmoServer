@@ -10,8 +10,8 @@ skynet.start(function()
   summdriver.start()
   summdriver.autoload(services.list)
 
-  local gated = skynet.newservice("client/gated")
-  skynet.name(GLOBAL.SERVICE_NAME.GATED, gated)
+  local gated = skynet.newservice("client/gate")
+  skynet.name(GLOBAL.SERVICE_NAME.GATE, gated)
   skynet.call(gated, "lua", "open", {
     port = 50001,
     maxclient = 100,

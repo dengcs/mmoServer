@@ -3,20 +3,20 @@ local skynet = require "skynet.manager"
 local summdriver = {}
 
 local function __send(command, ...)
-    skynet.send(GLOBAL.SERVICE_NAME.SUMMD, "lua", command, ...)
+    skynet.send(GLOBAL.SERVICE_NAME.SUMMARY, "lua", command, ...)
 end
 
 local function __call(command, ...)
-    return skynet.call(GLOBAL.SERVICE_NAME.SUMMD, "lua", command, ...)
+    return skynet.call(GLOBAL.SERVICE_NAME.SUMMARY, "lua", command, ...)
 end
 
 -- 启动'summd'服务
 -- 1. 启动配置（关联服务列表）
 function summdriver.start()
-    local summd = skynet.uniqueservice("summd")
-    skynet.name(GLOBAL.SERVICE_NAME.SUMMD, summd)
+    local summary = skynet.uniqueservice("summary")
+    skynet.name(GLOBAL.SERVICE_NAME.SUMMARY, summary)
 
-    skynet.call(summd, "lua", "init", {auto = true})
+    skynet.call(summary, "lua", "init", {auto = true})
 end
 
 function summdriver.close()
