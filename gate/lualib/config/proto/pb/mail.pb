@@ -19,7 +19,7 @@ attachment
 member
 pid (	Rpid
 nickname (	Rnickname
-portrait (Rportrait"
+portrait (	Rportrait"
 mail_access":
 mail_access_resp&
 mails (2.game.proto.mailRmails"

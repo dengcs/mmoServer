@@ -37,6 +37,10 @@ M.list = {
         name = GLOBAL.SERVICE_NAME.CHAT,
         module = "common.chat",
     },
+    {
+        name = GLOBAL.SERVICE_NAME.RANK,
+        module = "common.rank",
+    },
 }
 
 return M

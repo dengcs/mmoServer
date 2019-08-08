@@ -54,6 +54,7 @@ function REQUEST:create_player()
 			nickname  	= self.proto.nickname,
 			portrait  	= self.proto.portrait,
 			account   	= login_acount,
+			level		= 1,
 		}
 		
 		local result = player.insert(vdata)

@@ -15,7 +15,7 @@ receivePid
 	send_name (	RsendName
 
 send_level (R	sendLevel#
-send_portrait (RsendPortrait
+send_portrait (	RsendPortrait
 receive_pid (	R
 receivePid
 content (	Rcontent

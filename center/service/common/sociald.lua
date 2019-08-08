@@ -3,6 +3,22 @@ local service   = require "factory.service"
 local db_social	= require "db.mongo.social"
 
 -----------------------------------------------------------
+--- 内部变量/内部逻辑
+-----------------------------------------------------------
+
+local function rank_update(alias, pid, value)
+	local needUpdate = false
+
+	if alias == "level" then
+		needUpdate = true
+	end
+
+	if needUpdate then
+		skynet.send(GLOBAL.SERVICE_NAME.RANK, "lua", "update", alias, pid, value)
+	end
+end
+
+-----------------------------------------------------------
 --- 内部類
 -----------------------------------------------------------
 
@@ -23,7 +39,7 @@ function social:load(pid)
 end
 
 function social:update(pid, data)
-	local cdata = self.cache[pid]
+	local cdata = self.cache[pid] or self:load(pid)
 	if not cdata then
 		cdata = {dirty = false}
 		self.cache[pid] = cdata
@@ -34,6 +50,7 @@ function social:update(pid, data)
 		if v ~= cdata[k] then
 			cdata[k] = v
 			cdata.dirty = true
+			rank_update(k, pid, v)
 		end
 	end
 end

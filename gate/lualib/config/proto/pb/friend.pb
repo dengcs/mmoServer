@@ -7,7 +7,7 @@ game.proto"z
 pid (	Rpid
 sex (Rsex
 nickname (	Rnickname
-portrait (Rportrait
+portrait (	Rportrait
 level (Rlevel"
 friend_access"|
 friend_access_resp3

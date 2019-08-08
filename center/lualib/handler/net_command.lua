@@ -12,6 +12,21 @@ local REQUEST 		= {}
 --- 内部变量/内部逻辑
 -----------------------------------------------------------
 
+local function send_msg(name, payload)
+
+	local message = {
+		header = {
+			proto 	= name,
+		},
+		payload = payload
+	}
+
+	local byte_fd 	= string.pack(">J", 1)
+	local msg_data 	= skynet.packstring(message)
+
+	local compose_data = {byte_fd, msg_data}
+	skynet.rawsend(skynet.self(), "client", table.concat(compose_data))
+end
 -----------------------------------------------------------
 --- 网络请求接口
 -----------------------------------------------------------
@@ -41,21 +56,9 @@ function REQUEST:game_cmd_test()
 		mail.deliver_mail(pid, title, content)
 	end
 
-	function handler.send_msg(name, pid)
-		local payload = { receive_pid = pid, channel = 2, content = "测试发送" }
-
-		local message = {
-			header = {
-				proto 	= name,
-			},
-			payload = payload
-		}
-
-		local byte_fd 	= string.pack(">J", 1)
-		local msg_data 	= skynet.packstring(message)
-
-		local compose_data = {byte_fd, msg_data}
-		skynet.rawsend(skynet.self(), "client", table.concat(compose_data))
+	function handler.test_rank()
+		local proto = {alias = "level", spoint = 1, epoint = 10}
+		send_msg("rank_access", proto)
 	end
 
 	local fn = handler[cmd]

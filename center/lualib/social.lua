@@ -26,11 +26,11 @@ end
 local social = {}
 
 function social.get_user_data(pid)
-    return get_user_data(pid)
+    return get_user_data(tonumber(pid))
 end
 
 function social.get_friend_data(pid)
-    return get_user_data(pid)
+    return get_user_data(tonumber(pid))
 end
 
 function social.get_friend_byName(name)

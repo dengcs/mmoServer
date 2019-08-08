@@ -28,6 +28,7 @@ GLOBAL.SERVICE_NAME =
     FRIEND      = ".friend",
     MAIL        = ".mail",
     CHAT        = ".chat",
+    RANK        = ".rank",
 }
 
 GAME = 
