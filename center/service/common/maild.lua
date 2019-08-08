@@ -171,6 +171,12 @@ local db =
 		}
 		return db_mail.keys(query)
 	end,
+
+	-- 清理过期邮件
+	['clear'] = function()
+		local query = { deadline = {['$lt'] = this.time()} }
+		return db_mail.del(query)
+	end
 }
 
 -- 邮件投递操作(角色编号为零表示系统邮箱)
@@ -400,11 +406,24 @@ local server = {}
 
 -- 服务构造通知
 -- 1. 构造配置
-function server.init_handler(config)
+function server.init_handler()
 	madmin = MailBox.new(0, 0)
 	for _, v in pairs(db.select(0) or {}) do
 		madmin:add(v.mid, v.category, v.source, v.subject, v.content, v.attachments, v.status, v.exdata, v.ctime, v.deadline)
 	end
+end
+
+-- 服务开始
+function server.start_handler()
+	local function clear()
+		db.clear()
+	end
+	this.schedule(clear, 24*3600, SCHEDULER_FOREVER)
+end
+
+-- 服务结束通知
+function server.exit_handler()
+	db.clear()
 end
 
 -- 内部指令通知

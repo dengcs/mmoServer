@@ -3,6 +3,7 @@
 ---------------------------------------------------------------------
 local service  	= require "factory.service"
 local conf_rank	= require "config.rank"
+local db_rank	= require "db.mongo.rank"
 
 tb_insert 	= table.insert
 tb_remove 	= table.remove
@@ -34,6 +35,18 @@ function Board:ctor(alias, limit)
 	self.alias     	= alias
 	self.limit		= limit
 	self.ranks		= {}
+end
+
+function Board:load()
+	local data = db_rank.get(self.alias)
+	if data then
+		self.ranks = data.ranks or {}
+	end
+end
+
+function Board:save()
+	local data = { alias = self.alias, ranks = self.ranks }
+	db_rank.set(self.alias, data)
 end
 
 -- 更新目标排名
@@ -173,7 +186,27 @@ local server = {}
 -- 1. 构造参数
 function server.init_handler()
 	for alias,limit in pairs(conf_rank) do
-		boards[alias] = Board.new(alias, limit)
+		local board = Board.new(alias, limit)
+		boards[alias] = board
+		board:load()
+	end
+end
+
+-- 服务开始
+function server.start_handler()
+	local function save_all()
+		for _,board in pairs(boards) do
+			board:save()
+		end
+	end
+
+	this.schedule(save_all, 3600, SCHEDULER_FOREVER)
+end
+
+-- 服务结束通知
+function server.exit_handler()
+	for _,board in pairs(boards) do
+		board:save()
 	end
 end
 

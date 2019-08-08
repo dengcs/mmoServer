@@ -35,6 +35,7 @@ function social:load(pid)
 	local cdata = db_social.get(pid)
 	if cdata then
 		self.cache[pid] = cdata
+		return cdata
 	end
 end
 
@@ -59,7 +60,7 @@ function social:save(pid, clean)
 	local cdata = self.cache[pid]
 	if cdata then
 		if cdata.dirty then
-			cdata.dirty = nil
+			cdata.dirty = false
 			-- 保存数据
 			db_social.set(pid, cdata)
 		end

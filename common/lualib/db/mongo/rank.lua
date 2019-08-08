@@ -4,13 +4,14 @@
 local skynet = require "skynet"
 
 local dbName = "poker"
-local dtName = "mail"
+local dtName = "rank"
 
 local M = {}
 
 -- 数据查询操作
 -- 1. 数据键值
-function M.get(query)
+function M.get(key)
+    local query = {alias = key}
 	local ok,ret = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGO, "lua", "get", dbName, dtName, query)
 
     if ok ~= 0 then
@@ -26,7 +27,8 @@ end
 -- 数据更新操作
 -- 1. 数据键值
 -- 2. 数据内容
-function M.set(query, value)
+function M.set(key, value)
+    local query = {alias = key}
 	local ok,suc = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGO, "lua", "set", dbName, dtName, query, value)
     if ok ~= 0 then
         ERROR("'%s[%s]' execute failed['%s']!!!", dbName, dtName, key)
@@ -38,12 +40,7 @@ end
 -- 数据删除操作
 -- 1. 数据键值
 function M.del(key)
-    local ok, suc = skynet.call(GLOBAL.SERVICE_NAME.DATAMONGO, "lua", "del", dbName, dtName, key)
-    if ok ~= 0 then
-        ERROR("'%s[%s]' execute failed!!!", dbName, dtName)
-    end
-
-    return suc
+    ERROR("this function isn't implemented!!!")
 end
 
 -- 判断键值是否有效
