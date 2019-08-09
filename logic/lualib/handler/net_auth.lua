@@ -2,7 +2,7 @@
 --- 游戏服登录逻辑
 -----------------------------------------------------------
 local skynet  	= require "skynet"
-local player	= require "db.mongo.player"
+local db_player	= require "db.mongo.player"
 local allocid	= require "utils.allocid"
 local cluster	= require "skynet.cluster"
 
@@ -28,7 +28,7 @@ function REQUEST:query_players()
 	local ret = 1
 	
 	local account = self.proto.account
-	local data = player.keys({account = account})
+	local data = db_player.keys({account = account})
 	
 	if data and next(data) then
 		ret = 0
@@ -57,11 +57,10 @@ function REQUEST:create_player()
 			level		= 1,
 		}
 		
-		local result = player.insert(vdata)
+		local result = db_player.insert(vdata)
 
 		if result then
-			player_id = vdata.pid
-			this.call("player_create", player_id)
+			this.call("player_create")
 			ret = 0
 		end
 	end
@@ -78,7 +77,7 @@ function REQUEST:player_login()
 	if player_id then
 	    local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "load", player_id)
 	    if ok == 0 then
-			this.call("player_login", player_id)
+			this.call("player_login")
 			msg_data.ret = 0
 			msg_data.pid = player_id
 		end
