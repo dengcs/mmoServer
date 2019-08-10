@@ -196,6 +196,14 @@ function FriendData:del_authorize(pid)
     end
 end
 
+function FriendData:has_authorized(pid)
+    if self.authorize.list[pid] then
+        return true
+    else
+        return false
+    end
+end
+
 -- 判断朋友是否已满
 function FriendData:friend_has_full()
     if self.friend.len >= MAX_FRIENDS_VALUE then
@@ -343,7 +351,7 @@ function command.agree_application(source, target)
         return ERRCODE.COMMON_SYSTEM_ERROR
     end
     -- 检查是否申请
-    if not u2:has_applied(source) then
+    if not u1:has_authorized(target) then
         return ERRCODE.COMMON_PARAMS_ERROR
     end
     -- 检查好友容量
@@ -370,7 +378,7 @@ function command.reject_application(source, target)
         return ERRCODE.COMMON_SYSTEM_ERROR
     end
     -- 检查是否申请
-    if not u2:has_applied(source) then
+    if not u1:has_authorized(target) then
         return ERRCODE.COMMON_PARAMS_ERROR
     end
     -- 拒绝好友申请
