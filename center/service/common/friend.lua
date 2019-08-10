@@ -6,6 +6,8 @@ local service   = require "factory.service"
 local db_friend	= require "db.mongo.friend"
 local social    = require "social"
 
+local tb_insert = table.insert
+local tb_remove = table.remove
 -----------------------------------------------------------
 --- 常量表
 -----------------------------------------------------------
@@ -248,15 +250,15 @@ local cache = {}
 
 function cache:init()
     self.queue          = {}
-    self.cache_count  	= 0
+    self.indexes        = {}
     self.cache_max  	= 1000
 end
 
 function cache:load(pid)
     local friendData = FriendData.new(pid)
-    local vdata = db_friend.get(pid)
-    if vdata then
-        friendData:unserialize(vdata)
+    local vData = db_friend.get(pid)
+    if vData then
+        friendData:unserialize(vData)
     end
     return friendData
 end
@@ -266,24 +268,23 @@ function cache:get(pid)
     if not friendData then
         friendData = self:load(pid)
         self.queue[pid] = friendData
-        self.cache_count = self.cache_count + 1
+        tb_insert(self.indexes, pid)
+
+        if #self.indexes > self.cache_max then
+            local remove_pid = tb_remove(self.indexes, 1)
+            self:save(remove_pid)
+            self.queue[remove_pid] = nil
+        end
     end
     return friendData
 end
 
-function cache:save(pid, clean)
+function cache:save(pid)
     local friendData = self.queue[pid]
     if friendData then
         if friendData:check_dirty() then
             db_friend.set(pid, friendData:serialize())
             friendData:clear_dirty()
-        end
-
-        if clean then
-            if self.cache_count > self.cache_max then
-                self.queue[pid] = nil
-                self.cache_count = self.cache_count - 1
-            end
         end
     end
 end
