@@ -10,14 +10,14 @@ lua_cpath = root .. "luaclib/?.so"
 
 preload = "./common/lualib/preload.lua"	-- run preload.lua before every lua service run
 thread = 8
-logger = nil
+logger = "./log/gate.log"
 logpath = "."
 harbor = 0
 start = "main"	-- main script
 bootstrap = "snlua bootstrap"	-- The service for bootstrap
 cpath = root.."cservice/?.so"
 cluster = "./common/lualib/config/clustername.lua"
--- daemon = "./gate.pid"
+daemon = "./gate.pid"
 
 datasource = "config.datasource"
 node = "gate"
