@@ -8,9 +8,13 @@ start(){
 }
 
 stop(){
-    pid=`cat ${1}.pid`
-    kill ${pid}
-    echo "${1}[${pid}] stopped"
+    filename=${1}.pid
+    if [ -f "${filename}" ]; then
+        pid=`cat ${filename}`
+        kill ${pid}
+        rm -f ${filename}
+        echo "${1}[${pid}] stopped"
+    fi
 }
 
 exit(){
@@ -22,8 +26,8 @@ start_all(){
     start logic
     for((i=3;i>=1;i--));
     do
-    echo ${i};
-    sleep 1;
+        echo ${i};
+        sleep 1;
     done
     start gate
 }
@@ -33,8 +37,8 @@ stop_all(){
     exit ${LOGIC_CMD_PORT}
     for((i=3;i>=1;i--));
     do
-    echo ${i};
-    sleep 1;
+        echo ${i};
+        sleep 1;
     done
     stop gate
     stop logic
