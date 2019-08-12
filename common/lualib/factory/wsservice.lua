@@ -6,32 +6,32 @@ local sockethelper = require "http.sockethelper"
 
 local wsService = {}
 
-function wsService.start(handler)
-    assert(handler)
-    assert(handler.on_message)
+function wsService.start(module)
+    assert(module)
+    assert(module.on_message)
 
     local client_number = 0
 
-    local service = {}
+    local handler = {}
 
-    function service.connect(ws)
+    function handler.connect(ws)
         client_number = client_number + 1
 
-        if handler.on_connect then
-            handler.on_connect(ws)
+        if module.on_connect then
+            module.on_connect(ws)
         end
     end
 
-    function service.disconnect(fd)
+    function handler.disconnect(fd)
         client_number = client_number - 1
 
-        if handler.on_disconnect then
-            handler.on_disconnect(fd)
+        if module.on_disconnect then
+            module.on_disconnect(fd)
         end
     end
 
-    function service.message(fd, msgData)
-        handler.on_message(fd, msgData)
+    function handler.message(fd, msgData)
+        module.on_message(fd, msgData)
     end
 
 
@@ -45,7 +45,7 @@ function wsService.start(handler)
                     addr = addr,
                     check_origin = false,
                 }
-                local ws = websocket.new(fd, header, service, params)
+                local ws = websocket.new(fd, header, handler, params)
                 if ws then
                     return true
                 end
@@ -56,7 +56,7 @@ function wsService.start(handler)
 
     local CMD = {}
 
-    function CMD.open(source, conf)
+    function CMD.init(source, conf)
         conf.ip           = conf.ip or "0.0.0.0"
         conf.maxclient    = conf.maxclient or 1024
 
@@ -78,8 +78,8 @@ function wsService.start(handler)
             end
         end)
 
-        if handler.on_open then
-            handler.on_open(conf)
+        if module.on_init then
+            module.on_init(conf)
         end
     end
 
@@ -90,7 +90,7 @@ function wsService.start(handler)
             if f then
                 safe_handler(f, source, ...)
             else
-                safe_handler(handler.command, cmd, ...)
+                safe_handler(module.command, cmd, ...)
             end
         end)
     end)

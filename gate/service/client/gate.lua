@@ -105,15 +105,15 @@ end
 ---------------------------------------------------------------------
 --- 服务事件回调（底层事件通知）
 ---------------------------------------------------------------------
-local handler = {}
+local server = {}
 
-function handler.on_open(conf)
+function server.on_init(conf)
 	pbhelper.register()
 
 	this.schedule(clean_token , interval, SCHEDULER_FOREVER)
 end
 
-function handler.on_connect(web_socket)
+function server.on_connect(web_socket)
 	local fd = web_socket.id
 	local session = {
 		web_socket 	= web_socket,
@@ -122,7 +122,7 @@ function handler.on_connect(web_socket)
 	sessions[fd] = session
 end
 
-function handler.on_disconnect(fd)
+function server.on_disconnect(fd)
 	local token = nil
 	local session = sessions[fd]
 	if session then
@@ -143,7 +143,7 @@ function handler.on_disconnect(fd)
 	sessions[fd] = nil
 end
 
-function handler.on_message(fd, message)
+function server.on_message(fd, message)
     local session = sessions[fd]
     if session then
 		local msg = decode(message)
@@ -203,11 +203,11 @@ function handler.on_message(fd, message)
     end
 end
 
-function handler.command(cmd,...)
+function server.command(cmd,...)
     local fn = CMD[cmd]
     if fn then
       	return fn(...)
     end
 end
 
-wsservice.start(handler)
+wsservice.start(server)

@@ -12,7 +12,7 @@ skynet.start(function()
 
   local gated = skynet.newservice("client/gate")
   skynet.name(GLOBAL.SERVICE_NAME.GATE, gated)
-  skynet.call(gated, "lua", "open", {
+  skynet.call(gated, "lua", "init", {
     port = 50001,
     maxclient = 100,
   })
