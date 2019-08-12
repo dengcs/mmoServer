@@ -18,6 +18,15 @@ skynet.start(function()
     maxclient = 100,
     nodelay = false,
   })
+
+  -- 启动控制后台
+  local cmd = skynet.newservice("http", "center.cmd", 1)
+  skynet.call(cmd, "lua", "init", {
+    address = "0.0.0.0",
+    port    = 42002,
+    auto    = true,
+    router  = { "router.cmd" },
+  })
   
   cluster.open(skynet.getenv("node"))
   
