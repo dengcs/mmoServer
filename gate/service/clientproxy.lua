@@ -16,7 +16,6 @@ local tb_concat         = table.concat
 local sky_packstring    = skynet.packstring
 
 local channel = nil
-local reply_id = 1
 
 -- 客户端应答回调
 local function dispatch_reply(so)
@@ -29,7 +28,7 @@ local function dispatch_reply(so)
         skynet.send(GLOBAL.SERVICE_NAME.GATE, "lua", "response", result)
     end
 
-    return reply_id
+    return true
 end
 
 -- 直接转发客户端数据
@@ -42,7 +41,7 @@ function CMD.forward(fd, msg)
             local compose_data = {msg_len, byte_fd, msg_data}
             local packet_data = tb_concat(compose_data)
 
-            channel:request(packet_data)
+            channel:request(packet_data, dispatch_reply)
         end
     end
 end
@@ -63,7 +62,7 @@ function CMD.signal(fd, protoName)
         local compose_data = {msg_len, byte_fd, msg_data}
         local packet_data = tb_concat(compose_data)
 
-        channel:request(packet_data)
+        channel:request(packet_data, dispatch_reply)
     end
 end
 
@@ -72,7 +71,6 @@ function server.init_handler(conf)
         host        = conf.ip,
         port        = conf.port,
         nodelay     = false,
-        response    = dispatch_reply,
     }
 
     if not channel then
