@@ -48,7 +48,7 @@ function REQUEST:create_player()
 	
 	if login_acount then
 
-		local vdata = {
+		local vData = {
 			pid			= allocid.generate(),
 			sex 		= self.proto.sex,
 			nickname  	= self.proto.nickname,
@@ -57,10 +57,11 @@ function REQUEST:create_player()
 			level		= 1,
 		}
 		
-		local result = db_player.insert(vdata)
+		local result = db_player.insert(vData)
 
 		if result then
-			this.call("player_create")
+			player_id = vData.pid
+			this.call("player_create", player_id)
 			ret = 0
 		end
 	end
@@ -77,7 +78,7 @@ function REQUEST:player_login()
 	if player_id then
 	    local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "load", player_id)
 	    if ok == 0 then
-			this.call("player_login")
+			this.call("player_login", player_id)
 			msg_data.ret = 0
 			msg_data.pid = player_id
 		end

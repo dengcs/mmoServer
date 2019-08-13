@@ -32,37 +32,37 @@ function social:init()
 end
 
 function social:load(pid)
-	local cdata = db_social.get(pid)
-	if cdata then
-		self.cache[pid] = cdata
-		return cdata
+	local vData = db_social.get(pid)
+	if vData then
+		self.cache[pid] = vData
+		return vData
 	end
 end
 
 function social:update(pid, data)
-	local cdata = self.cache[pid] or self:load(pid)
-	if not cdata then
-		cdata = {dirty = false}
-		self.cache[pid] = cdata
+	local vData = self.cache[pid] or self:load(pid)
+	if not vData then
+		vData = {dirty = false}
+		self.cache[pid] = vData
 		self.cache_count = self.cache_count + 1
 	end
 
 	for k,v in pairs(data or {}) do
-		if v ~= cdata[k] then
-			cdata[k] = v
-			cdata.dirty = true
+		if v ~= vData[k] then
+			vData[k] = v
+			vData.dirty = true
 			rank_update(k, pid, v)
 		end
 	end
 end
 
 function social:save(pid, clean)
-	local cdata = self.cache[pid]
-	if cdata then
-		if cdata.dirty then
-			cdata.dirty = false
+	local vData = self.cache[pid]
+	if vData then
+		if vData.dirty then
+			vData.dirty = false
 			-- 保存数据
-			db_social.set(pid, cdata)
+			db_social.set(pid, vData)
 		end
 
 		if clean then

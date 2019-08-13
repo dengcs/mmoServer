@@ -3,9 +3,9 @@ local pbhelper      = require "net.pbhelper"
 local wsservice 	= require "factory.wsservice"
 local cluster		= require "skynet.cluster"
 
-local tb_insert = table.insert
 local encode 	= pbhelper.pb_encode
 local decode 	= pbhelper.pb_decode
+local tb_insert	= table.insert
 
 local MSG_STATE = {
 	PREPARE 	= 0,
@@ -14,10 +14,8 @@ local MSG_STATE = {
 }
 
 local sessions 			= {}
-local token_data_map	= {}
-
--- 每分钟清理下session
-local interval = 60
+local token_sessions	= {}
+local fd_expiry_map		= {}
 
 ---------------------------------------------------------------------
 --- 内部函数
@@ -25,28 +23,25 @@ local interval = 60
 
 -- 回复消息
 local function response(message)
-	local token	= message.header.fd
-	local token_data = token_data_map[token]
-	if token_data then
-		local session = token_data.session
-		if session then
-			local web_socket = session.web_socket
-			if web_socket and web_socket:is_alive() then
-				local protoName = message.header.proto
-				local data      = message.payload
-				local errCode   = message.header.errcode
-				local msgData 	= encode(protoName, data, errCode)
-				web_socket:send_binary(msgData)
-			end
+	local fd	= message.header.fd
+	local session = sessions[fd]
+	if session then
+		local web_socket = session.web_socket
+		if web_socket and web_socket:is_alive() then
+			local protoName = message.header.proto
+			local data      = message.payload
+			local errCode   = message.header.errcode
+			local msgData 	= encode(protoName, data, errCode)
+			web_socket:send_binary(msgData)
 		end
 	end
 end
 
 -- 返回客户端消息
-local function resp_msg(token, proto, data)
+local function resp_msg(fd, proto, data)
 	local message = {
 		header = {
-			fd		= token,
+			fd		= fd,
 			proto 	= proto,
 		},
 		payload = data
@@ -56,28 +51,27 @@ local function resp_msg(token, proto, data)
 end
 
 -- 推送消息的代理
-local function send_to_proxy(cmd, token, msg)
-	skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", cmd, token, msg)
-	skynet.send(GLOBAL.SERVICE_NAME.GAMEPROXY, "lua", cmd, token, msg)
+local function send_to_proxy(cmd, fd, msg)
+	skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", cmd, fd, msg)
+	skynet.send(GLOBAL.SERVICE_NAME.GAMEPROXY, "lua", cmd, fd, msg)
 end
 
--- 清理过期token
-local function clean_token()
+-- 清理过期session
+local function clear_expiry_session()
 	local now = skynet.now()
 
 	local clear_list = {}
-	for token, v in pairs(token_data_map) do
-		if v.expiry then
-			if v.expiry > 0 and now > v.expiry then
-				-- 跟逻辑服断开虚拟连接
-				send_to_proxy("signal", token, "disconnect")
-				tb_insert(clear_list, token)
-			end
+	for fd, expiry in pairs(fd_expiry_map) do
+		if now > expiry then
+			-- 跟逻辑服断开虚拟连接
+			send_to_proxy("signal", fd, "disconnect")
+			tb_insert(clear_list, fd)
 		end
 	end
 
-	for i, v in pairs(clear_list) do
-		token_data_map[v] = nil
+	for _,fd in pairs(clear_list) do
+		fd_expiry_map[fd] = nil
+		sessions[fd] = nil
 	end
 end
 
@@ -110,12 +104,13 @@ local server = {}
 function server.on_init(conf)
 	pbhelper.register()
 
-	this.schedule(clean_token , interval, SCHEDULER_FOREVER)
+	this.schedule(clear_expiry_session , 60, SCHEDULER_FOREVER)
 end
 
 function server.on_connect(web_socket)
 	local fd = web_socket.id
 	local session = {
+		fd			= fd,
 		web_socket 	= web_socket,
 		state		= MSG_STATE.PREPARE
 	}
@@ -123,24 +118,13 @@ function server.on_connect(web_socket)
 end
 
 function server.on_disconnect(fd)
-	local token = nil
 	local session = sessions[fd]
 	if session then
-		if session.state == MSG_STATE.REQUEST then
-			token = session.token
+		fd_expiry_map[fd] = skynet.now() + 120
+		if session.token then
+			token_sessions[session.token] = nil
 		end
 	end
-
-	if token then
-		local token_data = token_data_map[token]
-		if token_data then
-			local expiry = skynet.now() + interval
-			token_data.expiry 	= expiry
-			token_data.session	= nil
-		end
-	end
-
-	sessions[fd] = nil
 end
 
 function server.on_message(fd, message)
@@ -151,9 +135,9 @@ function server.on_message(fd, message)
 			local proto 	= msg.header.proto
 			if session.state == MSG_STATE.REQUEST then
 				if game_proto_find(proto) then
-					skynet.send(GLOBAL.SERVICE_NAME.GAMEPROXY, "lua", "forward", session.token, msg)
+					skynet.send(GLOBAL.SERVICE_NAME.GAMEPROXY, "lua", "forward", fd, msg)
 				else
-					skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "forward", session.token, msg)
+					skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "forward", fd, msg)
 				end
 			else
 				local message	= msg.payload
@@ -165,35 +149,27 @@ function server.on_message(fd, message)
 							-- 记录token
 							local ret, token = cluster.call("center", GLOBAL.SERVICE_NAME.TOKEN, "generate", message.account)
 							if ret == 0 then
-								local token_data = token_data_map[token]
-								if token_data then
-									local pre_session = token_data.session
-									if pre_session then
-										pre_session.state = MSG_STATE.PREPARE
-										resp_msg(token, "kick_notify", {reason = 0})
-									end
-								else
-									token_data = {}
-									token_data_map[token] = token_data
+								local pre_session = token_sessions[token]
+								if pre_session then
+									pre_session.state = MSG_STATE.PREPARE
+									pre_session.token = nil
+									resp_msg(pre_session.fd, "kick_notify", {reason = 0})
 								end
-
-								token_data.session = session
+								token_sessions[token] = session
 
 								session.token = token
 								session.state = MSG_STATE.HANDSHAKE
-								resp_msg(token, "register_resp", {token = token})
+								resp_msg(fd, "register_resp", {token = token})
 							end
 						end
 					elseif session.state == MSG_STATE.HANDSHAKE then
 						-- 验证token
 						if proto == "verify" then
-							local ret = 1
-							if session.token and session.token == message.token then
+							if session.token == message.token then
 								session.state = MSG_STATE.REQUEST
-								ret = 0
 								-- 和逻辑服建立虚拟连接
-								send_to_proxy("signal", session.token, "connect")
-								resp_msg(session.token, "verify_resp", {ret = ret})
+								send_to_proxy("signal", fd, "connect")
+								resp_msg(fd, "verify_resp", {ret = 0})
 							end
 						end
 					end
