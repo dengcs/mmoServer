@@ -8,14 +8,12 @@ M.list = {
     {
         name = GLOBAL.SERVICE_NAME.LOGICPROXY,
         module = "clientproxy",
-        ip = "127.0.0.1",
-        port = 51001,
+        path = "config.proxy.logic",
     },
     {
         name = GLOBAL.SERVICE_NAME.GAMEPROXY,
         module = "clientproxy",
-        ip = "127.0.0.1",
-        port = 52001,
+        path = "config.proxy.center",
     },
 }
 

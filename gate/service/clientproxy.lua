@@ -6,6 +6,7 @@
 local skynet        = require "skynet"
 local service       = require "factory.service"
 local socketchannel = require "skynet.socketchannel"
+local random        = require "utils.random"
 
 local server = {}
 local CMD = {}
@@ -13,9 +14,11 @@ local CMD = {}
 local str_pack          = string.pack
 local str_unpack        = string.unpack
 local tb_concat         = table.concat
+local tb_insert         = table.insert
 local sky_packstring    = skynet.packstring
 
-local channel = nil
+local channels          = {}
+local fd_channel_map    = {}
 
 -- 客户端应答回调
 local function dispatch_reply(so)
@@ -33,6 +36,7 @@ end
 
 -- 直接转发客户端数据
 function CMD.forward(fd, msg)
+    local channel = fd_channel_map[fd]
     if channel then
         if msg then
             local byte_fd = str_pack(">J", fd)
@@ -48,6 +52,24 @@ end
 
 -- 客户端信号，需要自己构造协议头
 function CMD.signal(fd, protoName)
+    local channel = nil
+
+    if protoName == "connect" then
+        local channel_cnt = #channels
+        if channel_cnt > 0 then
+            local select = 1
+            if channel_cnt > 1 then
+                select = random.Get(channel_cnt)
+            end
+            channel = channels[select]
+            fd_channel_map[fd] = channel
+        end
+
+    else
+        channel = fd_channel_map[fd]
+        fd_channel_map[fd] = nil
+    end
+
     if channel then
         local msgData =
         {
@@ -67,18 +89,19 @@ function CMD.signal(fd, protoName)
 end
 
 function server.init_handler(conf)
-    channel = socketchannel.channel {
-        host        = conf.ip,
-        port        = conf.port,
-        nodelay     = false,
-    }
+    local clients = require(conf.path)
+    for _,v in pairs(clients or {}) do
+        local channel = socketchannel.channel {
+            host        = v.ip,
+            port        = v.port,
+            nodelay     = false,
+        }
 
-    if not channel then
-        ERROR(ENETUNREACH, "channel is nil")
-        return
+        if channel then
+            channel:connect(true)
+            tb_insert(channels, channel)
+        end
     end
-
-    channel:connect(true)
 end
 
 function server.exit_handler()
