@@ -12,6 +12,7 @@ local ENUM 			= require("config.enum")
 local tb_insert		= table.insert
 local PLAY_STATE 	= ENUM.PLAY_STATE
 local PLAY_EVENT	= ENUM.PLAY_EVENT
+local STATE_BOTTOM	= 11 -- 获得底牌
 
 local hide_byte_bit = 1024
 
@@ -74,6 +75,7 @@ function play_core:state_notify(idx, state)
 	end
 end
 
+-- 推送底牌
 function play_core:push_bottom()
 	if self.landowner > 0 then
 
@@ -84,10 +86,10 @@ function play_core:push_bottom()
 			end
 		end
 
-		local data = json_codec.encode(PLAY_STATE.BOTTOM, {idx = self.landowner, msg = self.data.cards})
+		local data = json_codec.encode(STATE_BOTTOM, {idx = self.landowner, msg = self.data.cards})
 		self:broadcast(data)
 
-		local notify_data = json_codec.encode(PLAY_STATE.BOTTOM)
+		local notify_data = json_codec.encode(STATE_BOTTOM)
 		self:notify(self.landowner, notify_data)
 	end
 end
@@ -136,7 +138,7 @@ function play_core:get_type_indexes(idx, type, value, count)
 	return poker_type.get_type_indexes(type, cards, value, count)
 end
 
---
+-- 出牌
 function play_core:post_cards(idx, card_indexes)
 	local ret_cards = {}
 	local cards = self:get_cards(idx)
@@ -163,10 +165,10 @@ end
 function play_core:game_over(idx)
 	self.play_state:stop()
 
-	self:event(PLAY_EVENT.GAME_OVER, {})
-
 	local broadcast_data = json_codec.encode(PLAY_STATE.OVER, {idx = idx})
 	self:broadcast(broadcast_data)
+
+	self:event(PLAY_EVENT.GAME_OVER, {})
 end
 
 function play_core:set_round_state(idx, type, value, count)
@@ -188,8 +190,8 @@ function play_core:is_main_type(idx)
 	return false
 end
 
--- 主动出牌
-function play_core:check_play(idx, msg)
+-- 验牌及出牌
+function play_core:check_and_post(idx, msg)
 	local indexes = {}
 	local cards = self:get_cards(idx)
 	for _, v in pairs(msg or {}) do
@@ -277,23 +279,23 @@ function play_core:update(idx, data, direct)
 
 	if place_idx == idx then
 		local cmd, msg = json_codec.decode(data)
-		if not cmd then
+		if cmd ~= state then
 			return
 		end
 
 		local ok = false
 
-		if state == PLAY_STATE.SNATCH and cmd == state then
+		if state == PLAY_STATE.SNATCH then
 			if msg == 1 then
 				self.landowner = idx
 			end
 			ok = true
-		elseif state == PLAY_STATE.DOUBLE and cmd == state then
+		elseif state == PLAY_STATE.DOUBLE then
 			if msg == 1 then
 				self.double = self.double * 2
 			end
 			ok = true
-		elseif state == PLAY_STATE.PLAY and cmd == state then
+		elseif state == PLAY_STATE.PLAY then
 			if direct then
 				ok = true
 			else
@@ -301,7 +303,11 @@ function play_core:update(idx, data, direct)
 					-- 托管
 					msg = self:entrust(idx)
 					self:timeout_update(300, idx, cmd, msg)
-				elseif msg == 0 or self:check_play(idx, msg) then
+				elseif msg == 0 then
+					-- 要不起
+					ok = true
+				elseif self:check_and_post(idx, msg) then
+					-- 出牌
 					ok = true
 				end
 			end

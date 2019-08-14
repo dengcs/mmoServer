@@ -109,7 +109,6 @@ local PLAY_STATE = {
 	DOUBLE	= 4, -- 加倍
 	PLAY 	= 5, -- 游戏
 	OVER 	= 6, -- 结束
-	BOTTOM	= 11, -- 获得底牌
 }
 
 ENUM.PLAY_STATE = PLAY_STATE

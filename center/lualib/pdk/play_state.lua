@@ -88,21 +88,21 @@ function play_state:turn_worker()
 	if self.count > max_count then
 		self.state = self.state + 1
 		self:reset_state_param()
-		self:handle_state_event()
+		self:monitor_event()
 	end
 
 	self.place_idx	= (self.place_idx % GLOBAL_PLAYER_NUM) + 1
 end
 
 -- 发底牌
-function play_state:handle_push_bottom()
+function play_state:push_bottom_event()
 	if self.state == PLAY_STATE.DOUBLE then
 		self:push_bottom()
 	end
 end
 
 -- 地主出牌
-function play_state:handle_landowner_play()
+function play_state:landowner_play_event()
 	if self.state == PLAY_STATE.PLAY then
 		local landowner = self:get_landowner()
 		if landowner > 0 then
@@ -111,9 +111,9 @@ function play_state:handle_landowner_play()
 	end
 end
 
-function play_state:handle_state_event()
-	self:handle_push_bottom()
-	self:handle_landowner_play()
+function play_state:monitor_event()
+	self:push_bottom_event()
+	self:landowner_play_event()
 end
 
 -- 运行到发牌

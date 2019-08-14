@@ -3,10 +3,7 @@
 --
 local skynet  	= require "skynet"
 local service 	= require "factory.service"
-local ENUM    	= require "config.enum"
 local model		= require "combat.game"
-
-local GAME_STATE = ENUM.GAME_STATE
 
 local COMMAND = {}
 -----------------------------------------------------------
