@@ -6,7 +6,6 @@ local ENUM    		= require "config.enum"
 local play_manager	= require "pdk.play_manager"
 
 local tinsert 		= table.insert
-local userdriver 	= skynet.userdriver()
 
 local PLAYER_STATE_TYPE = ENUM.PLAYER_STATE_TYPE
 local GAME_MEMBER_STATE = ENUM.GAME_MEMBER_STATE
@@ -22,7 +21,7 @@ local PLAY_EVENT		= ENUM.PLAY_EVENT
 -- 2. 战场别名
 -- 3. 强制标志
 local function enter_environment(pid, alias, force)
-	local errcode, retval = userdriver.usercall(pid, "on_enter_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias, force)
+	local errcode, retval = this.usercall(pid, "on_enter_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias, force)
 	if not retval then
 		errcode = ERRCODE.GAME_ENTERENV_FAILED
 	end
@@ -33,7 +32,7 @@ end
 -- 1. 角色编号
 -- 2. 战场别名
 local function leave_environment(pid, alias)
-	local errcode, retval = userdriver.usercall(pid, "on_leave_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias)
+	local errcode, retval = this.usercall(pid, "on_leave_environment", PLAYER_STATE_TYPE.PLAYER_STATE_GAME, alias)
 	if not retval then
 		errcode = ERRCODE.GAME_LEAVEENV_FAILED
 	end
@@ -87,7 +86,7 @@ function Member:notify(name, data)
 	if self.agent ~= nil then
 		skynet.send(self.agent, "lua", "on_common_notify", name, data)
 	else
-		userdriver.usersend(self.pid, "on_common_notify", name, data)
+		this.usersend(self.pid, "on_common_notify", name, data)
 	end
 end
 

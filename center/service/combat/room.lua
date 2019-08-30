@@ -5,8 +5,6 @@ local skynet  = require "skynet"
 local service = require "factory.service"
 local model = require "combat.room"
 local robot = require "combat.robot"
--- 底层驱动加载
-local userdriver = require "driver.userdriver"
 
 local COMMAND = {}
 
@@ -153,7 +151,7 @@ function COMMAND.on_invite(cid, tid, source, pid)
 		pid      = member.pid,
 		nickname = member.nickname,
 	}
-	userdriver.usersend(pid, "on_common_invite", name, data)
+	this.usersend(pid, "on_common_invite", name, data)
 	return 0
 end
 

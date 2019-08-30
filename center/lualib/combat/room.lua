@@ -5,7 +5,6 @@ local skynet   	= require "skynet_ex"
 local utils 	= require "combat.utils"
 
 local tinsert 		= table.insert
-local userdriver 	= skynet.userdriver()
 
 -----------------------------------------------------------
 --- 内部常量/内部逻辑
@@ -133,7 +132,7 @@ function Member:notify(name, data)
 	if self.agent ~= nil then
 		skynet.send(self.agent, "lua", "on_common_notify", name, data)
 	else
-		userdriver.usersend(self.pid, "on_common_notify", name, data)
+		this.usersend(self.pid, "on_common_notify", name, data)
 	end
 end
 
@@ -382,7 +381,7 @@ end
 ---- 消息广播
 --function Channel:broadcast(name, data)
 --	for k, v in pairs(self.onlines) do
---		userdriver.usersend(k, "on_common_notify", name, data)
+--		this.usersend(k, "on_common_notify", name, data)
 --	end
 --end
 
