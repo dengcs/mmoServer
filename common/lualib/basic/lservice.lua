@@ -14,36 +14,37 @@ SCHEDULER_FOREVER 		= -1
 --- 服务框架调用方法
 ---------------------------------------------------------------------
 local function __DO_COMMAND(f, ...)
-    local ok, result = xpcall(f, function (message)
-        LOG_ERROR(debug.traceback(message))
-        return message
-    end, ...)
-    if not ok then
-        return table.pack(ok, result)
+    local ok = 0
+    local result = nil
+
+    if IS_FUNCTION(f) then
+        result = f(...)
+    else
+        ok = EPERM
     end
 
-    return table.pack(0, result)
+    return table.pack(ok, result)
 end
 
 local function __SAFE_SEND(f, ...)
-    local ok, result = xpcall(f, function (message)
-        LOG_ERROR(debug.traceback(message))
-        return message
-    end, ...)
+    if IS_FUNCTION(f) then
+        f(...)
+    end
 
     skynet.ret()
 end
 
 local function __SAFE_CALL(f, ...)
-    local ok, result = xpcall(f, function (message)
-        LOG_ERROR(debug.traceback(message))
-        return message
-    end, ...)
-    if not ok then
-        return skynet.retpack(ok, result)
+    local ok = 0
+    local result = nil
+
+    if IS_FUNCTION(f) then
+        result = f(...)
+    else
+        ok = EPERM
     end
 
-    return skynet.retpack(0, result)
+    return skynet.retpack(ok, result)
 end
 
 function SAFE_HANDLER(session)

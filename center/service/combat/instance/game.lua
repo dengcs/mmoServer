@@ -64,10 +64,10 @@ function COMMAND.on_leave(alias, pid)
 
 	local member = game:quit(pid)
 	if member ~= nil then
-		game:broadcast("game_quit__notify", {pid = member.pid})
+		game:broadcast("game_quit_notify", {pid = member.pid})
 		-- 清理战场
 		if game:empty() then
-			COMMAND.on_close(alias)
+			games[alias] = nil
 		end
 	end
 	return 0

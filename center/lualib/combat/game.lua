@@ -49,8 +49,7 @@ Member.__index = Member
 -- 构造成员对象
 -- 1. 参赛者信息
 function Member.new(vdata)
-	local member = {}
-	setmetatable(member, Member)
+	local member = setmetatable({}, Member)
 	-- 设置基础数据
 	member.agent      	= vdata.agent					-- 角色句柄
 	member.pid        	= vdata.pid						-- 角色编号
@@ -117,8 +116,7 @@ Game.__index = Game
 -- 1. 战场id
 -- 2. 成员列表
 function Game.new(alias, data)
-	local game = {}
-	setmetatable(game, Game)
+	local game = setmetatable({}, Game)
 
 	-- 设置战场数据
 	game.alias    	= alias							-- 战场id

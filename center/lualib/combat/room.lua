@@ -60,8 +60,7 @@ Member.__index = Member
 -- 构造成员对象
 function Member.new(vdata)
 	if vdata and next(vdata) then
-		local member = {}
-		setmetatable(member, Member)
+		local member = setmetatable({}, Member)
 		-- 设置成员数据
 		member.agent			= vdata.agent			-- 角色句柄
 		member.pid             	= vdata.pid				-- 角色编号
@@ -159,9 +158,7 @@ Team.__index = Team
 -- 构造队伍
 -- 1. 创建者信息
 function Team.new(vdata)
-	local team = {}
-
-	setmetatable(team, Team)
+	local team = setmetatable({}, Team)
 
 	-- 设置队伍数据
 	team.id      	= allocid()					-- 队伍编号（顺序递增）
@@ -374,9 +371,7 @@ Channel.__index = Channel
 
 -- 构建频道
 function Channel.new(id)
-	local channel = {}
-	-- 注册成员方法
-	setmetatable(channel, Channel)
+	local channel = setmetatable({}, Channel)
 
 	-- 设置频道数据
 	channel.id		= id

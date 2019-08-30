@@ -14,7 +14,7 @@ local PLAY_STATE 	= ENUM.PLAY_STATE
 local PLAY_EVENT	= ENUM.PLAY_EVENT
 local STATE_BOTTOM	= 11 -- 获得底牌
 
-local hide_byte_bit = 1024
+local hide_byte_bit = 0x400
 
 local play_core = {}
 
@@ -139,7 +139,7 @@ function play_core:get_type_indexes(idx, type, value, count)
 end
 
 -- 出牌
-function play_core:post_cards(idx, card_indexes)
+function play_core:remove_cards(idx, card_indexes)
 	local ret_cards = {}
 	local cards = self:get_cards(idx)
 	for _, v in pairs(card_indexes or {}) do
@@ -164,10 +164,10 @@ end
 
 function play_core:game_over(idx)
 	self.play_state:stop()
-
+	-- 通知客户端游戏已经结束
 	local broadcast_data = json_codec.encode(PLAY_STATE.OVER, {idx = idx})
 	self:broadcast(broadcast_data)
-
+	-- 通知内部处理游戏结束事件
 	self:event(PLAY_EVENT.GAME_OVER, {})
 end
 
@@ -213,7 +213,7 @@ function play_core:check_and_post(idx, msg)
 	if is_main then
 		local type, max_value, count = poker_type.test_type(msg)
 		if type then
-			self:post_cards(idx, indexes)
+			self:remove_cards(idx, indexes)
 			self:set_round_state(idx, type, max_value, count)
 			return true
 		end
@@ -224,7 +224,7 @@ function play_core:check_and_post(idx, msg)
 
 		local ret_type, max_value, ret_count = poker_type.check_type(type, msg, value, count)
 		if ret_type then
-			self:post_cards(idx, indexes)
+			self:remove_cards(idx, indexes)
 			self:set_round_state(idx, ret_type, max_value, ret_count)
 			return true
 		end
@@ -241,7 +241,7 @@ function play_core:entrust(idx)
 	if is_main then
 		local indexes, type, max_value, count = self:get_default_indexes(idx)
 		if indexes then
-			local cards = self:post_cards(idx, indexes)
+			local cards = self:remove_cards(idx, indexes)
 			self:set_round_state(idx, type, max_value, count)
 			msg = cards
 		end
@@ -251,7 +251,7 @@ function play_core:entrust(idx)
 		local count = self.round_state.count
 		local indexes, max_value = self:get_type_indexes(idx, type, value, count)
 		if indexes then
-			local cards = self:post_cards(idx, indexes)
+			local cards = self:remove_cards(idx, indexes)
 			self:set_round_state(idx, type, max_value, count)
 			msg = cards
 		end
