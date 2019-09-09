@@ -393,7 +393,7 @@ end
 -- 创建队伍
 function Channel:create(vdata)
 	local team = Team.new(vdata)
-	if team ~= nil then
+	if team then
 		team.channel		= self.id
 		self.teams[team.id] = team
 	end

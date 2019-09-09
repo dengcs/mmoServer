@@ -83,7 +83,7 @@ function Member:notify(name, data)
 		return
 	end
 	-- 战场消息通知
-	if self.agent ~= nil then
+	if self.agent then
 		skynet.send(self.agent, "lua", "on_common_notify", name, data)
 	else
 		this.usersend(self.pid, "on_common_notify", name, data)
@@ -126,7 +126,7 @@ function Game.new(alias, data)
 	game.channel	= data.channel
 	game.teamid		= data.teamid
 	game.owner		= data.owner
-	for _, user in pairs(data.members) do
+	for _, user in ipairs(data.members) do
 		-- 加入战场
 		local member = game:join(Member.new(user))
 		if member == nil then
@@ -229,15 +229,20 @@ function Game:reconnect(pid)
 	return member
 end
 
+-- 游戏结束
+function Game:over(data)
+	for _, v in pairs(self.members) do
+		if not v.robot then
+			leave_environment(v.pid, self.alias)
+		end
+	end
+	skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "game_finish", self.alias, data)
+end
+
 -- 内部事件
 function Game:event(id, data)
 	if id == PLAY_EVENT.GAME_OVER then
-		for i, v in pairs(self.members) do
-			if not v.robot then
-				leave_environment(v.pid, self.alias)
-			end
-		end
-		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "game_finish", self.alias, data)
+		self:over(data)
 	end
 end
 

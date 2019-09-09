@@ -164,11 +164,17 @@ end
 
 function play_core:game_over(idx)
 	self.play_state:stop()
+	local overData =
+	{
+		idx 		= idx,
+		double		= self.double,
+		landowner 	= self.landowner,
+	}
 	-- 通知客户端游戏已经结束
-	local broadcast_data = json_codec.encode(PLAY_STATE.OVER, {idx = idx})
-	self:broadcast(broadcast_data)
+	local bc_data = json_codec.encode(PLAY_STATE.OVER, overData)
+	self:broadcast(bc_data)
 	-- 通知内部处理游戏结束事件
-	self:event(PLAY_EVENT.GAME_OVER, {})
+	self:event(PLAY_EVENT.GAME_OVER, overData)
 end
 
 function play_core:set_round_state(idx, type, value, count)

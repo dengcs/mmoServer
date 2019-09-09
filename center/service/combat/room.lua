@@ -28,11 +28,7 @@ local channels =
 	[4] = Channel.new(4),	-- 高级频道
 }
 
--- 间隔时间
-local function interval()
-	return 500
-end
-
+-- 匹配逻辑
 local function schedule()
 	-- 逻辑
 	local function fn()
@@ -53,7 +49,7 @@ local function schedule()
 	end
 	-- 任务处理
 	xpcall(fn, catch)
-	skynet.timeout(interval(), schedule)
+	skynet.timeout(500, schedule)
 end
 
 -----------------------------------------------------------
@@ -111,7 +107,7 @@ function COMMAND.on_join(cid, tid, vdata)
     
     -- 加入队伍
     local member = team:join(vdata)
-    if member ~= nil then
+    if member then
         return 0
     else
         return ERRCODE.COMMON_SYSTEM_ERROR
@@ -167,7 +163,7 @@ function COMMAND.on_chat(cid, tid, name, data)
     end
     -- 队伍检查
     local team = channel:get(tid)
-    if team ~= nil then
+    if team then
 		-- 消息转发
 		team:broadcast(name, data)
 		return 0
@@ -234,7 +230,7 @@ end
 local handler = {}
 
 function handler.init_handler()
-	skynet.timeout(interval(), schedule)
+	schedule()
 end
 
 -- 消息分发逻辑

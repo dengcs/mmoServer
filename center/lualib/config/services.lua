@@ -15,7 +15,7 @@ M.list = {
     },
     {
         name = GLOBAL.SERVICE_NAME.GAME,
-        module = "combat.instance.game",
+        module = "combat.game",
     },
     {
         name = GLOBAL.SERVICE_NAME.ROOM,
