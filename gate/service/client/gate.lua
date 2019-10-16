@@ -1,7 +1,6 @@
 local skynet 		= require "skynet_ex"
 local pbhelper      = require "net.pbhelper"
 local wsservice 	= require "factory.wsservice"
-local cluster		= require "skynet.cluster"
 
 local encode 	= pbhelper.pb_encode
 local decode 	= pbhelper.pb_decode
@@ -147,8 +146,8 @@ function server.on_message(fd, message)
 						-- 需要记录账号信息（比如IP）
 						if proto == "register" then
 							-- 记录token
-							local ret, token = cluster.call("center", GLOBAL.SERVICE_NAME.TOKEN, "generate", message.account)
-							if ret == 0 then
+							local token = message.account
+							if IS_STRING(token) and string.len(token) > 0 then
 								local pre_session = token_sessions[token]
 								if pre_session then
 									pre_session.state = MSG_STATE.PREPARE

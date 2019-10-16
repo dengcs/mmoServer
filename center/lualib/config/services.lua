@@ -22,10 +22,6 @@ M.list = {
         module = "combat.room",
     },
     {
-        name = GLOBAL.SERVICE_NAME.TOKEN,
-        module = "token",
-    },
-    {
         name = GLOBAL.SERVICE_NAME.MAIL,
         module = "common.maild",
     },

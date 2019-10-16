@@ -23,7 +23,6 @@ GLOBAL.SERVICE_NAME =
     USERCENTER  = ".usercenter",
     GAME        = ".game",
     ROOM        = ".room",
-    TOKEN       = ".token",
     SOCIAL      = ".social",
     FRIEND      = ".friend",
     MAIL        = ".mail",
