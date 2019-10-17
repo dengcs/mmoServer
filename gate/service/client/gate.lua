@@ -70,7 +70,6 @@ local function clear_expiry_session()
 
 	for _,fd in pairs(clear_list) do
 		fd_expiry_map[fd] = nil
-		sessions[fd] = nil
 	end
 end
 
@@ -119,9 +118,14 @@ end
 function server.on_disconnect(fd)
 	local session = sessions[fd]
 	if session then
+		sessions[fd] = nil
 		fd_expiry_map[fd] = skynet.now() + 120
+
 		if session.token then
-			token_sessions[session.token] = nil
+			local t_session = token_sessions[session.token]
+			if t_session and t_session.state == session.state then
+				token_sessions[session.token] = nil
+			end
 		end
 	end
 end
@@ -151,7 +155,6 @@ function server.on_message(fd, message)
 								local pre_session = token_sessions[token]
 								if pre_session then
 									pre_session.state = MSG_STATE.PREPARE
-									pre_session.token = nil
 									resp_msg(pre_session.fd, "kick_notify", {reason = 0})
 								end
 								token_sessions[token] = session

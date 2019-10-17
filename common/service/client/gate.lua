@@ -79,7 +79,7 @@ end
 
 local CMD = {}
 
-function CMD.disconnect(fd, client_fd)
+function CMD.close_client(fd, client_fd)
     local clients = connection[fd]
     if clients then
         clients[client_fd] = nil

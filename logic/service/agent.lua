@@ -56,7 +56,7 @@ function CMD.disconnect(source, unloaded)
 	if session then
 		local fd 		= session.fd
 		local client_fd = session.client_fd
-		skynet.send(GLOBAL.SERVICE_NAME.GATE, "lua", "disconnect", fd, client_fd)
+		skynet.send(GLOBAL.SERVICE_NAME.GATE, "lua", "close_client", fd, client_fd)
 		session = nil
 	end
 
