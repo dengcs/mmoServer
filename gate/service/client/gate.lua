@@ -1,6 +1,7 @@
 local skynet 		= require "skynet_ex"
 local pbhelper      = require "net.pbhelper"
 local wsservice 	= require "factory.wsservice"
+local random		= require "utils.random"
 
 local encode 	= pbhelper.pb_encode
 local decode 	= pbhelper.pb_decode
@@ -13,8 +14,10 @@ local MSG_STATE = {
 }
 
 local sessions 			= {}
-local token_sessions	= {}
+local session_map		= {}
 local fd_expiry_map		= {}
+
+local generate_token	= random.Get(10000)
 
 ---------------------------------------------------------------------
 --- 内部函数
@@ -121,11 +124,8 @@ function server.on_disconnect(fd)
 		sessions[fd] = nil
 		fd_expiry_map[fd] = skynet.now() + 120
 
-		if session.token then
-			local t_session = token_sessions[session.token]
-			if t_session and t_session.state == session.state then
-				token_sessions[session.token] = nil
-			end
+		if session.state == MSG_STATE.REQUEST then
+			session_map[session.account] = nil
 		end
 	end
 end
@@ -150,18 +150,21 @@ function server.on_message(fd, message)
 						-- 需要记录账号信息（比如IP）
 						if proto == "register" then
 							-- 记录token
-							local token = message.account
-							if IS_STRING(token) and string.len(token) > 0 then
-								local pre_session = token_sessions[token]
+							local account 	= message.account
+							local acc_len	= string.len(account)
+							if acc_len > 0 and acc_len < 100 then
+								local pre_session = session_map[account]
 								if pre_session then
-									pre_session.state = MSG_STATE.PREPARE
+									pre_session.state = MSG_STATE.HANDSHAKE
 									resp_msg(pre_session.fd, "kick_notify", {reason = 0})
 								end
-								token_sessions[token] = session
+								session_map[account] = session
 
-								session.token = token
-								session.state = MSG_STATE.HANDSHAKE
-								resp_msg(fd, "register_resp", {token = token})
+								generate_token	= generate_token + 1
+								session.token 	= generate_token
+								session.account = account
+								session.state 	= MSG_STATE.HANDSHAKE
+								resp_msg(fd, "register_resp", {token = generate_token})
 							end
 						end
 					elseif session.state == MSG_STATE.HANDSHAKE then

@@ -100,10 +100,10 @@
           <entry key="project.open.time.4" value="25" />
           <entry key="project.open.time.5" value="19" />
           <entry key="project.open.time.6" value="10" />
-          <entry key="project.open.time.7" value="7" />
+          <entry key="project.open.time.7" value="8" />
           <entry key="project.open.time.8" value="11" />
           <entry key="project.open.time.9" value="4" />
-          <entry key="project.opened" value="110" />
+          <entry key="project.opened" value="111" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -123,7 +123,7 @@
           <entry key="js" value="1" />
           <entry key="logic" value="5" />
           <entry key="login" value="3" />
-          <entry key="lua" value="1923" />
+          <entry key="lua" value="1927" />
           <entry key="mc" value="1" />
           <entry key="md" value="1" />
           <entry key="mk" value="1" />
@@ -140,7 +140,7 @@
           <entry key="JavaScript" value="1" />
           <entry key="PLAIN_TEXT" value="152" />
           <entry key="Scratch" value="1" />
-          <entry key="lua" value="1923" />
+          <entry key="lua" value="1927" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -151,7 +151,7 @@
           <entry key="gitignore" value="14" />
           <entry key="logic" value="19" />
           <entry key="login" value="8" />
-          <entry key="lua" value="25413" />
+          <entry key="lua" value="25565" />
           <entry key="md" value="40" />
           <entry key="proto" value="721" />
           <entry key="sh" value="755" />
@@ -161,13 +161,28 @@
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="1712" />
-          <entry key="lua" value="25413" />
+          <entry key="lua" value="25565" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
+    <leaf>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/gate/service/client/gate.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="601">
+              <caret line="127" column="23" selection-start-line="127" selection-start-column="12" selection-end-line="127" selection-end-column="23" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gate/service/main.lua">
+          <provider selected="true" editor-type-id="text-editor" />
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -178,8 +193,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>aux_getn</find>
-      <find>time</find>
       <find>numusearray</find>
       <find>countint</find>
       <find>arrayindex</find>
@@ -208,6 +221,8 @@
       <find>dispatch_reply</find>
       <find>sky_packstring</find>
       <find>resp_msg</find>
+      <find>token_sessions</find>
+      <find>generate_token</find>
     </findStrings>
     <replaceStrings>
       <replace>hide_byte_bit</replace>
@@ -295,8 +310,8 @@
         <option value="$PROJECT_DIR$/config/hot_fix/inject_test.lua" />
         <option value="$PROJECT_DIR$/common/lualib/basic/macros.lua" />
         <option value="$PROJECT_DIR$/center/lualib/config/services.lua" />
-        <option value="$PROJECT_DIR$/gate/service/client/gate.lua" />
         <option value="$PROJECT_DIR$/common/service/client/gate.lua" />
+        <option value="$PROJECT_DIR$/gate/service/client/gate.lua" />
       </list>
     </option>
   </component>
@@ -337,6 +352,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -359,6 +376,13 @@
               <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
               <item name="common" type="462c0819:PsiDirectoryNode" />
               <item name="lualib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+              <item name="lualib" type="462c0819:PsiDirectoryNode" />
+              <item name="utils" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
@@ -436,8 +460,6 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -503,8 +525,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="-7" y="-7" width="2062" height="1126" extended-state="6" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.19910179" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2010978" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -553,11 +576,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/engine/3rd/lua/llimits.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-342" />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/engine/3rd/lua/lapi.h">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -811,9 +829,6 @@
     <entry file="file://$PROJECT_DIR$/gate/lualib/config/proxy/center.lua">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/gate/service/main.lua">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/center/lualib/pdk/poker_type.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-4539">
@@ -852,17 +867,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gate/service/client/gate.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1121">
-          <caret line="76" column="30" selection-start-line="76" selection-start-column="15" selection-end-line="76" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/common/lualib/basic/macros.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="15" column="19" selection-start-line="15" selection-end-line="15" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gate/service/main.lua">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/lualib/utils/random.lua">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gate/service/client/gate.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="601">
+          <caret line="127" column="23" selection-start-line="127" selection-start-column="12" selection-end-line="127" selection-end-column="23" />
         </state>
       </provider>
     </entry>
