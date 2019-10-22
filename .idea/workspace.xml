@@ -151,7 +151,7 @@
           <entry key="gitignore" value="14" />
           <entry key="logic" value="19" />
           <entry key="login" value="8" />
-          <entry key="lua" value="25565" />
+          <entry key="lua" value="25569" />
           <entry key="md" value="40" />
           <entry key="proto" value="721" />
           <entry key="sh" value="755" />
@@ -161,7 +161,7 @@
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="1712" />
-          <entry key="lua" value="25565" />
+          <entry key="lua" value="25569" />
         </counts>
       </usages-collector>
     </session>
@@ -171,8 +171,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/gate/service/client/gate.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="601">
-              <caret line="127" column="23" selection-start-line="127" selection-start-column="12" selection-end-line="127" selection-end-column="23" />
+            <state relative-caret-position="133">
+              <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
             </state>
           </provider>
         </entry>
@@ -193,7 +193,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>numusearray</find>
       <find>countint</find>
       <find>arrayindex</find>
       <find>computesizes</find>
@@ -208,7 +207,6 @@
       <find>luaH_resizearray</find>
       <find>tinsert</find>
       <find>luaH_newkey</find>
-      <find>clear_expiry_session</find>
       <find>token</find>
       <find>cluster</find>
       <find>GLOBAL.SERVICE_NAME.TOKEN</find>
@@ -216,13 +214,15 @@
       <find>channels</find>
       <find>get_cards_mode</find>
       <find>get_3with1</find>
-      <find>fd_expiry_map</find>
       <find>GLOBAL.SERVICE_NAME.GATE</find>
       <find>dispatch_reply</find>
       <find>sky_packstring</find>
       <find>resp_msg</find>
       <find>token_sessions</find>
       <find>generate_token</find>
+      <find>clear_expiry_session</find>
+      <find>fd_expiry_map</find>
+      <find>tb_insert</find>
     </findStrings>
     <replaceStrings>
       <replace>hide_byte_bit</replace>
@@ -882,8 +882,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gate/service/client/gate.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="601">
-          <caret line="127" column="23" selection-start-line="127" selection-start-column="12" selection-end-line="127" selection-end-column="23" />
+        <state relative-caret-position="133">
+          <caret line="7" lean-forward="true" selection-start-line="7" selection-end-line="7" />
         </state>
       </provider>
     </entry>

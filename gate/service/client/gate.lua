@@ -5,7 +5,6 @@ local random		= require "utils.random"
 
 local encode 	= pbhelper.pb_encode
 local decode 	= pbhelper.pb_decode
-local tb_insert	= table.insert
 
 local MSG_STATE = {
 	PREPARE 	= 0,
@@ -15,7 +14,6 @@ local MSG_STATE = {
 
 local sessions 			= {}
 local session_map		= {}
-local fd_expiry_map		= {}
 
 local generate_token	= random.Get(10000)
 
@@ -58,24 +56,6 @@ local function send_to_proxy(cmd, fd, msg)
 	skynet.send(GLOBAL.SERVICE_NAME.GAMEPROXY, "lua", cmd, fd, msg)
 end
 
--- 清理过期session
-local function clear_expiry_session()
-	local now = skynet.now()
-
-	local clear_list = {}
-	for fd, expiry in pairs(fd_expiry_map) do
-		if now > expiry then
-			-- 跟逻辑服断开虚拟连接
-			send_to_proxy("signal", fd, "disconnect")
-			tb_insert(clear_list, fd)
-		end
-	end
-
-	for _,fd in pairs(clear_list) do
-		fd_expiry_map[fd] = nil
-	end
-end
-
 -- 游戏服协议匹配
 local function game_proto_find(proto)
 	local prefix_list = {"game_", "room_", "mail_", "friend_", "chat_"}
@@ -104,8 +84,6 @@ local server = {}
 
 function server.on_init(conf)
 	pbhelper.register()
-
-	this.schedule(clear_expiry_session , 60, SCHEDULER_FOREVER)
 end
 
 function server.on_connect(web_socket)
@@ -122,7 +100,7 @@ function server.on_disconnect(fd)
 	local session = sessions[fd]
 	if session then
 		sessions[fd] = nil
-		fd_expiry_map[fd] = skynet.now() + 120
+		send_to_proxy("signal", fd, "disconnect")
 
 		if session.state == MSG_STATE.REQUEST then
 			session_map[session.account] = nil
