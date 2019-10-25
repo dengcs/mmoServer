@@ -73,7 +73,6 @@ end
 
 function play_state:turn()
 	self:turn_worker()
-	print("dcs------------", self.place_idx, self.state)
 	return self.place_idx,self.state
 end
 

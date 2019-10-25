@@ -28,10 +28,11 @@ local function dispatch_reply(so)
     local result = skynet.unpack(reply)
 
     if result then
+        skynet.error("dcs----response--", table.tostring(result))
         skynet.send(GLOBAL.SERVICE_NAME.GATE, "lua", "response", result)
     end
 
-    return true
+    return 0,true
 end
 
 -- 直接转发客户端数据
@@ -39,13 +40,14 @@ function CMD.forward(fd, msg)
     local channel = fd_channel_map[fd]
     if channel then
         if msg then
+            skynet.error("dcs----request--", table.tostring(msg))
             local byte_fd = str_pack(">J", fd)
             local msg_data = sky_packstring(msg)
             local msg_len = str_pack(">H", msg_data:len() + byte_fd:len())
             local compose_data = {msg_len, byte_fd, msg_data}
             local packet_data = tb_concat(compose_data)
 
-            channel:request(packet_data, dispatch_reply)
+            channel:request(packet_data)
         end
     end
 end
@@ -84,7 +86,7 @@ function CMD.signal(fd, protoName)
         local compose_data = {msg_len, byte_fd, msg_data}
         local packet_data = tb_concat(compose_data)
 
-        channel:request(packet_data, dispatch_reply)
+        channel:request(packet_data)
     end
 end
 
@@ -95,6 +97,7 @@ function server.init_handler(conf)
             host        = v.ip,
             port        = v.port,
             nodelay     = false,
+            response    = dispatch_reply,
         }
 
         if channel then

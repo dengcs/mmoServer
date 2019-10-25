@@ -49,7 +49,7 @@ local function schedule()
 	end
 	-- 任务处理
 	xpcall(fn, catch)
-	skynet.timeout(500, schedule)
+	skynet.timeout(100, schedule)
 end
 
 -----------------------------------------------------------

@@ -114,7 +114,7 @@ function M:message_response(session, name, message, errno)
 	local msg_len = strpack(">H", msg_data:len())
 	local compose_data = {msg_len, msg_data}
 	local packet_data = tconcat(compose_data)
-
+	skynet.error("dcs---response--", fd, table.tostring(data))
 	socketdriver.send(fd, packet_data)
 	return 0
 end
@@ -165,6 +165,7 @@ end
 -- 4. 方法集合
 local function message_request(self, session, message, commands)
 	assert(message)
+	skynet.error("dcs---request--", table.tostring(message))
 	-- 异常捕捉
 	local function traceback()
 		LOG_ERROR(debug.traceback())
