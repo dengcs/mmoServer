@@ -311,7 +311,10 @@ function play_core:update(idx, data, direct)
 					self:timeout_update(300, idx, cmd, msg)
 				elseif msg == 0 then
 					-- 要不起
-					ok = true
+					local is_main = self:is_main_type(idx)
+					if is_main == false then
+						ok = true
+					end
 				elseif self:check_and_post(idx, msg) then
 					-- 出牌
 					ok = true
