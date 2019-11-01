@@ -197,7 +197,7 @@ function play_core:is_main_type(idx)
 end
 
 -- 验牌及出牌
-function play_core:check_and_post(idx, msg)
+function play_core:check_and_play(idx, msg)
 	local indexes = {}
 	local cards = self:get_cards(idx)
 	for _, v in pairs(msg or {}) do
@@ -315,7 +315,7 @@ function play_core:update(idx, data, direct)
 					if is_main == false then
 						ok = true
 					end
-				elseif self:check_and_post(idx, msg) then
+				elseif self:check_and_play(idx, msg) then
 					-- 出牌
 					ok = true
 				end

@@ -285,7 +285,9 @@ end
 function poker_type.check_one(cards)
 	local len = #cards
 	if len == 1 then
-		return div4_ceil(cards[1])
+		-- 主要为了区分大王和小王
+		local addVal = (cards[1] == GLOBAL_POKER_MAX) and 1 or 0
+		return div4_ceil(cards[1]) + addVal
 	end
 	return 0
 end
