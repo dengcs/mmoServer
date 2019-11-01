@@ -449,7 +449,7 @@ function poker_type.check_3with1(cards)
 			else
 				temp_data[card] = temp_data[card] + 1
 				-- 收集重要数据
-				if temp_data[card] == 3 and card < GLOBAL_POKER_VALUE2 then
+				if temp_data[card] == 3 and (len == 4 or card < GLOBAL_POKER_VALUE2) then
 					target_count = target_count + 1
 					tb_insert(check_cards, card)
 				end
@@ -488,7 +488,7 @@ function poker_type.check_3with2(cards)
 			else
 				temp_data[card] = temp_data[card] + 1
 				-- 收集重要数据
-				if temp_data[card] == 3  and card < GLOBAL_POKER_VALUE2 then
+				if temp_data[card] == 3  and (len == 5 or card < GLOBAL_POKER_VALUE2) then
 					target_count = target_count + 1
 					tb_insert(check_cards, card)
 				elseif temp_data[card] == 2 then
@@ -876,7 +876,7 @@ function poker_type.get_3with1(mode, value, count)
 		end
 	end
 
-	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
+	if max_value > 0 and (count == 1 or max_value < GLOBAL_POKER_VALUE2) then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
@@ -951,7 +951,7 @@ function poker_type.get_3with2(mode, value, count)
 		end
 	end
 
-	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
+	if max_value > 0 and (count == 1 or max_value < GLOBAL_POKER_VALUE2) then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
