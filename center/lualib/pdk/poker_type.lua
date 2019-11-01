@@ -608,6 +608,12 @@ function poker_type.get_one(mode, value)
 				indexes = v
 				max_value = i
 				break
+			elseif value == GLOBAL_POKER_JOKER then
+				if i == GLOBAL_POKER_JOKER then
+					indexes = v
+					max_value = i
+					break
+				end
 			end
 		end
 	end

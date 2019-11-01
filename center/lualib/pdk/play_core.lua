@@ -302,6 +302,7 @@ function play_core:update(idx, data, direct)
 			end
 			ok = true
 		elseif state == PLAY_STATE.PLAY then
+			-- 是否是托管的定时调用
 			if direct then
 				ok = true
 			else
