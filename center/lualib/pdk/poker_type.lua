@@ -695,22 +695,24 @@ function poker_type.get_1straight(mode, value, count)
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
-		if (first + i) == v then
-			straight_count = straight_count + 1
-		else
-			straight_count = 1
-			first = v - i
-		end
+		if v < GLOBAL_POKER_VALUE2 then
+			if (first + i) == v then
+				straight_count = straight_count + 1
+			else
+				straight_count = 1
+				first = v - i
+			end
 
-		if straight_count >= count then
-			if v > value then
-				max_value = v
-				break
+			if straight_count >= count then
+				if v > value then
+					max_value = v
+					break
+				end
 			end
 		end
 	end
 
-	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
+	if max_value > 0 then
 		indexes = {}
 		for i = count, 1, -1 do
 			tb_insert(indexes, mode[max_value - i + 1][1])
@@ -747,22 +749,24 @@ function poker_type.get_2straight(mode, value, count)
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
-		if (first + i) == v then
-			straight_count = straight_count + 1
-		else
-			straight_count = 1
-			first = v - i
-		end
+		if v < GLOBAL_POKER_VALUE2 then
+			if (first + i) == v then
+				straight_count = straight_count + 1
+			else
+				straight_count = 1
+				first = v - i
+			end
 
-		if straight_count >= count then
-			if v > value then
-				max_value = v
-				break
+			if straight_count >= count then
+				if v > value then
+					max_value = v
+					break
+				end
 			end
 		end
 	end
 
-	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
+	if max_value > 0 then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
@@ -802,22 +806,24 @@ function poker_type.get_3straight(mode, value, count)
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
-		if (first + i) == v then
-			straight_count = straight_count + 1
-		else
-			straight_count = 1
-			first = v - i
-		end
+		if v < GLOBAL_POKER_VALUE2 then
+			if (first + i) == v then
+				straight_count = straight_count + 1
+			else
+				straight_count = 1
+				first = v - i
+			end
 
-		if straight_count >= count then
-			if v > value then
-				max_value = v
-				break
+			if straight_count >= count then
+				if v > value then
+					max_value = v
+					break
+				end
 			end
 		end
 	end
 
-	if max_value > 0 and max_value < GLOBAL_POKER_VALUE2 then
+	if max_value > 0 then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
@@ -849,8 +855,8 @@ function poker_type.get_3with1(mode, value, count)
 			tb_insert(key_list, i)
 		end
 
-		if len == 1 then
-			first_keys[i] = v[1]
+		if len < 3 then
+			tb_insert(first_keys, i)
 			attach_len = attach_len + 1
 		end
 	end
@@ -865,26 +871,27 @@ function poker_type.get_3with1(mode, value, count)
 	end
 
 	tb_sort(key_list)
-
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
-		if (first + i) == v then
-			straight_count = straight_count + 1
-		else
-			straight_count = 1
-			first = v - i
-		end
+		if count == 1 or v < GLOBAL_POKER_VALUE2 then
+			if (first + i) == v then
+				straight_count = straight_count + 1
+			else
+				straight_count = 1
+				first = v - i
+			end
 
-		if straight_count >= count then
-			if v > value then
-				max_value = v
-				break
+			if straight_count >= count then
+				if v > value then
+					max_value = v
+					break
+				end
 			end
 		end
 	end
 
-	if max_value > 0 and (count == 1 or max_value < GLOBAL_POKER_VALUE2) then
+	if max_value > 0 then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
@@ -894,10 +901,11 @@ function poker_type.get_3with1(mode, value, count)
 			tb_insert(indexes, mode[card][3])
 		end
 
+		tb_sort(first_keys)
 		local attach_count = 0
-		for _, v in pairs(first_keys) do
+		for _, v in ipairs(first_keys) do
 			if attach_count < count then
-				tb_insert(indexes, v)
+				tb_insert(indexes, mode[v][1])
 				attach_count = attach_count + 1
 			end
 		end
@@ -924,8 +932,8 @@ function poker_type.get_3with2(mode, value, count)
 			tb_insert(key_list, i)
 		end
 
-		if len == 2 then
-			first_keys[i] = v
+		if len == 2 and i ~= GLOBAL_POKER_JOKER then
+			tb_insert(first_keys, i)
 			attach_len = attach_len + 1
 		end
 	end
@@ -940,26 +948,27 @@ function poker_type.get_3with2(mode, value, count)
 	end
 
 	tb_sort(key_list)
-
 	local straight_count = 0
 	local first = key_list[1] - 1
 	for i, v in pairs(key_list) do
-		if (first + i) == v then
-			straight_count = straight_count + 1
-		else
-			straight_count = 1
-			first = v - i
-		end
+		if count == 1 or v < GLOBAL_POKER_VALUE2 then
+			if (first + i) == v then
+				straight_count = straight_count + 1
+			else
+				straight_count = 1
+				first = v - i
+			end
 
-		if straight_count >= count then
-			if v > value then
-				max_value = v
-				break
+			if straight_count >= count then
+				if v > value then
+					max_value = v
+					break
+				end
 			end
 		end
 	end
 
-	if max_value > 0 and (count == 1 or max_value < GLOBAL_POKER_VALUE2) then
+	if max_value > 0 then
 		indexes = {}
 		local card = 0
 		for i = count, 1, -1 do
@@ -969,12 +978,12 @@ function poker_type.get_3with2(mode, value, count)
 			tb_insert(indexes, mode[card][3])
 		end
 
+		tb_sort(first_keys)
 		local attach_count = 0
-
-		for i, v in pairs(first_keys) do
+		for _, v in ipairs(first_keys) do
 			if attach_count < count then
-				tb_insert(indexes, v[1])
-				tb_insert(indexes, v[2])
+				tb_insert(indexes, mode[v][1])
+				tb_insert(indexes, mode[v][2])
 				attach_count = attach_count + 1
 			end
 		end
@@ -987,9 +996,10 @@ function poker_type.get_4with1(mode, value)
 	local indexes = nil
 	local max_value = 0
 
-	local attach_len = 0
-	local first_val = nil
-	local second_val = nil
+	local first_len = 0
+	local second_len = 0
+	local first_val = {}
+	local second_val = {}
 	local key_list = {}
 
 	for i, v in pairs(mode or {}) do
@@ -999,13 +1009,13 @@ function poker_type.get_4with1(mode, value)
 		end
 
 		if len == 1 then
-			first_val = v[1]
-			attach_len = attach_len + 1
+			tb_insert(first_val, i)
+			first_len = first_len + 1
 		end
 
-		if len == 2 then
-			second_val = v[1]
-			attach_len = attach_len + 1
+		if len == 2 and i ~= GLOBAL_POKER_JOKER then
+			tb_insert(second_val, i)
+			second_len = second_len + 1
 		end
 	end
 
@@ -1014,11 +1024,12 @@ function poker_type.get_4with1(mode, value)
 		return
 	end
 
-	if attach_len < 1 then
+	if first_len < 1 and second_len < 1 then
 		return
 	end
 
-	for _, v in pairs(key_list) do
+	tb_sort(key_list)
+	for _, v in ipairs(key_list) do
 		if v > value then
 			max_value = v
 			break
@@ -1031,10 +1042,14 @@ function poker_type.get_4with1(mode, value)
 			tb_insert(indexes, v)
 		end
 
-		if first_val then
-			tb_insert(indexes, first_val)
-		elseif second_val then
-			tb_insert(indexes, second_val)
+		if first_len > 0 then
+			tb_sort(first_val)
+			local key = first_val[1]
+			tb_insert(indexes, mode[key][1])
+		elseif second_len > 0 then
+			tb_sort(second_val)
+			local key = second_val[1]
+			tb_insert(indexes, mode[key][1])
 		end
 	end
 
@@ -1045,9 +1060,10 @@ function poker_type.get_4with21(mode, value)
 	local indexes = nil
 	local max_value = 0
 
-	local attach_len = 0
-	local first_val = nil
-	local second_val = nil
+	local first_len = 0
+	local second_len = 0
+	local first_val = {}
+	local second_val = {}
 	local key_list = {}
 
 	for i, v in pairs(mode or {}) do
@@ -1057,22 +1073,13 @@ function poker_type.get_4with21(mode, value)
 		end
 
 		if len == 1 then
-			if not first_val then
-				first_val = {}
-			end
-			tb_insert(first_val, v[1])
-
-			attach_len = attach_len + 1
+			tb_insert(first_val, i)
+			first_len = first_len + 1
 		end
 
-		if len == 2 then
-			if not second_val then
-				second_val = {}
-			end
-			tb_insert(second_val, v[1])
-			tb_insert(second_val, v[2])
-
-			attach_len = attach_len + 2
+		if len == 2 and i ~= GLOBAL_POKER_JOKER then
+			tb_insert(second_val, i)
+			second_len = second_len + 2
 		end
 	end
 
@@ -1081,11 +1088,12 @@ function poker_type.get_4with21(mode, value)
 		return
 	end
 
-	if attach_len < 2 then
+	if (first_len + second_len) < 2 then
 		return
 	end
 
-	for _, v in pairs(key_list) do
+	tb_sort(key_list)
+	for _, v in ipairs(key_list) do
 		if v > value then
 			max_value = v
 			break
@@ -1098,20 +1106,26 @@ function poker_type.get_4with21(mode, value)
 			tb_insert(indexes, v)
 		end
 
-		if first_val then
-			local first_len = #first_val
-			if first_len > 1 then
-				tb_insert(indexes, first_val[1])
-				tb_insert(indexes, first_val[2])
-			else
-				tb_insert(indexes, first_val[1])
-				if second_val then
-					tb_insert(indexes, second_val[1])
+		local attach_count = 0
+		if first_len > 0 then
+			tb_sort(first_val)
+			for _,v in ipairs(first_val) do
+				tb_insert(indexes, mode[v][1])
+				attach_count = attach_count + 1
+				if attach_count >= 2 then
+					break
 				end
 			end
-		elseif second_val then
-			tb_insert(indexes, second_val[1])
-			tb_insert(indexes, second_val[2])
+		end
+		if attach_count < 2 then
+			tb_sort(second_val)
+			local attach_indexes = second_val[1]
+			if attach_count == 0 then
+				tb_insert(indexes, attach_indexes[1])
+				tb_insert(indexes, attach_indexes[2])
+			elseif attach_count == 1 then
+				tb_insert(indexes, attach_indexes[1])
+			end
 		end
 	end
 
@@ -1123,7 +1137,7 @@ function poker_type.get_4with22(mode, value)
 	local max_value = 0
 
 	local attach_len = 0
-	local first_val = nil
+	local first_val = {}
 	local key_list = {}
 
 	for i, v in pairs(mode or {}) do
@@ -1132,12 +1146,8 @@ function poker_type.get_4with22(mode, value)
 			tb_insert(key_list, i)
 		end
 
-		if len == 2 then
-			if not first_val then
-				first_val = {}
-			end
-			tb_insert(first_val, v)
-
+		if len == 2 and i ~= GLOBAL_POKER_JOKER then
+			tb_insert(first_val, i)
 			attach_len = attach_len + 1
 		end
 	end
@@ -1151,7 +1161,8 @@ function poker_type.get_4with22(mode, value)
 		return
 	end
 
-	for _, v in pairs(key_list) do
+	tb_sort(key_list)
+	for _, v in ipairs(key_list) do
 		if v > value then
 			max_value = v
 			break
@@ -1164,15 +1175,11 @@ function poker_type.get_4with22(mode, value)
 			tb_insert(indexes, v)
 		end
 
-		if first_val then
-			local first_len = #first_val
-			if first_len > 1 then
-				tb_insert(indexes, first_val[1][1])
-				tb_insert(indexes, first_val[1][2])
-				tb_insert(indexes, first_val[2][1])
-				tb_insert(indexes, first_val[2][2])
-			end
-		end
+		tb_sort(first_val)
+		tb_insert(indexes, mode[first_val[1]][1])
+		tb_insert(indexes, mode[first_val[1]][2])
+		tb_insert(indexes, mode[first_val[2]][1])
+		tb_insert(indexes, mode[first_val[2]][2])
 	end
 
 	return indexes, max_value
