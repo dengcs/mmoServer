@@ -11,7 +11,6 @@ local STATE_COUNT = {
 	[PLAY_STATE.PREPARE] = 3,
 	[PLAY_STATE.DEAL] = 3,
 	[PLAY_STATE.SNATCH] = 4,
-	[PLAY_STATE.DOUBLE] = 3,
 	[PLAY_STATE.PLAY] = 120,
 }
 
@@ -50,11 +49,16 @@ function play_state:get_landowner()
 	if get_landowner then
 		return get_landowner()
 	end
+	return 1
 end
 
 function play_state:reset_state_param()
 	self.count  	= 1
 	self.place_idx	= 0
+end
+
+function play_state:inc_count()
+	self.count 	= self.count + 1
 end
 
 function play_state:start()
@@ -93,26 +97,11 @@ function play_state:turn_worker()
 	self.place_idx	= (self.place_idx % GLOBAL_PLAYER_NUM) + 1
 end
 
--- 发底牌
-function play_state:push_bottom_event()
-	if self.state == PLAY_STATE.DOUBLE then
+function play_state:monitor_event()
+	if self.state == PLAY_STATE.PLAY then
+		self.place_idx = self:get_landowner() - 1
 		self:push_bottom()
 	end
-end
-
--- 地主出牌
-function play_state:landowner_play_event()
-	if self.state == PLAY_STATE.PLAY then
-		local landowner = self:get_landowner()
-		if landowner > 0 then
-			self.place_idx = landowner - 1
-		end
-	end
-end
-
-function play_state:monitor_event()
-	self:push_bottom_event()
-	self:landowner_play_event()
 end
 
 -- 运行到发牌
@@ -137,10 +126,6 @@ end
 
 function play_state:is_snatch()
 	return self.state == PLAY_STATE.SNATCH
-end
-
-function play_state:is_double()
-	return self.state == PLAY_STATE.DOUBLE
 end
 
 function play_state:is_play()

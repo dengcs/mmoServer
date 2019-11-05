@@ -294,11 +294,8 @@ function play_core:update(idx, data, direct)
 		if state == PLAY_STATE.SNATCH then
 			if msg == 1 then
 				self.landowner = idx
-			end
-			ok = true
-		elseif state == PLAY_STATE.DOUBLE then
-			if msg == 1 then
-				self.double = self.double * 2
+			elseif self.landowner == (idx%3 + 1) then
+				self.play_state:inc_count()
 			end
 			ok = true
 		elseif state == PLAY_STATE.PLAY then
