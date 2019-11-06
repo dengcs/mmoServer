@@ -43,47 +43,35 @@ function play_manager:copy_functions_from_game(functions)
 	self.game.functions = assert(functions)
 end
 
--- 内部消息通知
-function play_manager:event(id, data)
-	local event = self.game.functions.event
-	if event then
-		event(id, data)
-	end
-end
-
--- 座位通知消息
-function play_manager:notify(idx, data)
-	local notify = self.game.functions.notify
-	if notify then
-		notify(idx, data)
-	end
-end
-
--- 游戏广播消息
-function play_manager:broadcast(data)
-	local broadcast = self.game.functions.broadcast
-	if broadcast then
-		broadcast(data)
+function play_manager:call_super(fnName, ...)
+	local func = self.game.functions[fnName]
+	if func then
+		return func(...)
 	end
 end
 
 function play_manager:auth_functions_to_core()
 	local function broadcast(data)
-		self:broadcast(data)
+		self:call_super("broadcast", data)
 	end
 
 	local function notify(idx, data)
-		self:notify(idx, data)
+		self:call_super("notify", idx, data)
 	end
 
 	local function event(id, data)
-		self:event(id, data)
+		self:call_super("event", id, data)
+	end
+
+	local function shuffle_and_deal()
+		self:shuffle_and_deal()
 	end
 
 	local functions = {}
 	functions.broadcast = broadcast
 	functions.notify = notify
 	functions.event = event
+	functions.shuffle_and_deal = shuffle_and_deal
 
 	return functions
 end

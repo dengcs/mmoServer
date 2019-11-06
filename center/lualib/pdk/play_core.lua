@@ -38,60 +38,15 @@ function play_core:begin(data)
 	self.play_state:start_and_run()
 end
 
--- 内部消息通知
-function play_core:event(id, data)
-	local event = self.play_mgr.functions.event
-	if event then
-		event(id, data)
+function play_core:call_super(fnName, ...)
+	local func = self.play_mgr.functions[fnName]
+	if func then
+		return func(...)
 	end
 end
 
--- 座位通知消息
-function play_core:notify(idx, data)
-	local notify = self.play_mgr.functions.notify
-	if notify then
-		notify(idx, data)
-	end
-end
-
--- 游戏广播消息
-function play_core:broadcast(data)
-	local broadcast = self.play_mgr.functions.broadcast
-	if broadcast then
-		broadcast(data)
-	end
-end
-
-function play_core:state_notify(idx, state)
-	if state == PLAY_STATE.PREPARE then
-		local data = json_codec.encode(state, {idx = idx})
-		self:notify(idx, data)
-	elseif state == PLAY_STATE.DEAL then
-		local data = json_codec.encode(state, self:get_cards(idx))
-		self:notify(idx, data)
-	elseif state == PLAY_STATE.SNATCH then
-		local data = json_codec.encode(state)
-		self:notify(idx, data)
-	end
-end
-
--- 推送底牌
-function play_core:push_bottom()
-	if self.landowner > 0 then
-
-		local places = self.data.places[self.landowner]
-		if places then
-			for _, v in pairs(self.data.cards) do
-				tb_insert(places.cards, v)
-			end
-		end
-
-		local data = json_codec.encode(STATE_BOTTOM, {idx = self.landowner, msg = self.data.cards})
-		self:broadcast(data)
-
-		local notify_data = json_codec.encode(STATE_BOTTOM)
-		self:notify(self.landowner, notify_data)
-	end
+function play_core:copy_functions_from_manager(functions)
+	self.play_mgr.functions = functions
 end
 
 -- 授权给状态模块的函数
@@ -116,8 +71,37 @@ function play_core:auth_functions_to_state()
 	return functions
 end
 
-function play_core:copy_functions_from_manager(functions)
-	self.play_mgr.functions = functions
+function play_core:state_notify(idx, state)
+	if state == PLAY_STATE.PREPARE then
+		local data = json_codec.encode(state, {idx = idx})
+		self:call_super("notify", idx, data)
+	elseif state == PLAY_STATE.DEAL then
+		local data = json_codec.encode(state, self:get_cards(idx))
+		self:call_super("notify", idx, data)
+	elseif state == PLAY_STATE.SNATCH then
+		local data = json_codec.encode(state)
+		self:call_super("notify", idx, data)
+	end
+end
+
+-- 推送底牌
+function play_core:push_bottom()
+	if self.landowner > 0 then
+		local places = self.data.places[self.landowner]
+		if places then
+			for _, v in pairs(self.data.cards) do
+				tb_insert(places.cards, v)
+			end
+		end
+
+		local data = json_codec.encode(STATE_BOTTOM, {idx = self.landowner, msg = self.data.cards})
+		self:call_super("broadcast", data)
+
+		local notify_data = json_codec.encode(STATE_BOTTOM)
+		self:call_super("notify", self.landowner, notify_data)
+	else
+		-- 重新开始
+	end
 end
 
 -- 获取某个位置的牌
@@ -172,9 +156,9 @@ function play_core:game_over(idx)
 	}
 	-- 通知客户端游戏已经结束
 	local bc_data = json_codec.encode(PLAY_STATE.OVER, overData)
-	self:broadcast(bc_data)
+	self:call_super("broadcast", bc_data)
 	-- 通知内部处理游戏结束事件
-	self:event(PLAY_EVENT.GAME_OVER, overData)
+	self:call_super("event", PLAY_EVENT.GAME_OVER, overData)
 end
 
 function play_core:set_round_state(idx, type, value, count)
@@ -296,6 +280,9 @@ function play_core:update(idx, data, direct)
 				self.landowner = idx
 			elseif self.landowner == (idx%3 + 1) then
 				self.play_state:inc_count()
+			elseif self.landowner == 0 and idx == 3 then
+				self:call_super("shuffle_and_deal")
+				return
 			end
 			ok = true
 		elseif state == PLAY_STATE.PLAY then
@@ -322,7 +309,7 @@ function play_core:update(idx, data, direct)
 
 		if ok then
 			local broadcast_data = json_codec.encode(state, {idx = idx, msg = msg})
-			self:broadcast(broadcast_data)
+			self:call_super("broadcast", broadcast_data)
 
 			local is_game_over = self:check_game_over(idx)
 			if is_game_over then
@@ -331,7 +318,7 @@ function play_core:update(idx, data, direct)
 
 			place_idx, state = self.play_state:turn()
 			local notify_data = json_codec.encode(state)
-			self:notify(place_idx, notify_data)
+			self:call_super("notify", place_idx, notify_data)
 		end
 	end
 end

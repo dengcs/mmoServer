@@ -30,26 +30,11 @@ function play_state:copy_functions_from_core(functions)
 	self.play_core.functions = assert(functions)
 end
 
-function play_state:state_notify(idx, state)
-	local state_notify = self.play_core.functions.state_notify
-	if state_notify then
-		state_notify(idx, state)
+function play_state:call_super(fnName, ...)
+	local func = self.play_core.functions[fnName]
+	if func then
+		return func(...)
 	end
-end
-
-function play_state:push_bottom()
-	local push_bottom = self.play_core.functions.push_bottom
-	if push_bottom then
-		push_bottom()
-	end
-end
-
-function play_state:get_landowner()
-	local get_landowner = self.play_core.functions.get_landowner
-	if get_landowner then
-		return get_landowner()
-	end
-	return 1
 end
 
 function play_state:reset_state_param()
@@ -99,8 +84,8 @@ end
 
 function play_state:monitor_event()
 	if self.state == PLAY_STATE.PLAY then
-		self.place_idx = self:get_landowner() - 1
-		self:push_bottom()
+		self.place_idx = (self:call_super("get_landowner") or 0) - 1
+		self:call_super("push_bottom")
 	end
 end
 
@@ -108,7 +93,7 @@ end
 function play_state:run()
 	repeat
 		local place_idx, state = self:turn()
-		self:state_notify(place_idx, state)
+		self:call_super("state_notify", place_idx, state)
 		if state > PLAY_STATE.DEAL then
 			break
 		end

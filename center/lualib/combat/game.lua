@@ -145,6 +145,28 @@ function Game:init_play_mgr()
 	self.play_mgr:copy_functions_from_game(functions)
 end
 
+-- 封装函数给玩法模块调用
+function Game:auth_functions_to_manager()
+	local function broadcast(data)
+		self:broadcast("game_update_notify", {data = data})
+	end
+
+	local function notify(idx, data)
+		self:notify(idx, "game_update_notify", {data = data})
+	end
+
+	local function event(id, data)
+		self:event(id, data)
+	end
+
+	local functions = {}
+	functions.broadcast = broadcast
+	functions.notify = notify
+	functions.event = event
+
+	return functions
+end
+
 -- 加入战场
 function Game:join(member)
 	if member ~= nil then
@@ -296,28 +318,6 @@ end
 function Game:start()
 	self:broadcast("game_start_notify", self:snapshot())
 	self.play_mgr:shuffle_and_deal()
-end
-
--- 封装函数给玩法模块调用
-function Game:auth_functions_to_manager()
-	local function broadcast(data)
-		self:broadcast("game_update_notify", {data = data})
-	end
-
-	local function notify(idx, data)
-		self:notify(idx, "game_update_notify", {data = data})
-	end
-
-	local function event(id, data)
-		self:event(id, data)
-	end
-
-	local functions = {}
-	functions.broadcast = broadcast
-	functions.notify = notify
-	functions.event = event
-
-	return functions
 end
 
 function Game:update(pid, data)
