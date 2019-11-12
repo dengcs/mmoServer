@@ -245,6 +245,14 @@ function play_core:entrust(idx)
 	return msg
 end
 
+function play_core:timeout_super(ti, name, ...)
+	local function execute(...)
+		self:call_super(name, ...)
+	end
+
+	skynet.timeout(ti, execute)
+end
+
 function play_core:timeout_update(ti, idx, cmd, msg)
 	local function execute()
 		local data = json_codec.encode(cmd, msg)
@@ -271,15 +279,24 @@ function play_core:update(idx, data, direct)
 		local ok = false
 
 		if state == PLAY_STATE.SNATCH then
-			if msg == 1 then
-				self.landowner = idx
-			elseif self.landowner == (idx%3 + 1) then
-				self.play_state:inc_count()
-			elseif self.landowner == 0 and idx == 3 then
-				self:call_super("shuffle_and_deal")
-				return
+			if direct then
+				ok = true
+			else
+				if msg == 1 then
+					self.landowner = idx
+					ok = true
+				elseif self.landowner == (idx%3 + 1) then
+					self.play_state:inc_count()
+					self:timeout_update(300, idx, cmd, 0)
+				elseif self.landowner == 0 and idx == 3 then
+					self:timeout_update(300, idx, cmd, 0)
+					self:timeout_super(310, "shuffle_and_deal")
+				elseif msg == 0 then
+					ok = true
+				elseif not msg then
+					self:timeout_update(300, idx, cmd, 0)
+				end
 			end
-			ok = true
 		elseif state == PLAY_STATE.PLAY then
 			-- 是否是托管的定时调用
 			if direct then

@@ -24,8 +24,8 @@ function REQUEST:game_login()
 	local pid = tonumber(self.proto.pid)
 
     repeat
-        local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "verify_fd", pid, self.client_fd)
-        if ok == false then
+        local ok, result = skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "verify_fd", pid, self.client_fd)
+        if ok ~= 0 or result == false then
             ret = ERRCODE.COMMON_PARAMS_ERROR
             break
         end

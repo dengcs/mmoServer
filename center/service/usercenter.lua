@@ -45,6 +45,7 @@ function COMMAND.unload(source, pid)
     local u = onlines[pid]
     if u then
         onlines[pid] = nil
+        client_fds[pid] = nil
     else
         ERROR("usercenterd : user[%s] not found!!!", pid)
     end
@@ -102,7 +103,10 @@ end
 -- 验证连接fd
 function COMMAND.verify_fd(source, pid, client_fd)
     local cur_fd = client_fds[pid]
-    return cur_fd == client_fd
+    if cur_fd then
+        return cur_fd == client_fd
+    end
+    return false
 end
 
 ---------------------------------------------------------------------
