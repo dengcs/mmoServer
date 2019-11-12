@@ -100,6 +100,7 @@ function COMMAND:player_login(pid)
 	self.user:call("Player", "on_login", pid)
 	local snapshot = self.user:call("Player", "get_snapshot")
 	cluster.call("center", GLOBAL.SERVICE_NAME.SOCIAL, "update", pid, snapshot)
+	cluster.call("center", GLOBAL.SERVICE_NAME.USERCENTER, "set_fd", pid, self.client_fd)
 end
 
 HANDLER.REQUEST   	= REQUEST

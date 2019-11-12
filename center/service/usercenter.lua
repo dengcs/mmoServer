@@ -10,6 +10,8 @@ local skynet    = require "skynet"
 
 -- 在线用户列表
 local onlines = {}
+-- 客户端fd列表
+local client_fds = {}
 
 ---------------------------------------------------------------------
 --- 服务导出接口
@@ -85,6 +87,22 @@ function COMMAND.broadcast(source, cmd, ...)
     for _, u in pairs(onlines or {}) do
         skynet.send(u.agent, "lua", cmd, ...)
     end
+end
+
+-- 设置客户端fd
+-- 1. 指令来源
+-- 2. 角色编号
+-- 3. 客户端fd
+function COMMAND.set_fd(source, pid, client_fd)
+    if pid and client_fd then
+        client_fds[pid] = client_fd
+    end
+end
+
+-- 验证连接fd
+function COMMAND.verify_fd(source, pid, client_fd)
+    local cur_fd = client_fds[pid]
+    return cur_fd == client_fd
 end
 
 ---------------------------------------------------------------------

@@ -23,12 +23,20 @@ function REQUEST:game_login()
 
 	local pid = tonumber(self.proto.pid)
 
-	this.call("load_data", pid)
-	
-	local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "load", pid)
-	if ok ~= 0 then
-		ret = ERRCODE.COMMON_SYSTEM_ERROR
-	end
+    repeat
+        local ok = skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "verify_fd", pid, self.client_fd)
+        if ok == false then
+            ret = ERRCODE.COMMON_PARAMS_ERROR
+            break
+        end
+
+        local code = skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "load", pid)
+        if code ~= 0 then
+            ret = ERRCODE.COMMON_SYSTEM_ERROR
+            break
+        end
+        this.call("load_data", pid)
+    until(true)
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)
 end

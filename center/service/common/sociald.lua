@@ -6,7 +6,7 @@ local db_social	= require "db.mongo.social"
 --- 内部变量/内部逻辑
 -----------------------------------------------------------
 
-local function rank_update(alias, pid, value)
+local function rank_monitor(alias, pid, value)
 	local needUpdate = false
 
 	if alias == "level" then
@@ -51,7 +51,7 @@ function social:update(pid, data)
 		if v ~= vData[k] then
 			vData[k] = v
 			vData.dirty = true
-			rank_update(k, pid, v)
+			rank_monitor(k, pid, v)
 		end
 	end
 end

@@ -147,10 +147,11 @@ function M:user_context(session, extra)
 	-- 构造用户上下文
 	local context = 
 	{
-		user     = session.user_data,
-		response = __message_response,
-		call     = __command_execute,
-		trigger  = __event_trigger,
+		user     	= session.user_data,
+		response 	= __message_response,
+		call     	= __command_execute,
+		trigger  	= __event_trigger,
+		client_fd	= session.client_fd,
 	}
 	for k, v in pairs(extra or {}) do
 		context[k] = v

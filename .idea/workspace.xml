@@ -123,7 +123,7 @@
           <entry key="js" value="1" />
           <entry key="logic" value="5" />
           <entry key="login" value="3" />
-          <entry key="lua" value="1960" />
+          <entry key="lua" value="1970" />
           <entry key="mc" value="1" />
           <entry key="md" value="1" />
           <entry key="mk" value="1" />
@@ -140,7 +140,7 @@
           <entry key="JavaScript" value="1" />
           <entry key="PLAIN_TEXT" value="152" />
           <entry key="Scratch" value="1" />
-          <entry key="lua" value="1960" />
+          <entry key="lua" value="1970" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -151,7 +151,7 @@
           <entry key="gitignore" value="14" />
           <entry key="logic" value="19" />
           <entry key="login" value="8" />
-          <entry key="lua" value="26897" />
+          <entry key="lua" value="27215" />
           <entry key="md" value="40" />
           <entry key="proto" value="721" />
           <entry key="sh" value="755" />
@@ -161,75 +161,83 @@
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="1712" />
-          <entry key="lua" value="26897" />
+          <entry key="lua" value="27215" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_core.lua">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/gate/service/client/gate.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="731">
-              <caret line="97" column="42" selection-start-line="97" selection-start-column="42" selection-end-line="97" selection-end-column="42" />
+            <state relative-caret-position="-7">
+              <caret line="118" column="83" selection-start-line="118" selection-start-column="81" selection-end-line="118" selection-end-column="83" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/logic/service/agent.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="19">
+              <caret line="1" column="41" selection-start-line="1" selection-start-column="41" selection-end-line="1" selection-end-column="41" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/common/lualib/net/dispatcher.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="658">
+              <caret line="153" column="17" selection-start-line="153" selection-start-column="8" selection-end-line="153" selection-end-column="17" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/center/service/agent.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-1121">
+              <caret line="1" column="16" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="16" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/center/lualib/handler/net_auth.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="437">
-              <caret line="23" column="13" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="13" />
+            <state relative-caret-position="608">
+              <caret line="32" column="18" selection-start-line="32" selection-start-column="14" selection-end-line="32" selection-end-column="18" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/lualib/basic/game.lua">
+        <entry file="file://$PROJECT_DIR$/center/service/usercenter.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="76">
-              <caret line="4" column="18" selection-start-line="4" selection-end-line="4" selection-end-column="18" />
+            <state relative-caret-position="525">
+              <caret line="102" column="26" selection-start-line="102" selection-start-column="17" selection-end-line="102" selection-end-column="26" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/center/lualib/combat/game.lua">
+        <entry file="file://$PROJECT_DIR$/logic/lualib/handler/net_auth.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2755">
-              <caret line="145" column="3" selection-start-line="145" selection-start-column="3" selection-end-line="145" selection-end-column="3" />
+            <state relative-caret-position="687">
+              <caret line="102" column="66" selection-start-line="102" selection-start-column="60" selection-end-line="102" selection-end-column="66" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_manager.lua">
+        <entry file="file://$PROJECT_DIR$/center/service/common/sociald.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2166">
-              <caret line="114" column="34" selection-start-line="114" selection-start-column="25" selection-end-line="114" selection-end-column="34" />
+            <state relative-caret-position="152">
+              <caret line="8" column="27" selection-start-line="8" selection-start-column="27" selection-end-line="8" selection-end-column="27" />
             </state>
           </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_state.lua">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="684">
-              <caret line="36" column="7" selection-start-line="33" selection-start-column="4" selection-end-line="36" selection-end-column="7" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/center/lualib/handler/match_room.lua">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/center/lualib/handler/match_game.lua">
-          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
     </leaf>
@@ -311,8 +319,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/center/lualib/config/rank.lua" />
-        <option value="$PROJECT_DIR$/center/lualib/handler/net_command.lua" />
         <option value="$PROJECT_DIR$/gate/lualib/config/proto/src/rank.proto" />
         <option value="$PROJECT_DIR$/center/lualib/social.lua" />
         <option value="$PROJECT_DIR$/center/lualib/handler/net_rank.lua" />
@@ -334,8 +340,6 @@
         <option value="$PROJECT_DIR$/gate/service/main.lua" />
         <option value="$PROJECT_DIR$/common/lualib/factory/wsservice.lua" />
         <option value="$PROJECT_DIR$/center/service/token.lua" />
-        <option value="$PROJECT_DIR$/center/service/common/sociald.lua" />
-        <option value="$PROJECT_DIR$/logic/lualib/handler/net_auth.lua" />
         <option value="$PROJECT_DIR$/gate/lualib/config/proxy/logic.lua" />
         <option value="$PROJECT_DIR$/gate/lualib/config/proxy/center.lua" />
         <option value="$PROJECT_DIR$/gate/lualib/config/services.lua" />
@@ -352,7 +356,6 @@
         <option value="$PROJECT_DIR$/center/service/agent.lua" />
         <option value="$PROJECT_DIR$/center/service/combat/room.lua" />
         <option value="$PROJECT_DIR$/gate/service/client/gate.lua" />
-        <option value="$PROJECT_DIR$/common/lualib/net/dispatcher.lua" />
         <option value="$PROJECT_DIR$/gate/service/clientproxy.lua" />
         <option value="$PROJECT_DIR$/engine/lualib/skynet/socketchannel.lua" />
         <option value="$PROJECT_DIR$/common/lualib/basic/game.lua" />
@@ -362,6 +365,11 @@
         <option value="$PROJECT_DIR$/center/lualib/pdk/play_manager.lua" />
         <option value="$PROJECT_DIR$/center/lualib/combat/game.lua" />
         <option value="$PROJECT_DIR$/center/lualib/pdk/play_core.lua" />
+        <option value="$PROJECT_DIR$/common/lualib/net/dispatcher.lua" />
+        <option value="$PROJECT_DIR$/center/service/common/sociald.lua" />
+        <option value="$PROJECT_DIR$/center/service/usercenter.lua" />
+        <option value="$PROJECT_DIR$/logic/lualib/handler/net_auth.lua" />
+        <option value="$PROJECT_DIR$/center/lualib/handler/net_auth.lua" />
       </list>
     </option>
   </component>
@@ -371,7 +379,7 @@
       <select />
     </treeState>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="500" />
     <option name="y" value="105" />
     <option name="width" value="1400" />
@@ -458,6 +466,13 @@
             <path>
               <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
               <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
+              <item name="center" type="462c0819:PsiDirectoryNode" />
+              <item name="service" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
               <item name="common" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -524,6 +539,19 @@
               <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
               <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
               <item name="logic" type="462c0819:PsiDirectoryNode" />
+              <item name="lualib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
+              <item name="logic" type="462c0819:PsiDirectoryNode" />
+              <item name="lualib" type="462c0819:PsiDirectoryNode" />
+              <item name="handler" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
+              <item name="logic" type="462c0819:PsiDirectoryNode" />
               <item name="service" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -545,7 +573,7 @@
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="MASTER_TYPE&#9;null&#9;null" />
     <property name="ToolWindowEvent Log.ShowToolbar" value="false" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1573130571412" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1573530691950" />
     <property name="jdk.selected.LUA_MODULE" value="Lua" />
     <property name="last_opened_file_path" value="F:/dcs/java_workspace/GameAccess/.project" />
     <property name="project.structure.last.edited" value="Artifacts" />
@@ -604,7 +632,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-7" width="2062" height="1126" extended-state="7" />
+    <frame x="-7" y="-7" width="2062" height="1126" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.21107784" />
@@ -656,20 +684,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/engine/3rd/lua/lzio.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="513">
-          <caret line="27" column="38" selection-start-line="40" selection-start-column="12" selection-end-line="40" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/engine/3rd/lua/lzio.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1083">
-          <caret line="57" column="12" selection-start-line="63" selection-start-column="14" selection-end-line="63" selection-end-column="23" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/engine/3rd/lua/lgc.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="237">
@@ -768,20 +782,6 @@
     <entry file="file://$PROJECT_DIR$/common/lualib/basic/lstring.lua">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/center/service/usercenter.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2223">
-          <caret line="117" column="20" selection-start-line="117" selection-start-column="14" selection-end-line="117" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/logic/service/agent.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="71" column="16" selection-start-line="71" selection-start-column="10" selection-end-line="71" selection-end-column="16" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/gate/lualib/config/services.lua">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -807,13 +807,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gate/service/agent.lua">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/lualib/basic/macros.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="285">
-          <caret line="15" column="19" selection-start-line="15" selection-end-line="15" selection-end-column="19" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/gate/service/main.lua">
       <provider selected="true" editor-type-id="text-editor" />
@@ -857,13 +850,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/lualib/net/dispatcher.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3496">
-          <caret line="184" column="49" selection-start-line="184" selection-start-column="44" selection-end-line="184" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/engine/lualib/skynet/socketchannel.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="893">
@@ -875,13 +861,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="30" column="65" lean-forward="true" selection-start-line="30" selection-start-column="65" selection-end-line="30" selection-end-column="65" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gate/service/client/gate.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2185">
-          <caret line="115" column="46" lean-forward="true" selection-start-line="115" selection-start-column="46" selection-end-line="115" selection-end-column="46" />
         </state>
       </provider>
     </entry>
@@ -903,13 +882,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="506">
           <caret line="112" column="28" selection-start-line="112" selection-start-column="18" selection-end-line="112" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/center/service/agent.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1043">
-          <caret line="74" column="28" selection-start-line="74" selection-start-column="26" selection-end-line="74" selection-end-column="28" />
         </state>
       </provider>
     </entry>
@@ -947,17 +919,73 @@
     <entry file="file://$PROJECT_DIR$/center/lualib/handler/match_game.lua">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/center/lualib/handler/net_auth.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="437">
-          <caret line="23" column="13" selection-start-line="23" selection-start-column="10" selection-end-line="23" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_core.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="731">
           <caret line="97" column="42" selection-start-line="97" selection-start-column="42" selection-end-line="97" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gate/service/client/gate.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-7">
+          <caret line="118" column="83" selection-start-line="118" selection-start-column="81" selection-end-line="118" selection-end-column="83" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/center/service/agent.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1121">
+          <caret line="1" column="16" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logic/service/agent.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="19">
+          <caret line="1" column="41" selection-start-line="1" selection-start-column="41" selection-end-line="1" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/center/service/common/sociald.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="152">
+          <caret line="8" column="27" selection-start-line="8" selection-start-column="27" selection-end-line="8" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/lualib/basic/macros.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="22" column="14" selection-start-line="22" selection-start-column="4" selection-end-line="22" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/lualib/net/dispatcher.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="658">
+          <caret line="153" column="17" selection-start-line="153" selection-start-column="8" selection-end-line="153" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logic/lualib/handler/net_auth.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="687">
+          <caret line="102" column="66" selection-start-line="102" selection-start-column="60" selection-end-line="102" selection-end-column="66" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/center/service/usercenter.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="102" column="26" selection-start-line="102" selection-start-column="17" selection-end-line="102" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/center/lualib/handler/net_auth.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="608">
+          <caret line="32" column="18" selection-start-line="32" selection-start-column="14" selection-end-line="32" selection-end-column="18" />
         </state>
       </provider>
     </entry>
