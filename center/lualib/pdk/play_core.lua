@@ -278,44 +278,38 @@ function play_core:update(idx, data, direct)
 
 		local ok = false
 
-		if state == PLAY_STATE.SNATCH then
-			if direct then
+		if direct then
+			-- 定时调用
+			ok = true
+		elseif state == PLAY_STATE.SNATCH then
+			if msg == 1 then
+				self.landowner = idx
 				ok = true
-			else
-				if msg == 1 then
-					self.landowner = idx
-					ok = true
-				elseif self.landowner == (idx%3 + 1) then
-					self.play_state:inc_count()
-					self:timeout_update(300, idx, cmd, 0)
-				elseif self.landowner == 0 and idx == 3 then
-					self:timeout_update(300, idx, cmd, 0)
-					self:timeout_super(310, "shuffle_and_deal")
-				elseif msg == 0 then
-					ok = true
-				elseif not msg then
-					self:timeout_update(300, idx, cmd, 0)
-				end
+			elseif self.landowner == (idx%3 + 1) then
+				self.play_state:inc_count()
+				self:timeout_update(300, idx, cmd, 0)
+			elseif self.landowner == 0 and idx == 3 then
+				self:timeout_update(300, idx, cmd, 0)
+				self:timeout_super(310, "shuffle_and_deal")
+			elseif msg == 0 then
+				ok = true
+			elseif not msg then
+				self:timeout_update(300, idx, cmd, 0)
 			end
 		elseif state == PLAY_STATE.PLAY then
-			-- 是否是托管的定时调用
-			if direct then
-				ok = true
-			else
-				if not msg then
-					-- 托管
-					msg = self:entrust(idx)
-					self:timeout_update(300, idx, cmd, msg)
-				elseif msg == 0 then
-					-- 要不起
-					local is_main = self:is_main_type(idx)
-					if is_main == false then
-						ok = true
-					end
-				elseif self:check_and_play(idx, msg) then
-					-- 出牌
+			if not msg then
+				-- 托管
+				msg = self:entrust(idx)
+				self:timeout_update(300, idx, cmd, msg)
+			elseif msg == 0 then
+				-- 要不起
+				local is_main = self:is_main_type(idx)
+				if is_main == false then
 					ok = true
 				end
+			elseif self:check_and_play(idx, msg) then
+				-- 出牌
+				ok = true
 			end
 		end
 
