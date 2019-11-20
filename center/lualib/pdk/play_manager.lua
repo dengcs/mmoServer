@@ -23,7 +23,7 @@ end
 function play_manager:init()
 	self.pokers = {} -- 洗的牌
 	self.places = {} -- 每个座位上的牌
-	self.cards = {} -- 底牌
+	self.bottoms = {} -- 底牌
 	self.game	= {} -- 游戏相关信息
 
 	for i = 1, GLOBAL_POKER_MAX do
@@ -86,6 +86,7 @@ function play_manager:shuffle()
 		local random_idx = random.Get(poker_max)
 		local cur_idx = (i % poker_max) + 1
 		if random_idx ~= cur_idx then
+			-- 随机交换牌
 			temp_poker = self.pokers[cur_idx]
 			self.pokers[cur_idx] 	= self.pokers[random_idx]
 			self.pokers[random_idx] = temp_poker
@@ -107,11 +108,11 @@ function play_manager:deal()
 
 	-- 底牌
 	for i = 1, 3 do
-		self.cards[i] = self.pokers[poker_idx]
+		self.bottoms[i] = self.pokers[poker_idx]
 		poker_idx = poker_idx + 1
 	end
 
-	local core_data = {places = self.places, cards = self.cards}
+	local core_data = {places = self.places, bottoms = self.bottoms}
 	self.play_core:begin(core_data)
 end
 

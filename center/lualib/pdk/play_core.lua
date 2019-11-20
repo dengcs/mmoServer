@@ -7,6 +7,7 @@ local skynet 		= require "skynet"
 local json_codec	= require("pdk.json_codec")
 local poker_type	= require("pdk.poker_type")
 local play_state	= require("pdk.play_state")
+local random 		= require("utils.random")
 local ENUM 			= require("config.enum")
 
 local tb_insert		= table.insert
@@ -33,6 +34,7 @@ end
 function play_core:begin(data)
 	self.data = data
 	self.landowner = 0
+	self.snatch_mask = {0,0,0}
 	self.double = 1
 	self.round_state = {idx = 0, type = 0, value = 0, count = 0}
 	self.play_state:start_and_run()
@@ -89,12 +91,12 @@ function play_core:push_bottom()
 	if self.landowner > 0 then
 		local places = self.data.places[self.landowner]
 		if places then
-			for _, v in pairs(self.data.cards) do
+			for _, v in pairs(self.data.bottoms) do
 				tb_insert(places.cards, v)
 			end
 		end
 
-		local data = json_codec.encode(STATE_BOTTOM, {idx = self.landowner, msg = self.data.cards})
+		local data = json_codec.encode(STATE_BOTTOM, {idx = self.landowner, msg = self.data.bottoms})
 		self:call_super("broadcast", data)
 	end
 end
@@ -278,26 +280,63 @@ function play_core:update(idx, data, direct)
 
 		local ok = false
 
-		if direct then
-			-- 定时调用
-			ok = true
-		elseif state == PLAY_STATE.SNATCH then
-			if msg == 1 then
-				self.landowner = idx
+		if state == PLAY_STATE.SNATCH then
+			if msg then
+				local next_idx = idx%3 + 1
+				local count = self.play_state:get_count()
+				if msg == 1 then
+					if (self.landowner == 0 and idx == 3) or self.snatch_mask[idx] == 1 then
+						-- 确定当前玩家为地主
+						self.play_state:inc_count(5)
+					end
+					self.landowner = idx
+					self.snatch_mask[idx] = 1
+				elseif msg == 0 then
+					if self.landowner == next_idx then
+						-- 可以确定地主结束抢地主
+						self.play_state:inc_count(5)
+					else
+						if self.snatch_mask[next_idx] == 1 then
+							if next_idx == 2 then
+								if self.snatch_mask[3] == 0 then
+									-- 可以确定地主结束抢地主
+									self.play_state:inc_count(5)
+								end
+							elseif next_idx == 3 then
+								-- 可以确定地主结束抢地主
+								self.play_state:inc_count(5)
+							end
+						else
+							if idx == 3 then
+								if self.landowner == 0 then
+									-- 洗牌重新开始
+									self:timeout_super(100, "shuffle_and_deal")
+								else
+									-- 可以确定地主结束抢地主
+									self.play_state:inc_count(5)
+								end
+							end
+						end
+					end
+				end
+				if count > 2 and self.snatch_mask[next_idx] == 0 then
+					-- 确定下一个玩家放弃地主
+					self.play_state:inc_idx()
+				end
 				ok = true
-			elseif self.landowner == (idx%3 + 1) then
-				self.play_state:inc_count()
-				self:timeout_update(300, idx, cmd, 0)
-			elseif self.landowner == 0 and idx == 3 then
-				self:timeout_update(300, idx, cmd, 0)
-				self:timeout_super(310, "shuffle_and_deal")
-			elseif msg == 0 then
-				ok = true
-			elseif not msg then
-				self:timeout_update(300, idx, cmd, 0)
+			else
+				local random_val = random.Get(100)
+				if random_val < 60 then
+					self:timeout_update(300, idx, cmd, 1)
+				else
+					self:timeout_update(300, idx, cmd, 0)
+				end
 			end
 		elseif state == PLAY_STATE.PLAY then
-			if not msg then
+			if direct then
+				-- 定时调用
+				ok = true
+			elseif not msg then
 				-- 托管
 				msg = self:entrust(idx)
 				self:timeout_update(300, idx, cmd, msg)

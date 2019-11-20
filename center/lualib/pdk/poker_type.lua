@@ -153,6 +153,50 @@ function poker_type.check_type(type, cards, value, count)
 	end
 end
 
+function poker_type.get_loop_indexed(type, cards)
+	local indexes = nil
+	local max_value = 0
+
+	if type == POKER_TYPE_3WITH2 then
+		for i=4,1,-1 do
+			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH2, cards, 0, i)
+			if indexes then
+				break
+			end
+		end
+	elseif type == POKER_TYPE_3WITH1 then
+		for i=5,1,-1 do
+			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH1, cards, 0, i)
+			if indexes then
+				break
+			end
+		end
+	elseif type == POKER_TYPE_3STRAIGHT then
+		for i=6,2,-1 do
+			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3STRAIGHT, cards, 0, i)
+			if indexes then
+				break
+			end
+		end
+	elseif type == POKER_TYPE_2STRAIGHT then
+		for i=10,3,-1 do
+			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_2STRAIGHT, cards, 0, i)
+			if indexes then
+				break
+			end
+		end
+	elseif type == POKER_TYPE_1STRAIGHT then
+		for i=20,5,-1 do
+			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_1STRAIGHT, cards, 0, i)
+			if indexes then
+				break
+			end
+		end
+	end
+
+	return indexes, max_value
+end
+
 function poker_type.get_default_indexes(cards)
 	local indexes = nil
 	local max_value = 0
@@ -199,27 +243,27 @@ function poker_type.get_default_indexes(cards)
 		end
 	end
 
-	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH2, cards, 0, 1)
+	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_3WITH2, cards)
 	if indexes then
 		return indexes, POKER_TYPE_3WITH2, max_value, 1
 	end
 
-	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH1, cards, 0, 1)
+	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_3WITH1, cards)
 	if indexes then
 		return indexes, POKER_TYPE_3WITH1, max_value, 1
 	end
 
-	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3STRAIGHT, cards, 1, 2)
+	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_3STRAIGHT, cards)
 	if indexes then
 		return indexes, POKER_TYPE_3STRAIGHT, max_value, 2
 	end
 
-	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_2STRAIGHT, cards, 2, 3)
+	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_2STRAIGHT, cards)
 	if indexes then
 		return indexes, POKER_TYPE_2STRAIGHT, max_value, 3
 	end
 
-	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_1STRAIGHT, cards, 4, 5)
+	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_1STRAIGHT, cards)
 	if indexes then
 		return indexes, POKER_TYPE_1STRAIGHT, max_value, 5
 	end

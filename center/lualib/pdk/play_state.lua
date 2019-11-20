@@ -10,7 +10,7 @@ local PLAY_STATE = ENUM.PLAY_STATE
 local STATE_COUNT = {
 	[PLAY_STATE.PREPARE] = 3,
 	[PLAY_STATE.DEAL] = 3,
-	[PLAY_STATE.SNATCH] = 4,
+	[PLAY_STATE.SNATCH] = 5,
 	[PLAY_STATE.PLAY] = 120,
 }
 
@@ -42,8 +42,18 @@ function play_state:reset_state_param()
 	self.place_idx	= 0
 end
 
-function play_state:inc_count()
-	self.count 	= self.count + 1
+function play_state:get_count()
+	return self.count
+end
+
+function play_state:inc_count(count)
+	local add_count = count or 1
+	self.count 	= self.count + add_count
+end
+
+function play_state:inc_idx(count)
+	local add_count = count or 1
+	self.place_idx 	= self.place_idx + add_count
 end
 
 function play_state:start()
