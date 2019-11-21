@@ -4,8 +4,6 @@
 local skynet   	= require "skynet_ex"
 local utils 	= require "combat.utils"
 
-local tinsert 		= table.insert
-
 -----------------------------------------------------------
 --- 内部常量/内部逻辑
 -----------------------------------------------------------
@@ -59,21 +57,22 @@ Member.__index = Member
 -- 构造成员对象
 function Member.new(vdata)
 	if vdata and next(vdata) then
-		local member = setmetatable({}, Member)
-		-- 设置成员数据
-		member.agent			= vdata.agent			-- 角色句柄
-		member.pid             	= vdata.pid				-- 角色编号
-		member.sex             	= vdata.sex				-- 角色性别
-		member.nickname        	= vdata.nickname		-- 角色昵称
-		member.portrait        	= vdata.portrait		-- 角色头像
-		member.portrait_box_id 	= vdata.portrait_box_id	-- 角色像框
-		member.ulevel          	= vdata.ulevel			-- 角色等级
-		member.vlevel          	= vdata.vlevel			-- 贵族等级
-		member.score           	= vdata.score			-- 角色积分
-		member.state           	= ESTATES.PREPARE		-- 角色状态
-		member.robot		   	= vdata.robot			-- 机器人标识
-		member.place		   	= vdata.place			-- 角色座次
-		return member
+		local member =
+		{
+			agent				= vdata.agent,			-- 角色句柄
+			pid             	= vdata.pid,				-- 角色编号
+			sex             	= vdata.sex,				-- 角色性别
+			nickname        	= vdata.nickname,		-- 角色昵称
+			portrait        	= vdata.portrait,		-- 角色头像
+			portrait_box 		= vdata.portrait_box,	-- 角色像框
+			ulevel          	= vdata.ulevel,			-- 角色等级
+			vlevel          	= vdata.vlevel,			-- 贵族等级
+			score           	= vdata.score,			-- 角色积分
+			state           	= ESTATES.PREPARE,		-- 角色状态
+			robot		   		= vdata.robot,			-- 机器人标识
+			place		   		= vdata.place,			-- 角色座次
+		}
+		return setmetatable(member, Member)
 	end
 end
 
@@ -105,21 +104,21 @@ function Member:running()
 end
 
 -- 成员快照
-function Member:snapshot(type)
-	local snapshot = {}
-	snapshot.pid        		= self.pid
-	snapshot.sex        		= self.sex
-	snapshot.nickname   		= self.nickname
-	snapshot.portrait   		= self.portrait
-	snapshot.ulevel     		= self.ulevel
-	snapshot.vlevel     		= self.vlevel
-	snapshot.place				= self.place
-	snapshot.state				= self.state
-	snapshot.portrait_box_id 	= self.portrait_box_id
-	if not type then
-		snapshot.robot				= self.robot
-		snapshot.agent				= self.agent
-	end
+function Member:snapshot()
+	local snapshot =
+	{
+		pid        			= self.pid,
+		sex        			= self.sex,
+		nickname   			= self.nickname,
+		portrait   			= self.portrait,
+		ulevel     			= self.ulevel,
+		vlevel     			= self.vlevel,
+		place				= self.place,
+		state				= self.state,
+		portrait_box 		= self.portrait_box,
+		robot				= self.robot,
+		agent				= self.agent,
+	}
 	return snapshot
 end
 
@@ -157,16 +156,18 @@ Team.__index = Team
 -- 构造队伍
 -- 1. 创建者信息
 function Team.new(vdata)
-	local team = setmetatable({}, Team)
+	local team_dt =
+	{
+		id      	= allocid(),				-- 队伍编号（顺序递增）
+		owner   	= vdata.pid,				-- 领队编号
+		state   	= ESTATES.PREPARE,			-- 队伍状态
+		xtime   	= 0,						-- 匹配时间
+		count	 	= 0,						-- 成员数量
+		channel 	= 0,						-- 频道
+		members 	= {},						-- 成员列表
+	}
 
-	-- 设置队伍数据
-	team.id      	= allocid()					-- 队伍编号（顺序递增）
-	team.owner   	= vdata.pid					-- 领队编号
-	team.state   	= ESTATES.PREPARE			-- 队伍状态
-	team.xtime   	= 0							-- 匹配时间
-	team.count	 	= 0							-- 成员数量
-	team.channel 	= 0							-- 频道
-	team.members 	= {}						-- 成员列表
+	local team = setmetatable(team_dt, Team)
 	-- 成员加入队伍
 	local member = team:join(vdata)
 	if not member then
@@ -217,16 +218,18 @@ function Team:can_start()
 end
 
 -- 队伍快照（用于推送到战场）
-function Team:snapshot(type)
-	local snapshot = {}
-	snapshot.teamid 	= self.id
-	snapshot.channel 	= self.channel
-	snapshot.owner 		= self.owner
-	snapshot.state		= self.state
-	snapshot.members	= {}
+function Team:snapshot()
+	local snapshot =
+	{
+		teamid 		= self.id,
+		channel 	= self.channel,
+		owner 		= self.owner,
+		state		= self.state,
+		members		= {},
+	}
 
 	for _, v in pairs(self.members or {}) do
-		snapshot.members[v.place] = v:snapshot(type)
+		snapshot.members[v.place] = v:snapshot()
 	end
 
 	return snapshot
@@ -359,7 +362,7 @@ end
 function Team:synchronize()
 	-- 房间同步逻辑
 	local name = "room_synchronize_notify"
-	self:broadcast(name, self:snapshot(1))
+	self:broadcast(name, self:snapshot())
 end
 
 -----------------------------------------------------------
@@ -370,12 +373,12 @@ Channel.__index = Channel
 
 -- 构建频道
 function Channel.new(id)
-	local channel = setmetatable({}, Channel)
-
-	-- 设置频道数据
-	channel.id		= id
-	channel.teams   = {}	-- 频道房间列表
-	return channel
+	local channel =
+	{
+		id		= id,
+		teams   = {},	-- 频道房间列表
+	}
+	return setmetatable(channel, Channel)
 end
 
 ---- 消息广播

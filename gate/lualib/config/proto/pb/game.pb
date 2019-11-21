@@ -1,15 +1,15 @@
 
-Ú
+Õ
 src/game.proto
-game.proto"ì
+game.proto"ç
 
 GameMember
 pid (	Rpid
 place (Rplace
 sex (Rsex
 nickname (	Rnickname
-portrait (	Rportrait&
-portrait_box_id (RportraitBoxId
+portrait (	Rportrait!
+portrait_box (RportraitBox
 state (Rstate
 ulevel (Rulevel
 vlevel	 (Rvlevel"!

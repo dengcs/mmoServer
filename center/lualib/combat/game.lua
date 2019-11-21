@@ -48,26 +48,23 @@ Member.__index = Member
 -- 构造成员对象
 -- 1. 参赛者信息
 function Member.new(vdata)
-	local member = setmetatable({}, Member)
-	-- 设置基础数据
-	member.agent      	= vdata.agent					-- 角色句柄
-	member.pid        	= vdata.pid						-- 角色编号
-	member.sex        	= vdata.sex						-- 角色性别
-	member.nickname   	= vdata.nickname				-- 角色昵称
-	member.portrait   	= vdata.portrait				-- 角色头像
-	member.ulevel     	= vdata.ulevel					-- 角色等级
-	member.vlevel     	= vdata.vlevel					-- 贵族等级
-	member.score      	= vdata.score					-- 角色积分
-	member.state     	= GAME_MEMBER_STATE.ONLINE	-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
-	member.robot      	= vdata.robot					-- 是否是机器人
-	member.place		= vdata.place					-- 角色座位
-	member.portrait_box_id = vdata.portrait_box_id
-	-- 设置战场数据
-	member.game =
+	local member =
 	{
-		score          = 0,					-- 比赛得分
+		agent      		= vdata.agent,					-- 角色句柄
+		pid        		= vdata.pid,					-- 角色编号
+		sex        		= vdata.sex,					-- 角色性别
+		nickname   		= vdata.nickname,				-- 角色昵称
+		portrait   		= vdata.portrait,				-- 角色头像
+		ulevel     		= vdata.ulevel,					-- 角色等级
+		vlevel     		= vdata.vlevel,					-- 贵族等级
+		score      		= vdata.score,					-- 角色积分
+		state     		= GAME_MEMBER_STATE.ONLINE,		-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
+		robot      		= vdata.robot,					-- 是否是机器人
+		place			= vdata.place,					-- 角色座位
+		portrait_box 	= vdata.portrait_box,
+		game 			= {score = 0},					-- 比赛得分
 	}
-	return member
+	return setmetatable(member, Member)
 end
 
 -- 战场消息通知
@@ -92,16 +89,18 @@ end
 
 -- 成员快照
 function Member:snapshot()
-	local snapshot = {}
-	snapshot.pid      	= self.pid
-	snapshot.sex      	= self.sex
-	snapshot.nickname 	= self.nickname
-	snapshot.portrait 	= self.portrait
-	snapshot.ulevel   	= self.ulevel
-	snapshot.vlevel   	= self.vlevel
-	snapshot.place		= self.place
-	snapshot.state	  	= self.state
-	snapshot.portrait_box_id = self.portrait_box_id
+	local snapshot =
+	{
+		pid      		= self.pid,
+		sex      		= self.sex,
+		nickname 		= self.nickname,
+		portrait 		= self.portrait,
+		ulevel   		= self.ulevel,
+		vlevel   		= self.vlevel,
+		place			= self.place,
+		state	  		= self.state,
+		portrait_box 	= self.portrait_box,
+	}
 	return snapshot
 end
 
@@ -115,17 +114,19 @@ Game.__index = Game
 -- 1. 战场id
 -- 2. 成员列表
 function Game.new(alias, data)
-	local game = setmetatable({}, Game)
+	local game_dt =
+	{
+		alias    	= alias,							-- 战场id
+		state    	= GAME_STATE.PREPARE,				-- 战场状态
+		stime    	= 0,								-- 开始时间（滴答 = 10毫秒）
+		etime    	= 0,								-- 结束时间（滴答 = 10毫秒）
+		members  	= {},								-- 成员列表
+		channel		= data.channel,
+		teamid		= data.teamid,
+		owner		= data.owner,
+	}
 
-	-- 设置战场数据
-	game.alias    	= alias							-- 战场id
-	game.state    	= GAME_STATE.PREPARE		-- 战场状态
-	game.stime    	= 0								-- 开始时间（滴答 = 10毫秒）
-	game.etime    	= 0								-- 结束时间（滴答 = 10毫秒）
-	game.members  	= {}							-- 成员列表
-	game.channel	= data.channel
-	game.teamid		= data.teamid
-	game.owner		= data.owner
+	local game = setmetatable(game_dt, Game)
 	for _, user in ipairs(data.members) do
 		-- 加入战场
 		local member = game:join(Member.new(user))

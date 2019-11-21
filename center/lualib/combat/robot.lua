@@ -22,7 +22,7 @@ function robot.generate_robot()
 		ulevel     = 1,
 		vlevel     = 0,
 		score      = 0,
-		portrait_box_id = 0,
+		portrait_box = 0,
 		robot = true,
 	}
 	return robot

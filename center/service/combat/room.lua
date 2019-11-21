@@ -1,10 +1,10 @@
 --
 -- 房间赛组队服务
 --
-local skynet  = require "skynet"
-local service = require "factory.service"
-local model = require "combat.room"
-local robot = require "combat.robot"
+local skynet  	= require "skynet"
+local service 	= require "factory.service"
+local room 		= require "combat.room"
+local robot 	= require "combat.robot"
 
 local COMMAND = {}
 
@@ -13,7 +13,7 @@ local COMMAND = {}
 -----------------------------------------------------------
 
 -- 加载频道模型
-local Channel = model.Channel
+local Channel = room.Channel
 
 -----------------------------------------------------------
 --- 内部变量/内部逻辑
