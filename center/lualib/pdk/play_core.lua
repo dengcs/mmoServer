@@ -281,9 +281,9 @@ function play_core:update(idx, data, direct)
 		local ok = false
 
 		if state == PLAY_STATE.SNATCH then
+			local count = self.play_state:get_count()
 			if msg then
 				local next_idx = idx%3 + 1
-				local count = self.play_state:get_count()
 				if msg == 1 then
 					if (self.landowner == 0 and idx == 3) or self.snatch_mask[idx] == 1 then
 						-- 确定当前玩家为地主
@@ -325,11 +325,15 @@ function play_core:update(idx, data, direct)
 				end
 				ok = true
 			else
+				local delay = 300
+				if count == 1 and idx == 1 then
+					delay = 600
+				end
 				local random_val = random.Get(100)
 				if random_val < 60 then
-					self:timeout_update(300, idx, cmd, 1)
+					self:timeout_update(delay, idx, cmd, 1)
 				else
-					self:timeout_update(300, idx, cmd, 0)
+					self:timeout_update(delay, idx, cmd, 0)
 				end
 			end
 		elseif state == PLAY_STATE.PLAY then

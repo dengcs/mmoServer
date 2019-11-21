@@ -58,7 +58,8 @@ end
 
 function play_state:start()
 	self.state 	= PLAY_STATE.PREPARE
-	self:reset_state_param()
+	self.count  	= 0
+	self.place_idx	= 0
 end
 
 function play_state:stop()
