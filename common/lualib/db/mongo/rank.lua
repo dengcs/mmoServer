@@ -3,7 +3,7 @@
 ---------------------------------------------------------------------
 local skynet = require "skynet"
 
-local dbName = "poker"
+local dbName = skynet.getenv("db_name")
 local dtName = "rank"
 
 local M = {}
