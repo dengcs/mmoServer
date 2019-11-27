@@ -158,14 +158,14 @@ function poker_type.get_loop_indexed(type, cards)
 	local max_value = 0
 
 	if type == POKER_TYPE_3WITH2 then
-		for i=4,1,-1 do
+		for i=4,2,-1 do
 			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH2, cards, 0, i)
 			if indexes then
 				break
 			end
 		end
 	elseif type == POKER_TYPE_3WITH1 then
-		for i=5,1,-1 do
+		for i=5,2,-1 do
 			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH1, cards, 0, i)
 			if indexes then
 				break
@@ -484,7 +484,7 @@ end
 -- 检查牌型是否3带1
 function poker_type.check_3with1(cards)
 	local len = #cards
-	if len > 3 then
+	if len > 7 then
 		local target_count = 0
 		local temp_data = {}
 		local check_cards = {}
@@ -522,7 +522,7 @@ end
 -- 检查牌型是否3带2
 function poker_type.check_3with2(cards)
 	local len = #cards
-	if len > 4 then
+	if len > 9 then
 		local target_count = 0
 		local attach_count = 0
 		local temp_data = {}
@@ -885,7 +885,7 @@ function poker_type.get_3with1(mode, value, count)
 	local indexes = nil
 	local max_value = 0
 
-	if count < 1 then
+	if count < 2 then
 		return
 	end
 
@@ -962,7 +962,7 @@ function poker_type.get_3with2(mode, value, count)
 	local indexes = nil
 	local max_value = 0
 
-	if count < 1 then
+	if count < 2 then
 		return
 	end
 
