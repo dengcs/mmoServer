@@ -19,6 +19,7 @@ function poker_type.test_type(cards)
 	local max_value, count = 0, 0, 0
 	local len = #cards
 
+	-- 分长度提升效率
 	if len == 1 then
 		max_value, count = poker_type.check_one(cards)
 		if max_value > 0 then
@@ -49,21 +50,6 @@ function poker_type.test_type(cards)
 		if max_value > 0 then
 			return POKER_TYPE_3WITH1, max_value, count
 		end
-	elseif len == 5 then
-		max_value, count = poker_type.check_1straight(cards)
-		if max_value > 0 then
-			return POKER_TYPE_1STRAIGHT, max_value, count
-		end
-
-		max_value, count = poker_type.check_3with2(cards)
-		if max_value > 0 then
-			return POKER_TYPE_3WITH2, max_value, count
-		end
-
-		max_value, count = poker_type.check_4with1(cards)
-		if max_value > 0 then
-			return POKER_TYPE_4WITH1, max_value, count
-		end
 	else
 		max_value, count = poker_type.check_1straight(cards)
 		if max_value > 0 then
@@ -80,9 +66,14 @@ function poker_type.test_type(cards)
 			return POKER_TYPE_3STRAIGHT, max_value, count
 		end
 
-		max_value, count = poker_type.check_3with1(cards)
+		max_value, count = poker_type.check_3straight1(cards)
 		if max_value > 0 then
-			return POKER_TYPE_3WITH1, max_value, count
+			return POKER_TYPE_3STRAIGHT1, max_value, count
+		end
+
+		max_value, count = poker_type.check_3straight2(cards)
+		if max_value > 0 then
+			return POKER_TYPE_3STRAIGHT2, max_value, count
 		end
 
 		max_value, count = poker_type.check_3with2(cards)
@@ -119,6 +110,8 @@ function poker_type.check_type(type, cards, value, count)
 		[POKER_TYPE_1STRAIGHT] 	= poker_type.check_1straight,
 		[POKER_TYPE_2STRAIGHT] 	= poker_type.check_2straight,
 		[POKER_TYPE_3STRAIGHT] 	= poker_type.check_3straight,
+		[POKER_TYPE_3STRAIGHT1]	= poker_type.check_3straight1,
+		[POKER_TYPE_3STRAIGHT2]	= poker_type.check_3straight2,
 		[POKER_TYPE_3WITH1] 	= poker_type.check_3with1,
 		[POKER_TYPE_3WITH2] 	= poker_type.check_3with2,
 		[POKER_TYPE_4WITH1] 	= poker_type.check_4with1,
@@ -156,18 +149,21 @@ end
 function poker_type.get_loop_indexed(type, cards)
 	local indexes = nil
 	local max_value = 0
+	local max_count = 0
 
-	if type == POKER_TYPE_3WITH2 then
+	if type == POKER_TYPE_3STRAIGHT2 then
 		for i=4,2,-1 do
-			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH2, cards, 0, i)
+			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3STRAIGHT2, cards, 0, i)
 			if indexes then
+				max_count = i
 				break
 			end
 		end
-	elseif type == POKER_TYPE_3WITH1 then
+	elseif type == POKER_TYPE_3STRAIGHT1 then
 		for i=5,2,-1 do
-			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH1, cards, 0, i)
+			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3STRAIGHT1, cards, 0, i)
 			if indexes then
+				max_count = i
 				break
 			end
 		end
@@ -175,6 +171,7 @@ function poker_type.get_loop_indexed(type, cards)
 		for i=6,2,-1 do
 			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_3STRAIGHT, cards, 0, i)
 			if indexes then
+				max_count = i
 				break
 			end
 		end
@@ -182,6 +179,7 @@ function poker_type.get_loop_indexed(type, cards)
 		for i=10,3,-1 do
 			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_2STRAIGHT, cards, 0, i)
 			if indexes then
+				max_count = i
 				break
 			end
 		end
@@ -189,17 +187,19 @@ function poker_type.get_loop_indexed(type, cards)
 		for i=20,5,-1 do
 			indexes,max_value = poker_type.get_type_indexes(POKER_TYPE_1STRAIGHT, cards, 0, i)
 			if indexes then
+				max_count = i
 				break
 			end
 		end
 	end
 
-	return indexes, max_value
+	return indexes, max_value, max_count
 end
 
 function poker_type.get_default_indexes(cards)
 	local indexes = nil
 	local max_value = 0
+	local max_count = 0
 
 	local cards_len = 0
 	for _, v in pairs(cards) do
@@ -209,6 +209,7 @@ function poker_type.get_default_indexes(cards)
 	end
 
 	if cards_len == 2 then
+		-- 只剩2张牌时才主动出火箭
 		indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_KING, cards, 13)
 		if indexes then
 			return indexes, POKER_TYPE_KING, max_value
@@ -216,6 +217,7 @@ function poker_type.get_default_indexes(cards)
 	end
 
 	if cards_len == 8 then
+		-- 只剩8张牌时才主动出4with22
 		indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_4WITH22, cards, 0)
 		if indexes then
 			return indexes, POKER_TYPE_4WITH22, max_value
@@ -223,6 +225,7 @@ function poker_type.get_default_indexes(cards)
 	end
 
 	if cards_len == 6 then
+		-- 只剩6张牌时才主动出4with11
 		indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_4WITH21, cards, 0)
 		if indexes then
 			return indexes, POKER_TYPE_4WITH21, max_value
@@ -230,6 +233,7 @@ function poker_type.get_default_indexes(cards)
 	end
 
 	if cards_len == 5 then
+		-- 只剩5张牌时才主动出4with1
 		indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_4WITH1, cards, 0)
 		if indexes then
 			return indexes, POKER_TYPE_4WITH1, max_value
@@ -237,35 +241,46 @@ function poker_type.get_default_indexes(cards)
 	end
 
 	if cards_len == 4 then
+		-- 只剩4张牌时才主动出炸弹
 		indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_BOMB, cards, 0)
 		if indexes then
 			return indexes, POKER_TYPE_BOMB, max_value
 		end
 	end
 
-	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_3WITH2, cards)
+	indexes, max_value, max_count = poker_type.get_loop_indexed(POKER_TYPE_3STRAIGHT2, cards)
 	if indexes then
-		return indexes, POKER_TYPE_3WITH2, max_value, 1
+		return indexes, POKER_TYPE_3STRAIGHT2, max_value, max_count
 	end
 
-	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_3WITH1, cards)
+	indexes, max_value, max_count = poker_type.get_loop_indexed(POKER_TYPE_3STRAIGHT1, cards)
 	if indexes then
-		return indexes, POKER_TYPE_3WITH1, max_value, 1
+		return indexes, POKER_TYPE_3STRAIGHT1, max_value, max_count
 	end
 
-	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_3STRAIGHT, cards)
+	indexes, max_value, max_count = poker_type.get_loop_indexed(POKER_TYPE_3STRAIGHT, cards)
 	if indexes then
-		return indexes, POKER_TYPE_3STRAIGHT, max_value, 2
+		return indexes, POKER_TYPE_3STRAIGHT, max_value, max_count
 	end
 
-	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_2STRAIGHT, cards)
+	indexes, max_value, max_count = poker_type.get_loop_indexed(POKER_TYPE_2STRAIGHT, cards)
 	if indexes then
-		return indexes, POKER_TYPE_2STRAIGHT, max_value, 3
+		return indexes, POKER_TYPE_2STRAIGHT, max_value, max_count
 	end
 
-	indexes, max_value = poker_type.get_loop_indexed(POKER_TYPE_1STRAIGHT, cards)
+	indexes, max_value, max_count = poker_type.get_loop_indexed(POKER_TYPE_1STRAIGHT, cards)
 	if indexes then
-		return indexes, POKER_TYPE_1STRAIGHT, max_value, 5
+		return indexes, POKER_TYPE_1STRAIGHT, max_value, max_count
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH1, cards, 0)
+	if indexes then
+		return indexes, POKER_TYPE_3WITH1, max_value
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH2, cards)
+	if indexes then
+		return indexes, POKER_TYPE_3WITH2, max_value
 	end
 
 	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_THREE, cards, 0)
@@ -297,6 +312,8 @@ function poker_type.get_type_indexes(type, cards, value, count)
 		[POKER_TYPE_1STRAIGHT] 	= poker_type.get_1straight,
 		[POKER_TYPE_2STRAIGHT] 	= poker_type.get_2straight,
 		[POKER_TYPE_3STRAIGHT] 	= poker_type.get_3straight,
+		[POKER_TYPE_3STRAIGHT1]	= poker_type.get_3straight1,
+		[POKER_TYPE_3STRAIGHT2]	= poker_type.get_3straight2,
 		[POKER_TYPE_3WITH1] 	= poker_type.get_3with1,
 		[POKER_TYPE_3WITH2] 	= poker_type.get_3with2,
 		[POKER_TYPE_4WITH1] 	= poker_type.get_4with1,
@@ -481,8 +498,8 @@ function poker_type.check_3straight(cards)
 	return 0
 end
 
--- 检查牌型是否3带1
-function poker_type.check_3with1(cards)
+-- 检查牌型是否3连对带一张
+function poker_type.check_3straight1(cards)
 	local len = #cards
 	if len > 7 then
 		local target_count = 0
@@ -495,7 +512,7 @@ function poker_type.check_3with1(cards)
 			else
 				temp_data[card] = temp_data[card] + 1
 				-- 收集重要数据
-				if temp_data[card] == 3 and (len == 4 or card < GLOBAL_POKER_VALUE2) then
+				if temp_data[card] == 3 and card < GLOBAL_POKER_VALUE2 then
 					target_count = target_count + 1
 					tb_insert(check_cards, card)
 				end
@@ -519,8 +536,8 @@ function poker_type.check_3with1(cards)
 	return 0
 end
 
--- 检查牌型是否3带2
-function poker_type.check_3with2(cards)
+-- 检查牌型是否3连对带一对
+function poker_type.check_3straight2(cards)
 	local len = #cards
 	if len > 9 then
 		local target_count = 0
@@ -534,7 +551,7 @@ function poker_type.check_3with2(cards)
 			else
 				temp_data[card] = temp_data[card] + 1
 				-- 收集重要数据
-				if temp_data[card] == 3  and (len == 5 or card < GLOBAL_POKER_VALUE2) then
+				if temp_data[card] == 3  and card < GLOBAL_POKER_VALUE2 then
 					target_count = target_count + 1
 					tb_insert(check_cards, card)
 				elseif temp_data[card] == 2 then
@@ -560,6 +577,70 @@ function poker_type.check_3with2(cards)
 
 		if (target_card - first_card) == target_count then
 			return target_card, target_count
+		end
+	end
+	return 0
+end
+
+-- 检查牌型是否3带1
+function poker_type.check_3with1(cards)
+	local len = #cards
+	if len == 4 then
+		local val_data = {}
+		local temp_data = {}
+		for _, v in pairs(cards) do
+			local card = div4_ceil(v)
+			if not temp_data[card] then
+				temp_data[card] = 1
+				tb_insert(val_data, card)
+			else
+				temp_data[card] = temp_data[card] + 1
+				-- 收集重要数据
+				if temp_data[card] == 3 then
+					return card
+				end
+			end
+		end
+
+		if #val_data == 2 then
+			local card1 = val_data[1]
+			local card2 = val_data[2]
+			if temp_data[card1] == 3 then
+				return card1
+			end
+			if temp_data[card2] == 3 then
+				return card2
+			end
+		end
+	end
+	return 0
+end
+
+-- 检查牌型是否3带2
+function poker_type.check_3with2(cards)
+	local len = #cards
+	if len == 5 then
+		local val_data = {}
+		local temp_data = {}
+		for _, v in pairs(cards) do
+			local card = div4_ceil(v)
+			if not temp_data[card] then
+				temp_data[card] = 1
+				tb_insert(val_data, card)
+			else
+				temp_data[card] = temp_data[card] + 1
+			end
+		end
+
+		if #val_data == 2 then
+			local card1 = val_data[1]
+			local card2 = val_data[2]
+			if temp_data[card1] == 3 then
+				return card1
+			end
+			if temp_data[card2] == 3 then
+				return card2
+			end
 		end
 	end
 	return 0
@@ -881,7 +962,7 @@ function poker_type.get_3straight(mode, value, count)
 	return indexes, max_value
 end
 
-function poker_type.get_3with1(mode, value, count)
+function poker_type.get_3straight1(mode, value, count)
 	local indexes = nil
 	local max_value = 0
 
@@ -958,7 +1039,7 @@ function poker_type.get_3with1(mode, value, count)
 	return indexes, max_value
 end
 
-function poker_type.get_3with2(mode, value, count)
+function poker_type.get_3straight2(mode, value, count)
 	local indexes = nil
 	local max_value = 0
 
@@ -1031,6 +1112,125 @@ function poker_type.get_3with2(mode, value, count)
 				attach_count = attach_count + 1
 			end
 		end
+	end
+
+	return indexes, max_value
+end
+
+function poker_type.get_3with1(mode, value)
+	local indexes = nil
+	local max_value = 0
+
+	local first_len = 0
+	local second_len = 0
+	local first_val = {}
+	local second_val = {}
+	local key_list = {}
+
+	for i, v in pairs(mode or {}) do
+		local len = #v
+		if len == 3 then
+			tb_insert(key_list, i)
+		end
+
+		if len == 1 then
+			tb_insert(first_val, i)
+			first_len = first_len + 1
+		end
+
+		if len == 2 and i ~= GLOBAL_POKER_JOKER then
+			tb_insert(second_val, i)
+			second_len = second_len + 1
+		end
+	end
+
+	local key_len = #key_list
+	if key_len < 1 then
+		return
+	end
+
+	if first_len < 1 and second_len < 1 then
+		return
+	end
+
+	tb_sort(key_list)
+	for _, v in ipairs(key_list) do
+		if v > value then
+			max_value = v
+			break
+		end
+	end
+
+	if max_value > 0 then
+		indexes = {}
+		for _, v in pairs(mode[max_value] or {}) do
+			tb_insert(indexes, v)
+		end
+
+		if first_len > 0 then
+			tb_sort(first_val)
+			local key = first_val[1]
+			tb_insert(indexes, mode[key][1])
+		elseif second_len > 0 then
+			tb_sort(second_val)
+			local key = second_val[1]
+			tb_insert(indexes, mode[key][1])
+		end
+	end
+
+	return indexes, max_value
+end
+
+function poker_type.get_3with2(mode, value)
+	local indexes = nil
+	local max_value = 0
+
+	local first_len = 0
+	local first_val = {}
+	local key_list = {}
+
+	for i, v in pairs(mode or {}) do
+		local len = #v
+		if len == 3 then
+			tb_insert(key_list, i)
+		end
+
+		if len == 2 and i ~= GLOBAL_POKER_JOKER then
+			tb_insert(first_val, i)
+			first_len = first_len + 1
+		end
+	end
+
+	local key_len = #key_list
+	if key_len < 1 then
+		return
+	end
+
+	if first_len < 1 then
+		return
+	end
+
+	tb_sort(key_list)
+	for _, v in ipairs(key_list) do
+		if v > value then
+			max_value = v
+			break
+		end
+	end
+
+	if max_value > 0 then
+		indexes = {}
+		for _, v in pairs(mode[max_value] or {}) do
+			tb_insert(indexes, v)
+		end
+
+		if first_len > 1 then
+			tb_sort(first_val)
+		end
+
+		local key = first_val[1]
+		tb_insert(indexes, mode[key][1])
+		tb_insert(indexes, mode[key][2])
 	end
 
 	return indexes, max_value

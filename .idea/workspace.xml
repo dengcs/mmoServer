@@ -90,20 +90,20 @@
     <session id="-466466164">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="119" />
+          <entry key="project.closed" value="120" />
           <entry key="project.open.time.0" value="7" />
           <entry key="project.open.time.10" value="2" />
           <entry key="project.open.time.11" value="1" />
           <entry key="project.open.time.14" value="1" />
           <entry key="project.open.time.2" value="3" />
-          <entry key="project.open.time.3" value="21" />
+          <entry key="project.open.time.3" value="22" />
           <entry key="project.open.time.4" value="26" />
           <entry key="project.open.time.5" value="20" />
           <entry key="project.open.time.6" value="10" />
           <entry key="project.open.time.7" value="11" />
           <entry key="project.open.time.8" value="14" />
           <entry key="project.open.time.9" value="5" />
-          <entry key="project.opened" value="121" />
+          <entry key="project.opened" value="122" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -123,7 +123,7 @@
           <entry key="js" value="1" />
           <entry key="logic" value="5" />
           <entry key="login" value="3" />
-          <entry key="lua" value="1991" />
+          <entry key="lua" value="1994" />
           <entry key="mc" value="1" />
           <entry key="md" value="1" />
           <entry key="mk" value="1" />
@@ -140,7 +140,7 @@
           <entry key="JavaScript" value="1" />
           <entry key="PLAIN_TEXT" value="153" />
           <entry key="Scratch" value="1" />
-          <entry key="lua" value="1991" />
+          <entry key="lua" value="1994" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -151,7 +151,7 @@
           <entry key="gitignore" value="14" />
           <entry key="logic" value="19" />
           <entry key="login" value="8" />
-          <entry key="lua" value="28844" />
+          <entry key="lua" value="29157" />
           <entry key="md" value="40" />
           <entry key="proto" value="721" />
           <entry key="sh" value="755" />
@@ -161,7 +161,7 @@
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="1712" />
-          <entry key="lua" value="28844" />
+          <entry key="lua" value="29157" />
         </counts>
       </usages-collector>
     </session>
@@ -171,8 +171,26 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/center/lualib/pdk/poker_type.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-579">
-              <caret line="524" column="14" selection-start-line="524" selection-start-column="14" selection-end-line="524" selection-end-column="14" />
+            <state relative-caret-position="-10752">
+              <caret line="578" column="30" selection-start-line="578" selection-start-column="19" selection-end-line="578" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_core.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="264">
+              <caret line="228" column="45" selection-start-line="228" selection-start-column="40" selection-end-line="228" selection-end-column="45" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/common/lualib/basic/game.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="285">
+              <caret line="15" column="21" selection-start-line="15" selection-end-line="15" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -188,15 +206,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>event</find>
-      <find>notify</find>
-      <find>auth_functions_to_manager</find>
-      <find>broadcast</find>
-      <find>random</find>
-      <find>cards</find>
-      <find>push_bottom</find>
-      <find>self.cards</find>
-      <find>self.data</find>
       <find>snatch</find>
       <find>snatch_mask</find>
       <find>shuffle_and_deal</find>
@@ -218,13 +227,17 @@
       <find>index2addr</find>
       <find>lua_getmetatable</find>
       <find>lua_setmetatable</find>
+      <find>POKER_TYPE_3WITH1</find>
+      <find>POKER_TYPE_3WITH2</find>
+      <find>check_3with1</find>
+      <find>get_3with2</find>
+      <find>check_3with2</find>
+      <find>get_two</find>
+      <find>get_type_indexes</find>
+      <find>get_default_indexes</find>
+      <find>test_type</find>
     </findStrings>
     <replaceStrings>
-      <replace>hide_byte_bit</replace>
-      <replace>div4_ceil</replace>
-      <replace>gate</replace>
-      <replace>data_meta</replace>
-      <replace>user_meta</replace>
       <replace>inc_count</replace>
       <replace>agent_pool</replace>
       <replace>mongo_connection_pool</replace>
@@ -249,6 +262,12 @@
       <replace>remove_cards</replace>
       <replace>LUA_TNUMBER</replace>
       <replace>portrait_box</replace>
+      <replace>POKER_TYPE_3STRAIGHT1</replace>
+      <replace>POKER_TYPE_3STRAIGHT2</replace>
+      <replace>check_3straight2</replace>
+      <replace>check_3straight1</replace>
+      <replace>get_3straight1</replace>
+      <replace>get_3straight2</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -294,7 +313,6 @@
         <option value="$PROJECT_DIR$/gate/service/client/gate.lua" />
         <option value="$PROJECT_DIR$/gate/service/clientproxy.lua" />
         <option value="$PROJECT_DIR$/engine/lualib/skynet/socketchannel.lua" />
-        <option value="$PROJECT_DIR$/common/lualib/basic/game.lua" />
         <option value="$PROJECT_DIR$/common/lualib/config/enum.lua" />
         <option value="$PROJECT_DIR$/common/lualib/net/dispatcher.lua" />
         <option value="$PROJECT_DIR$/center/service/common/sociald.lua" />
@@ -307,6 +325,7 @@
         <option value="$PROJECT_DIR$/center/lualib/pdk/play_core.lua" />
         <option value="$PROJECT_DIR$/center/lualib/pdk/play_state.lua" />
         <option value="$PROJECT_DIR$/center/service/combat/room.lua" />
+        <option value="$PROJECT_DIR$/common/lualib/basic/game.lua" />
         <option value="$PROJECT_DIR$/center/lualib/pdk/poker_type.lua" />
       </list>
     </option>
@@ -348,7 +367,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -389,7 +408,7 @@
           <select />
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -457,7 +476,7 @@
     <frame x="-7" y="-7" width="2062" height="1126" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22105788" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22305389" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -673,9 +692,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/lualib/basic/game.lua">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_manager.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2166">
@@ -694,13 +710,6 @@
     <entry file="file://$PROJECT_DIR$/gate/lualib/config/proto/src/room.proto">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-135" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_core.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6251">
-          <caret line="329" column="25" selection-start-line="329" selection-start-column="20" selection-end-line="329" selection-end-column="25" />
-        </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_state.lua">
@@ -802,10 +811,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/common/lualib/basic/game.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="15" column="21" selection-start-line="15" selection-end-line="15" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_core.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="264">
+          <caret line="228" column="45" selection-start-line="228" selection-start-column="40" selection-end-line="228" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/center/lualib/pdk/poker_type.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-579">
-          <caret line="524" column="14" selection-start-line="524" selection-start-column="14" selection-end-line="524" selection-end-column="14" />
+        <state relative-caret-position="-10752">
+          <caret line="578" column="30" selection-start-line="578" selection-start-column="19" selection-end-line="578" selection-end-column="30" />
         </state>
       </provider>
     </entry>
