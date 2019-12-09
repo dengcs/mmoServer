@@ -13,7 +13,8 @@ local ENUM 			= require("config.enum")
 local tb_insert		= table.insert
 local PLAY_STATE 	= ENUM.PLAY_STATE
 local PLAY_EVENT	= ENUM.PLAY_EVENT
-local STATE_BOTTOM	= 11 -- 获得底牌
+local NOTIFY_BOTTOM	= 21 -- 获得底牌
+local NOTIFY_OVER	= 22 -- 结束通知剩余牌
 
 local hide_byte_bit = 0x400
 
@@ -96,7 +97,7 @@ function play_core:push_bottom()
 			end
 		end
 
-		local data = json_codec.encode(STATE_BOTTOM, {idx = self.landowner, msg = self.data.bottoms})
+		local data = json_codec.encode(NOTIFY_BOTTOM, {idx = self.landowner, msg = self.data.bottoms})
 		self:call_super("broadcast", data)
 	end
 end
@@ -152,8 +153,24 @@ function play_core:game_over(idx)
 		landowner 	= self.landowner,
 	}
 	-- 通知客户端游戏已经结束
-	local bc_data = json_codec.encode(PLAY_STATE.OVER, overData)
-	self:call_super("broadcast", bc_data)
+	local over_data = json_codec.encode(PLAY_STATE.OVER, overData)
+	self:call_super("broadcast", over_data)
+
+	-- 通知客户端剩余牌
+	local leftData = {}
+	for i=1,3 do
+		local left_cards = {}
+		local cards = self:get_cards(i)
+		for _, v in pairs(cards or {}) do
+			if v < hide_byte_bit then
+				tb_insert(left_cards, v)
+			end
+		end
+		tb_insert(leftData, left_cards)
+	end
+	local left_data = json_codec.encode(NOTIFY_OVER, leftData)
+	self:call_super("broadcast", left_data)
+
 	-- 通知内部处理游戏结束事件
 	self:call_super("event", PLAY_EVENT.GAME_OVER, overData)
 end
