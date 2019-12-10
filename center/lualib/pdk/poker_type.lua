@@ -289,7 +289,7 @@ function poker_type.get_default_indexes(cards)
 	end
 
 	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_TWO, cards, 0)
-	if indexes then
+	if indexes and max_value < GLOBAL_POKER_JOKER then
 		return indexes, POKER_TYPE_TWO, max_value
 	end
 
