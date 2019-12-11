@@ -123,13 +123,7 @@ function poker_type.check_type(type, cards, value, count)
 	if fn then
 		local max_value, ret_count = fn(cards)
 		if max_value > value then
-			if count then
-				if count == ret_count then
-					return type, max_value, count
-				end
-			else
-				return type, max_value
-			end
+			return type, max_value, count
 		end
 
 		if type ~= POKER_TYPE_BOMB then
@@ -210,7 +204,7 @@ function poker_type.get_default_indexes(cards)
 
 	if cards_len == 2 then
 		-- 只剩2张牌时才主动出火箭
-		indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_KING, cards, 13)
+		indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_KING, cards)
 		if indexes then
 			return indexes, POKER_TYPE_KING, max_value
 		end
@@ -289,7 +283,7 @@ function poker_type.get_default_indexes(cards)
 	end
 
 	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_TWO, cards, 0)
-	if indexes and max_value < GLOBAL_POKER_JOKER then
+	if indexes then
 		return indexes, POKER_TYPE_TWO, max_value
 	end
 
@@ -308,7 +302,7 @@ function poker_type.get_type_indexes(type, cards, value, count)
 		[POKER_TYPE_TWO] 		= poker_type.get_two,
 		[POKER_TYPE_THREE] 		= poker_type.get_three,
 		[POKER_TYPE_BOMB] 		= poker_type.get_bomb,
-		[POKER_TYPE_KING] 		= poker_type.get_two,
+		[POKER_TYPE_KING] 		= poker_type.get_king,
 		[POKER_TYPE_1STRAIGHT] 	= poker_type.get_1straight,
 		[POKER_TYPE_2STRAIGHT] 	= poker_type.get_2straight,
 		[POKER_TYPE_3STRAIGHT] 	= poker_type.get_3straight,
@@ -595,10 +589,6 @@ function poker_type.check_3with1(cards)
 				tb_insert(val_data, card)
 			else
 				temp_data[card] = temp_data[card] + 1
-				-- 收集重要数据
-				if temp_data[card] == 3 then
-					return card
-				end
 			end
 		end
 
@@ -751,7 +741,23 @@ function poker_type.get_two(mode, value)
 	for i, v in pairs(mode or {}) do
 		local len = #v
 		if len == 2 then
-			if i > value then
+			if i > value and i < GLOBAL_POKER_JOKER then
+				indexes = v
+				max_value = i
+				break
+			end
+		end
+	end
+	return indexes, max_value
+end
+
+function poker_type.get_king(mode)
+	local indexes = nil
+	local max_value = 0
+	for i, v in pairs(mode or {}) do
+		local len = #v
+		if len == 2 then
+			if i == GLOBAL_POKER_JOKER then
 				indexes = v
 				max_value = i
 				break
@@ -1185,7 +1191,6 @@ function poker_type.get_3with2(mode, value)
 	local indexes = nil
 	local max_value = 0
 
-	local first_len = 0
 	local first_val = {}
 	local key_list = {}
 
@@ -1197,16 +1202,14 @@ function poker_type.get_3with2(mode, value)
 
 		if len == 2 and i ~= GLOBAL_POKER_JOKER then
 			tb_insert(first_val, i)
-			first_len = first_len + 1
 		end
 	end
 
-	local key_len = #key_list
-	if key_len < 1 then
+	if #key_list < 1 then
 		return
 	end
 
-	if first_len < 1 then
+	if #first_val < 1 then
 		return
 	end
 
@@ -1224,7 +1227,7 @@ function poker_type.get_3with2(mode, value)
 			tb_insert(indexes, v)
 		end
 
-		if first_len > 1 then
+		if #first_val > 1 then
 			tb_sort(first_val)
 		end
 
