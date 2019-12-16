@@ -318,7 +318,7 @@ function poker_type.get_type_indexes(type, cards, value, count)
 	local fn = switch[type]
 	if fn then
 		local mode = poker_type.get_cards_mode(cards)
-		return fn(mode, value, count)
+		return fn(mode, value, count, cards)
 	end
 end
 
@@ -713,7 +713,7 @@ function poker_type.check_4with22(cards)
 	return 0
 end
 
-function poker_type.get_one(mode, value)
+function poker_type.get_one(mode, value, count, cards)
 	local indexes = nil
 	local max_value = 0
 	for i, v in pairs(mode or {}) do
@@ -724,7 +724,8 @@ function poker_type.get_one(mode, value)
 				max_value = i
 				break
 			elseif value == GLOBAL_POKER_JOKER then
-				if i == GLOBAL_POKER_JOKER then
+				local cardVal = cards[v[1]]
+				if cardVal == GLOBAL_POKER_MAX then
 					indexes = v
 					max_value = i
 					break
