@@ -51,7 +51,7 @@ end
 
 -- 1. 战场编号
 function COMMAND.on_close(alias)
-	games[self.alias] = nil
+	games[alias] = nil
   	return 0
 end
 

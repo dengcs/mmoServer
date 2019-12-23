@@ -201,6 +201,30 @@ function COMMAND.on_cancel(cid, tid, pid)
 	return 0
 end
 
+-- 退出房间
+-- 1. 频道编号
+-- 2. 房间编号
+-- 3. 角色编号
+function COMMAND.on_exit(cid, tid, pid)
+	-- 获取频道
+	local channel = channels[cid]
+	if channel == nil then
+		return ERRCODE.COMMON_PARAMS_ERROR
+	end
+	-- 队伍检查
+	local team = channel:get(tid)
+	if team == nil then
+		return ERRCODE.ROOM_NOT_EXISTS
+	end
+	-- 成员检查
+	local member = team:get(pid)
+	if member == nil then
+		return ERRCODE.ROOM_PERMISSION_DINIED
+	end
+	team:synchronize(cid)
+	return 0
+end
+
 -- 战场通知战斗结束
 -- 1. 队伍信息
 -- 2. 胜者编号

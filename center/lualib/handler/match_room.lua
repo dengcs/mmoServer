@@ -49,18 +49,27 @@ function REQUEST:room_qkjoin()
     self.response(resp, ret_msg)
 end
 
--- 离开房间
-function REQUEST:room_quit()
-	local resp = "room_quit_resp"
+-- 邀请好友
+function REQUEST:room_invite()
+	local resp = "room_invite_resp"
     local ret = 0
 
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)
 end
 
--- 邀请好友
-function REQUEST:room_invite()
-	local resp = "room_invite_resp"
+-- 取消匹配
+function REQUEST:room_cancel()
+    local resp = "room_cancel_resp"
+    local ret = 0
+
+    local ret_msg = {ret = ret}
+    self.response(resp, ret_msg)
+end
+
+-- 离开房间
+function REQUEST:room_quit()
+    local resp = "room_quit_resp"
     local ret = 0
 
     local ret_msg = {ret = ret}
