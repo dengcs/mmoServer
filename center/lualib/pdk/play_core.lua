@@ -15,6 +15,7 @@ local PLAY_STATE 	= ENUM.PLAY_STATE
 local PLAY_EVENT	= ENUM.PLAY_EVENT
 local NOTIFY_BOTTOM	= 21 -- 获得底牌
 local NOTIFY_OVER	= 22 -- 结束通知剩余牌
+local NOTIFY_DOUBLE	= 23 -- 通知加倍
 
 local hide_byte_bit = 0x400
 
@@ -175,11 +176,36 @@ function play_core:game_over(idx)
 	self:call_super("event", PLAY_EVENT.GAME_OVER, overData)
 end
 
+-- 翻倍
+function play_core:double_multiple(num)
+	local multiple = num or 2
+	self.double = self.double * multiple
+
+	local notify_data = json_codec.encode(NOTIFY_DOUBLE, {double = self.double, multiple = multiple})
+	self:call_super("broadcast", notify_data)
+end
+
+-- 根据出牌类型判断是否翻倍
+function play_core:double_by_round(type)
+	if type == POKER_TYPE_BOMB or type == POKER_TYPE_KING then
+		self:double_multiple()
+	end
+end
+
+-- 记录本轮牌类型相关数据，方便下轮判断
 function play_core:set_round_state(idx, type, value, count)
 	self.round_state.idx = idx
 	self.round_state.type = type
 	self.round_state.value = value
 	self.round_state.count = count
+
+	self:double_by_round(type)
+end
+
+-- 设置地主
+function play_core:set_landowner(idx)
+	self.landowner = idx
+	self:double_multiple()
 end
 
 -- 是否可以随意出牌
@@ -306,7 +332,7 @@ function play_core:update(idx, data, direct)
 						-- 确定当前玩家为地主
 						self.play_state:inc_count(5)
 					end
-					self.landowner = idx
+					self:set_landowner(idx)
 					self.snatch_mask[idx] = 1
 				elseif msg == 0 then
 					if self.landowner == next_idx then
