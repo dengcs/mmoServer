@@ -1,7 +1,7 @@
 -- assignment copy
-table.clone = function (t, nometa)
+table.clone = function (t, meta)
     local result = {}
-    if not nometa then
+    if meta then
         setmetatable(result, getmetatable(t))
     end
     for k, v in pairs(t) do
@@ -11,9 +11,9 @@ table.clone = function (t, nometa)
 end
 
 -- deep copy
-table.deep_clone = function (t, nometa)
+table.deep_clone = function (t, meta)
     local result = {}
-    if not nometa then
+    if meta then
         setmetatable(result, getmetatable(t))
     end
     for k, v in pairs(t) do

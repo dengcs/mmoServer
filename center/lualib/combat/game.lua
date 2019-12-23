@@ -141,7 +141,8 @@ function Game.new(alias, data)
 end
 
 function Game:init_play_mgr()
-	self.play_mgr = play_manager.new()
+	self.play_mgr = play_manager.new(self.channel)
+	self.play_mgr:init()
 	local functions = self:auth_functions_to_manager()
 	self.play_mgr:copy_functions_from_game(functions)
 end

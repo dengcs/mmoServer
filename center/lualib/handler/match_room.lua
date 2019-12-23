@@ -16,7 +16,8 @@ local REQUEST = {}
 function REQUEST:room_create()
     local resp = "room_create_resp"
     local ret = 0
-    local pid = self.user.pid
+    local pid       = self.user.pid
+    local channel   = self.proto.channel
 
     repeat
         local vdata = social.get_user_data(pid)
@@ -26,7 +27,7 @@ function REQUEST:room_create()
         end
 
         vdata.agent = skynet.self()
-        local ok,ret_code = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", 1, vdata)
+        local ok,ret_code = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", channel, vdata)
         if ok ~= 0 then
             ret = ERRCODE.ROOM_CREATE_FAILED
             break

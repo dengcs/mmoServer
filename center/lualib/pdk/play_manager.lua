@@ -10,21 +10,18 @@ local tb_insert = table.insert
 
 local play_manager = {}
 
-function play_manager.new()
-	local manager = {}
+function play_manager.new(channel)
+	local manager = {channel = channel}
 	manager.play_core = play_core.new()
 
-	setmetatable(manager, {__index = play_manager})
-	manager:init()
-
-	return manager
+	return setmetatable(manager, {__index = play_manager})
 end
 
 function play_manager:init()
-	self.pokers = {} -- 洗的牌
-	self.places = {} -- 每个座位上的牌
-	self.bottoms = {} -- 底牌
-	self.game	= {} -- 游戏相关信息
+	self.pokers 	= {} -- 洗的牌
+	self.places 	= {} -- 每个座位上的牌
+	self.bottoms 	= {} -- 底牌
+	self.game		= {} -- 游戏相关信息
 
 	for i = 1, GLOBAL_POKER_MAX do
 		tb_insert(self.pokers, i)
@@ -94,6 +91,33 @@ function play_manager:shuffle()
 	end
 end
 
+-- 不洗牌
+function play_manager:no_shuffle()
+	local sequences 	= {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17}
+	local sequence_len 	= #sequences
+	-- 打乱顺序
+	for i = 1, sequence_len do
+		local random_idx = random.Get(sequence_len)
+		if random_idx ~= i then
+			local sequence = sequences[i]
+			sequences[i] = sequences[random_idx]
+			sequences[random_idx] = sequence
+		end
+	end
+	-- 获取新牌
+	local idx = 1
+	local new_count = 3
+	local new_pokers = table.clone(self.pokers)
+	for i = 1, sequence_len do
+		local sequence = sequences[i]
+		for j = 1, new_count do
+			local new_idx = sequence * new_count + j
+			self.pokers[idx] = new_pokers[new_idx]
+			idx = idx + 1
+		end
+	end
+end
+
 -- 发牌
 function play_manager:deal()
 	local poker_idx = 1
@@ -102,8 +126,6 @@ function play_manager:deal()
 			v.cards[i] = self.pokers[poker_idx]
 			poker_idx = poker_idx + 1
 		end
-		-- 初始化身份（0：平民，1：地主）
-		v.identity = 0
 	end
 
 	-- 底牌
@@ -118,7 +140,11 @@ end
 
 -- 洗牌并发牌
 function play_manager:shuffle_and_deal()
-	self:shuffle()
+	if self.channel > 2 then
+		self:no_shuffle()
+	else
+		self:shuffle()
+	end
 	self:deal()
 end
 
