@@ -292,6 +292,11 @@ function poker_type.get_default_indexes(cards)
 		return indexes, POKER_TYPE_ONE, max_value
 	end
 
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_BOMB, cards, 0)
+	if indexes then
+		return indexes, POKER_TYPE_BOMB, max_value
+	end
+
 	return indexes
 end
 
