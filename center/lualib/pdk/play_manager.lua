@@ -105,7 +105,8 @@ function play_manager:no_shuffle()
 		end
 	end
 	-- 获取新牌
-	local idx = 1
+	-- 随机开始位置，防止切割固定牌
+	local idx = random.Get(GLOBAL_POKER_MAX)
 	local new_count = 3
 	local new_pokers = table.clone(self.pokers)
 	for i = 1, sequence_len do
@@ -113,7 +114,7 @@ function play_manager:no_shuffle()
 		for j = 1, new_count do
 			local new_idx = sequence * new_count + j
 			self.pokers[idx] = new_pokers[new_idx]
-			idx = idx + 1
+			idx = (idx % GLOBAL_POKER_MAX) + 1
 		end
 	end
 end

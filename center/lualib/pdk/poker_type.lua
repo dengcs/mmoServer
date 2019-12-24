@@ -313,15 +313,22 @@ function poker_type.get_play_indexes(type, cards, value, count)
 		end
 	end
 
-	if cards_len == 4 then
-		if type ~= POKER_TYPE_BOMB then
+	if type ~= POKER_TYPE_BOMB then
+		if cards_len == 4 then
 			-- 只剩4张牌时才主动出炸弹
 			indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_BOMB, cards, 0)
 			if indexes then
 				return indexes, POKER_TYPE_BOMB, max_value
 			end
 		end
+	else
+		indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_KING, cards)
+		if indexes then
+			return indexes, POKER_TYPE_KING, max_value
+		end
 	end
+
+
 
 	indexes, max_value = poker_type.get_type_indexes(type, cards, value, count)
 
