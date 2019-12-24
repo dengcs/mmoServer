@@ -36,6 +36,8 @@ local function schedule()
 			for _, team in pairs(channel.teams) do
 				if team:can_start() then
 					team:start()
+                elseif team:size() == 3 then
+                    team:wakeup_robot()
 				else
 					local member = robot.generate_robot()
 					team:join(member)
@@ -66,20 +68,22 @@ function COMMAND.on_create(cid, vdata)
 		return ERRCODE.COMMON_PARAMS_ERROR
 	end
 
-	local bJoin = false
+	local hasJoin = false
 	for _, team in pairs(channel.teams) do
 		if team:join(vdata) then
-			bJoin = true
+            hasJoin = true
 			break
 		end
 	end
 
-	if bJoin == false then
+	if hasJoin == false then
 		-- 创建房间
 		local team = channel:create(vdata)
 		if team == nil then
 			return ERRCODE.ROOM_CREATE_FAILED
 		end
+
+        team:synchronize()
 	end
 
 	return 0
@@ -102,7 +106,7 @@ function COMMAND.on_join(cid, tid, vdata)
         return ERRCODE.COMMON_CLIENT_ERROR
     end
     if not team:prepare() then
-        return ERRCODE.COMMON_CLIENT_ERROR
+        return ERRCODE.ROOM_NOT_PREPARE
     end
     
     -- 加入队伍
@@ -131,12 +135,12 @@ function COMMAND.on_invite(cid, tid, source, pid)
 		return ERRCODE.ROOM_NOT_EXISTS
 	end
 	if not team:prepare() then
-		return ERRCODE.ROOM_NOT_PERPARE
+		return ERRCODE.ROOM_NOT_PREPARE
 	end
 	-- 成员检查
 	local member = team:get(source)
 	if member == nil then
-		return ERRCODE.ROOM_PERMISSION_DINIED
+		return ERRCODE.COMMON_FIND_ERROR
 	end
 	-- 发出邀请
 	local name = "room_invite_notify"
@@ -172,6 +176,35 @@ function COMMAND.on_chat(cid, tid, name, data)
     end
 end
 
+-- 重新开始
+-- 1. 频道编号
+-- 2. 房间编号
+-- 3. 角色编号
+function COMMAND.on_restart(cid, tid, pid)
+    -- 获取频道
+    local channel = channels[cid]
+    if channel == nil then
+        return ERRCODE.COMMON_PARAMS_ERROR
+    end
+    -- 队伍检查
+    local team = channel:get(tid)
+    if team == nil then
+        return ERRCODE.ROOM_NOT_EXISTS
+    end
+    -- 检查是否准备状态
+    if not team:prepare() then
+        return ERRCODE.ROOM_NOT_PREPARE
+    end
+    -- 成员检查
+    local member = team:get(pid)
+    if not member then
+        return ERRCODE.COMMON_FIND_ERROR
+    end
+    member:convert("READY")
+    team:can_ready()
+    team:synchronize()
+end
+
 -- 取消准备
 -- 1. 频道编号
 -- 2. 房间编号
@@ -188,16 +221,16 @@ function COMMAND.on_cancel(cid, tid, pid)
 		return ERRCODE.ROOM_NOT_EXISTS
 	end
 	if not team:prepare() then
-		return ERRCODE.ROOM_NOT_PERPARE
+		return ERRCODE.ROOM_NOT_PREPARE
 	end
 	-- 成员检查
 	local member = team:get(pid)
 	if member == nil then
-		return ERRCODE.ROOM_PERMISSION_DINIED
+		return ERRCODE.COMMON_FIND_ERROR
 	end
 	-- 状态转换
 	member:convert("PREPARE")
-	team:synchronize(cid)
+	team:synchronize()
 	return 0
 end
 
@@ -217,11 +250,10 @@ function COMMAND.on_exit(cid, tid, pid)
 		return ERRCODE.ROOM_NOT_EXISTS
 	end
 	-- 成员检查
-	local member = team:get(pid)
+	local member = team:quit(pid)
 	if member == nil then
-		return ERRCODE.ROOM_PERMISSION_DINIED
+		return ERRCODE.COMMON_FIND_ERROR
 	end
-	team:synchronize(cid)
 	return 0
 end
 
@@ -241,7 +273,7 @@ function COMMAND.on_game_finish(cid, tid, data)
 	end
 
 	-- 变更状态
-	team:convert("PREPARE")
+	team:stop()
 	team:synchronize()
 
 	return 0

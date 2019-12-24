@@ -29,9 +29,35 @@ message room_qkjoin_resp
 	uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
 }
 
+// 重新开始
+message room_restart
+{
+    uint32 channel          = 1;
+    uint32 tid              = 2;
+}
+
+message room_restart_resp
+{
+    uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
+// 取消准备
+message room_cancel
+{
+    uint32 channel          = 1;
+    uint32 tid              = 2;
+}
+
+message room_cancel_resp
+{
+    uint32 ret				= 1;		// 操作结果（0 - 成功， 否则失败）
+}
+
 // 离开房间
 message room_quit
 {
+    uint32 channel          = 1;
+    uint32 tid              = 2;
 }
 
 // 应答
@@ -43,7 +69,9 @@ message room_quit_resp
 // 邀请好友
 message room_invite
 {
-	string pid				= 1;		// 好友编号
+    uint32 channel          = 1;
+    uint32 tid              = 2;
+	string pid				= 3;		// 好友编号
 }
 
 // 应答

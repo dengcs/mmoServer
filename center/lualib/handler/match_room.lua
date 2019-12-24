@@ -11,7 +11,6 @@ local REQUEST = {}
 -- 请求服务接口
 -----------------------------------------------------------
 
-
 -- 创建房间
 function REQUEST:room_create()
     local resp = "room_create_resp"
@@ -22,18 +21,18 @@ function REQUEST:room_create()
     repeat
         local vdata = social.get_user_data(pid)
         if vdata == nil then
-            ret = ERRCODE.ROOM_NOT_PLAYERDATA
+            ret = ERRCODE.COMMON_FIND_ERROR
             break
         end
 
         vdata.agent = skynet.self()
         local ok,ret_code = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", channel, vdata)
         if ok ~= 0 then
-            ret = ERRCODE.ROOM_CREATE_FAILED
+            ret = ERRCODE.COMMON_SYSTEM_ERROR
             break
         end
 
-        ret = ret_code or ret
+        ret = ret_code
     until(true)
 
     local ret_msg = {ret = ret}
@@ -56,6 +55,28 @@ function REQUEST:room_invite()
 
     local ret_msg = {ret = ret}
     self.response(resp, ret_msg)
+end
+
+-- 重新开始
+function REQUEST:room_restart()
+    local ret = 0
+
+    local pid       = self.user.pid
+    local channel   = self.proto.channel
+    local tid       = self.proto.tid
+
+    repeat
+        local ok,ret_code = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_restart", channel, tid, pid)
+
+        if ok ~= 0 then
+            ret = ERRCODE.COMMON_SYSTEM_ERROR
+            break
+        end
+
+        ret = ret_code
+    until(true)
+
+    self.response("room_restart_resp", {ret = ret})
 end
 
 -- 取消匹配

@@ -267,14 +267,14 @@ function poker_type.get_default_indexes(cards)
 		return indexes, POKER_TYPE_1STRAIGHT, max_value, max_count
 	end
 
-	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH1, cards, 0)
-	if indexes then
-		return indexes, POKER_TYPE_3WITH1, max_value
-	end
-
 	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH2, cards)
 	if indexes then
 		return indexes, POKER_TYPE_3WITH2, max_value
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH1, cards, 0)
+	if indexes then
+		return indexes, POKER_TYPE_3WITH1, max_value
 	end
 
 	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_THREE, cards, 0)
@@ -293,6 +293,39 @@ function poker_type.get_default_indexes(cards)
 	end
 
 	return indexes
+end
+
+function poker_type.get_play_indexes(type, cards, value, count)
+	local indexes = nil
+	local max_value = 0
+
+	local cards_len = 0
+	for _, v in pairs(cards) do
+		if v < hide_byte_bit then
+			cards_len = cards_len + 1
+		end
+	end
+
+	if cards_len == 2 then
+		indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_KING, cards)
+		if indexes then
+			return indexes, POKER_TYPE_KING, max_value
+		end
+	end
+
+	if cards_len == 4 then
+		if type ~= POKER_TYPE_BOMB then
+			-- 只剩4张牌时才主动出炸弹
+			indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_BOMB, cards, 0)
+			if indexes then
+				return indexes, POKER_TYPE_BOMB, max_value
+			end
+		end
+	end
+
+	indexes, max_value = poker_type.get_type_indexes(type, cards, value, count)
+
+	return indexes, type, max_value
 end
 
 function poker_type.get_type_indexes(type, cards, value, count)

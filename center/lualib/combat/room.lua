@@ -122,6 +122,22 @@ function Member:snapshot()
 	return snapshot
 end
 
+function Member:snapshotToC()
+	local snapshot =
+	{
+		pid        			= self.pid,
+		sex        			= self.sex,
+		nickname   			= self.nickname,
+		portrait   			= self.portrait,
+		ulevel     			= self.ulevel,
+		vlevel     			= self.vlevel,
+		place				= self.place,
+		state				= self.state,
+		portrait_box 		= self.portrait_box,
+	}
+	return snapshot
+end
+
 -- 消息通知
 function Member:notify(name, data)
 	-- 过滤机器人
@@ -142,7 +158,7 @@ function Member:convert(alias)
 	if convertible(self.state, state) then
 	  self.state = state
 	else
-	  assert(nil, string.format("member.convert(%s) failed!!!", alias))
+		ERROR("member.convert(%s) failed!!!", alias)
 	end
   end
 end
@@ -235,6 +251,23 @@ function Team:snapshot()
 	return snapshot
 end
 
+function Team:snapshotToC()
+	local snapshot =
+	{
+		teamid 		= self.id,
+		channel 	= self.channel,
+		owner 		= self.owner,
+		state		= self.state,
+		members		= {},
+	}
+
+	for _, v in pairs(self.members or {}) do
+		table.insert(snapshot.members, v:snapshotToC())
+	end
+
+	return snapshot
+end
+
 -- 成员数量
 function Team:size()
 	local count = 0
@@ -267,12 +300,23 @@ function Team:join(vdata)
 		self.count = self.count + 1
 		member.place = self.count
 		member:convert("READY")
-
-		if self.count == ROOM_MAX_MEMBERS then
-			self.state = ESTATES.READY
-		end
+		self:can_ready()
+		self:synchronize()
 	end
 	return member
+end
+
+function Team:can_ready()
+	local count = 0
+	for _, member in pairs(self.members) do
+		if member:ready() then
+			count = count + 1
+		end
+	end
+
+	if count == ROOM_MAX_MEMBERS then
+		self:convert("READY")
+	end
 end
 
 -- 离开队伍
@@ -292,12 +336,12 @@ function Team:quit(pid)
 	if (member ~= nil) and (member.pid == self.owner) then
 		for _, v in pairs(self.members) do
 			self.owner = v.pid
-			if v:ready() then
-				v:convert("PREPARE")
-			end
+			v:convert("PREPARE")
 			break
 		end
 	end
+
+	self:synchronize()
 
 	return member
 end
@@ -317,6 +361,15 @@ function Team:start()
 	utils.start(1,1,self:snapshot())
 
 	return true
+end
+
+function Team:wakeup_robot()
+	for _, member in pairs(self.members) do
+		if member.robot and member:prepare() then
+			member:convert("READY")
+		end
+	end
+	self:can_ready()
 end
 
 -- 通知匹配（快速状态转换）
@@ -342,7 +395,7 @@ function Team:convert(alias)
 				member:convert(alias)
 			end
 		else
-			assert(nil, string.format("team.convert(%s) failed!!!", alias))
+			ERROR("team.convert(%s) failed!!!", alias)
 		end
 	end
 end
@@ -362,7 +415,7 @@ end
 function Team:synchronize()
 	-- 房间同步逻辑
 	local name = "room_synchronize_notify"
-	self:broadcast(name, self:snapshot())
+	self:broadcast(name, self:snapshotToC())
 end
 
 -----------------------------------------------------------

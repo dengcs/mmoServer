@@ -19,12 +19,14 @@ ERRCODE =
 	COMMON_PARAMS_ERROR                         = 1008,     -- 参数错误
 	COMMON_STATUS_ERROR                         = 1009,     -- 状态错误
 	COMMON_MAXLVL_ERROR                         = 1010,     -- 最大等级错误
+	COMMON_FIND_ERROR                        	= 1011,     -- 目标未发现错误
 
 	--- 房间服务相关错误
 	ROOM_ENTERENV_FAILED				= 10001,	-- 进入房间
 	ROOM_LEAVEENV_FAILED				= 10002,	-- 离开房间
 	ROOM_CREATE_FAILED					= 10003,	-- 创建房间
-	ROOM_NOT_PLAYERDATA					= 10004,	-- 没有角色数据
+	ROOM_NOT_EXISTS						= 10005,
+	ROOM_NOT_PREPARE					= 10006,
 
 	--- 好友相关
 	FRIEND_ALREADY_FRIEND				= 11001,

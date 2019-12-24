@@ -116,9 +116,9 @@ function play_core:get_default_indexes(idx)
 	return poker_type.get_default_indexes(cards)
 end
 
-function play_core:get_type_indexes(idx, type, value, count)
+function play_core:get_play_indexes(idx, type, value, count)
 	local cards = self:get_cards(idx)
-	return poker_type.get_type_indexes(type, cards, value, count)
+	return poker_type.get_play_indexes(type, cards, value, count)
 end
 
 -- 出牌
@@ -279,10 +279,10 @@ function play_core:entrust(idx)
 		local type = self.round_state.type
 		local value = self.round_state.value
 		local count = self.round_state.count
-		local indexes, max_value = self:get_type_indexes(idx, type, value, count)
+		local indexes, ret_type, max_value = self:get_play_indexes(idx, type, value, count)
 		if indexes then
 			local cards = self:remove_cards(idx, indexes)
-			self:set_round_state(idx, type, max_value, count)
+			self:set_round_state(idx, ret_type, max_value, count)
 			msg = cards
 		end
 	end
