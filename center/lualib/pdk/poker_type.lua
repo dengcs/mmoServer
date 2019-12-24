@@ -267,7 +267,7 @@ function poker_type.get_default_indexes(cards)
 		return indexes, POKER_TYPE_1STRAIGHT, max_value, max_count
 	end
 
-	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH2, cards)
+	indexes, max_value = poker_type.get_type_indexes(POKER_TYPE_3WITH2, cards, 0)
 	if indexes then
 		return indexes, POKER_TYPE_3WITH2, max_value
 	end
