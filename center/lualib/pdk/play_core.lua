@@ -35,7 +35,7 @@ end
 
 function play_core:begin(data)
 	self.data = data
-	self.landowner = 0
+	self.lord = 0
 	self.snatch_mask = {0,0,0}
 	self.double = 1
 	self.round_state = {idx = 0, type = 0, value = 0, count = 0}
@@ -63,14 +63,14 @@ function play_core:auth_functions_to_state()
 		self:push_bottom()
 	end
 
-	local function get_landowner()
-		return self.landowner
+	local function get_lord()
+		return self.lord
 	end
 
 	local functions = {}
 	functions.state_notify 	= state_notify
 	functions.push_bottom 	= push_bottom
-	functions.get_landowner	= get_landowner
+	functions.get_lord	= get_lord
 
 	return functions
 end
@@ -90,15 +90,15 @@ end
 
 -- 推送底牌
 function play_core:push_bottom()
-	if self.landowner > 0 then
-		local places = self.data.places[self.landowner]
+	if self.lord > 0 then
+		local places = self.data.places[self.lord]
 		if places then
 			for _, v in pairs(self.data.bottoms) do
 				tb_insert(places.cards, v)
 			end
 		end
 
-		local data = json_codec.encode(NOTIFY_BOTTOM, {idx = self.landowner, msg = self.data.bottoms})
+		local data = json_codec.encode(NOTIFY_BOTTOM, {idx = self.lord, msg = self.data.bottoms})
 		self:call_super("broadcast", data)
 	end
 end
@@ -151,7 +151,7 @@ function play_core:game_over(idx)
 	{
 		idx 		= idx,
 		double		= self.double,
-		landowner 	= self.landowner,
+		lord 		= self.lord,
 	}
 	-- 通知客户端游戏已经结束
 	local over_data = json_codec.encode(PLAY_STATE.OVER, overData)
@@ -203,8 +203,8 @@ function play_core:set_round_state(idx, type, value, count)
 end
 
 -- 设置地主
-function play_core:set_landowner(idx)
-	self.landowner = idx
+function play_core:set_lord(idx)
+	self.lord = idx
 	self:double_multiple()
 end
 
@@ -328,14 +328,14 @@ function play_core:update(idx, data, direct)
 			if msg then
 				local next_idx = idx%3 + 1
 				if msg == 1 then
-					if (self.landowner == 0 and idx == 3) or self.snatch_mask[idx] == 1 then
+					if (self.lord == 0 and idx == 3) or self.snatch_mask[idx] == 1 then
 						-- 确定当前玩家为地主
 						self.play_state:inc_count(5)
 					end
-					self:set_landowner(idx)
+					self:set_lord(idx)
 					self.snatch_mask[idx] = 1
 				elseif msg == 0 then
-					if self.landowner == next_idx then
+					if self.lord == next_idx then
 						-- 可以确定地主结束抢地主
 						self.play_state:inc_count(5)
 					else
@@ -351,7 +351,7 @@ function play_core:update(idx, data, direct)
 							end
 						else
 							if idx == 3 then
-								if self.landowner == 0 then
+								if self.lord == 0 then
 									-- 洗牌重新开始
 									self:timeout_super(100, "shuffle_and_deal")
 								else

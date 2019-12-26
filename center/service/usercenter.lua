@@ -1,8 +1,10 @@
 ---------------------------------------------------------------------
 --- 用户管理服务（因为共享内存的关系，仅能管理所在节点用户）
 ---------------------------------------------------------------------
-local service   = require "factory.service"
 local skynet    = require "skynet"
+local allocid   = require "utils.allocid"
+local cluster	= require "skynet.cluster"
+local service   = require "factory.service"
 
 ---------------------------------------------------------------------
 --- 内部变量/内部逻辑
@@ -90,6 +92,20 @@ function COMMAND.broadcast(source, cmd, ...)
     end
 end
 
+-- 给逻辑服发消息
+function COMMAND.logic_call(source, pid, cmd, ...)
+    local node_id    = allocid.get_node(pid)
+    local node_name  = "logic"..node_id
+    return cluster.call(node_name, GLOBAL.SERVICE_NAME.USERCENTER, "usercall", pid, cmd, ...)
+end
+
+-- 给逻辑服发消息
+function COMMAND.logic_send(source, pid, cmd, ...)
+    local node_id    = allocid.get_node(pid)
+    local node_name  = "logic"..node_id
+    return cluster.call(node_name, GLOBAL.SERVICE_NAME.USERCENTER, "usersend", pid, cmd, ...)
+end
+
 -- 设置客户端fd
 -- 1. 指令来源
 -- 2. 角色编号
@@ -132,7 +148,7 @@ function server.command_handler(source, cmd, ...)
     if fn then
         return fn(source, ...)
     else
-        ERROR("command[%s] not found!!!", cmd)
+        LOG_ERROR("command[%s] not found!!!", cmd)
     end
 end
 

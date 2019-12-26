@@ -102,7 +102,7 @@ function server.command_handler(source, cmd, ...)
 	if fn then
 		return fn(...)
 	else
-		ERROR("command[%s] can't found!!!", cmd)
+		LOG_ERROR("command[%s] can't found!!!", cmd)
 	end
 end
 

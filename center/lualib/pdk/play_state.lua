@@ -95,7 +95,7 @@ end
 
 function play_state:monitor_event()
 	if self.state == PLAY_STATE.PLAY then
-		self.place_idx = (self:call_super("get_landowner") or 0) - 1
+		self.place_idx = (self:call_super("get_lord") or 0) - 1
 		self:call_super("push_bottom")
 	end
 end

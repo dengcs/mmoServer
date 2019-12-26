@@ -67,16 +67,24 @@ end
 ---------------------------------------------------------------------
 this = {}
 
+function this.logic_call(pid, command, ...)
+    return skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "logic_call", pid, command, ...)
+end
+
+function this.logic_send(pid, command, ...)
+    skynet.send(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "logic_send", pid, command, ...)
+end
+
 function this.usercall(pid, command, ...)
     return skynet.call(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "usercall", pid, command, ...)
 end
 
 function this.usersend(pid, command, ...)
-    return skynet.send(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "usersend", pid, command, ...)
+    skynet.send(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "usersend", pid, command, ...)
 end
 
 function this.broadcast(command, ...)
-    return skynet.send(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "broadcast", command, ...)
+    skynet.send(GLOBAL.SERVICE_NAME.USERCENTER, "lua", "broadcast", command, ...)
 end
 
 function this.call(command, ...)

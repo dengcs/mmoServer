@@ -62,7 +62,7 @@ function Player:add_resource(category, increment)
 		end
 	end
 
-	tb_insert(self.resources, { category = category, balance = 0, expense = 0 })
+	tb_insert(self.resources, { category = category, balance = increment, expense = 0 })
 	self:commit()
 end
 

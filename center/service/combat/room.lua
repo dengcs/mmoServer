@@ -37,7 +37,7 @@ local function schedule()
 				if team:can_start() then
 					team:start()
                 elseif team:size() == 3 then
-                    team:wakeup_robot()
+                    team:robot_ready()
 				else
 					local member = robot.generate_robot()
 					team:join(member)
@@ -273,6 +273,7 @@ function COMMAND.on_game_finish(cid, tid, data)
 	end
 
 	-- 变更状态
+	team:settle(data)
 	team:stop()
 	team:synchronize()
 
@@ -298,7 +299,7 @@ function handler.command_handler(source, cmd, ...)
 	if fn then
 		return fn(...)
 	else
-		ERROR("svcmanager : command[%s] can't find!!!", cmd)
+		LOG_ERROR("svcmanager : command[%s] can't find!!!", cmd)
 	end
 end
 

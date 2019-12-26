@@ -32,7 +32,10 @@ skynet.start(function()
   })
 
   -- 开启集群
-  cluster.open(skynet.getenv("node"))
+  local node      = skynet.getenv("node") or "logic"
+  local node_id   = skynet.getenv("nodeid") or 101
+  local node_name = node..node_id
+  cluster.open(node_name)
 
   skynet.error("Server end")
   skynet.exit()

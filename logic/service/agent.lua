@@ -66,7 +66,7 @@ end
 function CMD.load_data(source, name, data)
 	local ret_val = model_data:init(name, data)
 	if not ret_val then
-		ERROR("data_meta:init(name = %s) failed!!!", name)
+		LOG_ERROR("data_meta:init(name = %s) failed!!!", name)
 	end
 
 	local result = ret_val:copy()

@@ -158,7 +158,7 @@ function Member:convert(alias)
 	if convertible(self.state, state) then
 	  self.state = state
 	else
-		ERROR("member.convert(%s) failed!!!", alias)
+		LOG_ERROR("member.convert(%s) failed!!!", alias)
 	end
   end
 end
@@ -300,13 +300,13 @@ function Team:join(vdata)
 		self.count = self.count + 1
 		member.place = self.count
 		member:convert("READY")
-		self:can_ready()
+		self:auto_ready()
 		self:synchronize()
 	end
 	return member
 end
 
-function Team:can_ready()
+function Team:auto_ready()
 	local count = 0
 	for _, member in pairs(self.members) do
 		if member:ready() then
@@ -363,13 +363,13 @@ function Team:start()
 	return true
 end
 
-function Team:wakeup_robot()
+function Team:robot_ready()
 	for _, member in pairs(self.members) do
 		if member.robot and member:prepare() then
 			member:convert("READY")
 		end
 	end
-	self:can_ready()
+	self:auto_ready()
 end
 
 -- 通知匹配（快速状态转换）
@@ -377,6 +377,25 @@ function Team:stop()
 	self:convert("PREPARE")
 	self.xtime = 0
 	return true
+end
+
+-- 结算
+function Team:settle(data)
+	local win_idx 	= data.idx
+	local double	= data.double
+	local lord		= data.lord
+	for _, member in pairs(self.members) do
+		if member.place == win_idx then
+			this.logic_send(member.pid, "player_settle", true, self.channel, double)
+		else
+			-- 如果当前角色不是赢家，并且是地主那肯定是输了
+			if member.place == lord then
+				this.logic_send(member.pid, "player_settle", false, self.channel, double)
+			else
+				this.logic_send(member.pid, "player_settle", true, self.channel, double)
+			end
+		end
+	end
 end
 
 -- 等待时长（匹配等待时长）

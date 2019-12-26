@@ -160,7 +160,7 @@ function handler.command_handler(source, cmd, ...)
 	if fn then
 		return fn(...)
 	else
-		ERROR("svcmanager : command[%s] can't find!!!", cmd)
+		LOG_ERROR("svcmanager : command[%s] can't find!!!", cmd)
 	end
 end
 

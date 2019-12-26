@@ -149,7 +149,7 @@ function server.command_handler(source, cmd, ...)
 	if fn then
 		return fn(...)
 	else
-		ERROR("social : command[%s] can't find!!!", cmd)
+		LOG_ERROR("social : command[%s] can't find!!!", cmd)
 	end
 end
 

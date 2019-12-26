@@ -15,8 +15,9 @@ local SERVICE_XTIME_BITS = 30
 
 -- 获取节点编号
 local nodeid = tonumber(skynet.getenv("nodeid"))
-if (nodeid == nil) or nodeid > 1024 then
-    ERROR("node[%s] is illegal!!!", nodeid)
+
+if nodeid and nodeid > 1024 then
+    LOG_ERROR("node[%s] is illegal!!!", nodeid)
 end
 
 -- 时间戳
@@ -28,7 +29,6 @@ local seqno = 0
 local M = {}
 
 -- 分配唯一标识符
--- 1. 指令来源
 function M.generate()
     -- 更新时间戳
     local ctime = math.floor(skynet.time()*100) - 155730000000
@@ -44,6 +44,12 @@ function M.generate()
         seqno = seqno + 1
         return (seqno | ((nodeid << SERVICE_XTIME_BITS) | xtime) << SERVICE_SEQNO_BITS)
     end
+end
+
+-- 分离出节点ID
+function M.get_node(pid)
+    local pid_no = tonumber(pid)
+    return pid_no >> (SERVICE_XTIME_BITS + SERVICE_SEQNO_BITS)
 end
 
 return M

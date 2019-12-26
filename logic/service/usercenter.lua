@@ -69,7 +69,7 @@ function COMMAND.load(source, pid)
         
         local ok, objcpy = skynet.call(source, "lua", "load_data", name, retval)
         if ok ~= 0 then
-            ERROR("usercenterd : model[%s] load_data failed!!!", name)
+            LOG_ERROR("usercenterd : model[%s] load_data failed!!!", name)
         end
         user:init(name, objcpy)
     end
@@ -92,7 +92,7 @@ function COMMAND.unload(source, pid)
         u.user:cleanup_all()
         onlines[pid] = nil
     else
-        ERROR("usercenterd : user[%s] not found!!!", pid)
+        LOG_ERROR("usercenterd : user[%s] not found!!!", pid)
     end
     return 0
 end
@@ -119,7 +119,7 @@ function COMMAND.usercall(source, pid, cmd, ...)
     if u then
         local ok, retval = skynet.call(u.agent, "lua", cmd, ...)
         if ok ~= 0 then
-            ERROR("usercenterd : command[%s] failed!!!", cmd)
+            LOG_ERROR("usercenterd : command[%s] failed!!!", cmd)
         end
         return retval
     end
@@ -172,7 +172,7 @@ function server.command_handler(source, cmd, ...)
     if fn then
         return fn(source, ...)
     else
-        ERROR("command[%s] not found!!!", cmd)
+        LOG_ERROR("command[%s] not found!!!", cmd)
     end
 end
 

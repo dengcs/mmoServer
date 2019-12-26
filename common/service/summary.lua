@@ -157,7 +157,7 @@ function server.command_handler(source, cmd, ...)
     if f then
         return f(...)
     else
-        ERROR(EFAULT, "call: %s: command not found", cmd)
+        LOG_ERROR(EFAULT, "call: %s: command not found", cmd)
     end
 end
 
