@@ -95,15 +95,19 @@ end
 -- 给逻辑服发消息
 function COMMAND.logic_call(source, pid, cmd, ...)
     local node_id    = allocid.get_node(pid)
-    local node_name  = "logic"..node_id
-    return cluster.call(node_name, GLOBAL.SERVICE_NAME.USERCENTER, "usercall", pid, cmd, ...)
+    if node_id then
+        local node_name  = "logic"..node_id
+        return cluster.call(node_name, GLOBAL.SERVICE_NAME.USERCENTER, "usercall", pid, cmd, ...)
+    end
 end
 
 -- 给逻辑服发消息
 function COMMAND.logic_send(source, pid, cmd, ...)
     local node_id    = allocid.get_node(pid)
-    local node_name  = "logic"..node_id
-    return cluster.call(node_name, GLOBAL.SERVICE_NAME.USERCENTER, "usersend", pid, cmd, ...)
+    if node_id then
+        local node_name  = "logic"..node_id
+        return cluster.call(node_name, GLOBAL.SERVICE_NAME.USERCENTER, "usersend", pid, cmd, ...)
+    end
 end
 
 -- 设置客户端fd

@@ -385,11 +385,14 @@ function Team:settle(data)
 	local double	= data.double
 	local lord		= data.lord
 	for _, member in pairs(self.members) do
-		if member.place == win_idx then
-			this.logic_send(member.pid, "player_settle", true, self.channel, double)
+		if member.place == lord then
+			if member.place == win_idx then
+				this.logic_send(member.pid, "player_settle", true, self.channel, double)
+			else
+				this.logic_send(member.pid, "player_settle", false, self.channel, double)
+			end
 		else
-			-- 如果当前角色不是赢家，并且是地主那肯定是输了
-			if member.place == lord then
+			if win_idx == lord then
 				this.logic_send(member.pid, "player_settle", false, self.channel, double)
 			else
 				this.logic_send(member.pid, "player_settle", true, self.channel, double)

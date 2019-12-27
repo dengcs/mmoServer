@@ -40,9 +40,9 @@ function COMMAND:player_settle(win, channel, double)
 	local money = baseMoney * double
 
 	if win then
-		self.user:call("Player", "add_resource", money)
+		self.user:call("Player", "add_resource", GAME.RESOURCE.MONEY, money)
 	else
-		self.user:call("Player", "del_resource", money)
+		self.user:call("Player", "del_resource", GAME.RESOURCE.MONEY, money)
 	end
 end
 

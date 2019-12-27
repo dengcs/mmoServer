@@ -90,20 +90,20 @@
     <session id="-466466164">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="133" />
+          <entry key="project.closed" value="136" />
           <entry key="project.open.time.0" value="7" />
           <entry key="project.open.time.10" value="2" />
           <entry key="project.open.time.11" value="1" />
           <entry key="project.open.time.14" value="1" />
           <entry key="project.open.time.2" value="3" />
           <entry key="project.open.time.3" value="25" />
-          <entry key="project.open.time.4" value="28" />
+          <entry key="project.open.time.4" value="31" />
           <entry key="project.open.time.5" value="22" />
           <entry key="project.open.time.6" value="11" />
           <entry key="project.open.time.7" value="12" />
           <entry key="project.open.time.8" value="17" />
           <entry key="project.open.time.9" value="6" />
-          <entry key="project.opened" value="135" />
+          <entry key="project.opened" value="138" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -123,7 +123,7 @@
           <entry key="js" value="1" />
           <entry key="logic" value="8" />
           <entry key="login" value="3" />
-          <entry key="lua" value="2125" />
+          <entry key="lua" value="2132" />
           <entry key="mc" value="1" />
           <entry key="md" value="1" />
           <entry key="mk" value="1" />
@@ -140,7 +140,7 @@
           <entry key="JavaScript" value="1" />
           <entry key="PLAIN_TEXT" value="170" />
           <entry key="Scratch" value="1" />
-          <entry key="lua" value="2125" />
+          <entry key="lua" value="2132" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -151,7 +151,7 @@
           <entry key="gitignore" value="14" />
           <entry key="logic" value="19" />
           <entry key="login" value="8" />
-          <entry key="lua" value="32200" />
+          <entry key="lua" value="32274" />
           <entry key="md" value="40" />
           <entry key="proto" value="835" />
           <entry key="sh" value="755" />
@@ -161,18 +161,63 @@
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="PLAIN_TEXT" value="1826" />
-          <entry key="lua" value="32200" />
+          <entry key="lua" value="32274" />
         </counts>
       </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
-    <leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_core.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3211">
+              <caret line="169" column="26" selection-start-line="169" selection-start-column="18" selection-end-line="169" selection-end-column="26" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/center/service/combat/room.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="335">
+              <caret line="203" column="20" selection-start-line="203" selection-start-column="9" selection-end-line="203" selection-end-column="20" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/center/lualib/combat/room.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="209">
+              <caret line="365" column="25" selection-start-line="365" selection-start-column="14" selection-end-line="365" selection-end-column="25" />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/common/lualib/utils/allocid.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="342">
-              <caret line="18" column="9" selection-start-line="18" selection-start-column="3" selection-end-line="18" selection-end-column="9" />
+            <state relative-caret-position="772">
+              <caret line="51" column="18" selection-start-line="51" selection-start-column="18" selection-end-line="51" selection-end-column="18" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/center/service/usercenter.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="589">
+              <caret line="106" column="19" selection-start-line="106" selection-start-column="19" selection-end-line="106" selection-end-column="19" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/logic/lualib/model/player.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="190">
+              <caret line="55" column="37" selection-start-line="55" selection-start-column="29" selection-end-line="55" selection-end-column="37" />
             </state>
           </provider>
         </entry>
@@ -180,35 +225,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/logic/lualib/handler/net_player.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="432">
-              <caret line="28" column="9" lean-forward="true" selection-start-line="28" selection-start-column="9" selection-end-line="28" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/lualib/basic/macros.lua">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="19">
-              <caret line="1" column="6" selection-start-line="1" selection-end-line="1" selection-end-column="6" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/common/lualib/basic/lservice.lua">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1406">
-              <caret line="74" column="87" lean-forward="true" selection-start-line="74" selection-start-column="87" selection-end-line="74" selection-end-column="87" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/center/service/usercenter.lua">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="494">
-              <caret line="101" column="10" selection-start-line="101" selection-start-column="10" selection-end-line="101" selection-end-column="10" />
+            <state relative-caret-position="696">
+              <caret line="44" column="69" selection-start-line="44" selection-start-column="69" selection-end-line="44" selection-end-column="69" />
             </state>
           </provider>
         </entry>
@@ -330,8 +348,6 @@
         <option value="$PROJECT_DIR$/center/lualib/pdk/play_core.lua" />
         <option value="$PROJECT_DIR$/center/lualib/pdk/play_state.lua" />
         <option value="$PROJECT_DIR$/logic/service/main.lua" />
-        <option value="$PROJECT_DIR$/center/lualib/combat/room.lua" />
-        <option value="$PROJECT_DIR$/center/service/combat/room.lua" />
         <option value="$PROJECT_DIR$/center/service/combat/game.lua" />
         <option value="$PROJECT_DIR$/center/service/common/friend.lua" />
         <option value="$PROJECT_DIR$/center/service/common/rank.lua" />
@@ -341,10 +357,12 @@
         <option value="$PROJECT_DIR$/common/service/summary.lua" />
         <option value="$PROJECT_DIR$/logic/service/agent.lua" />
         <option value="$PROJECT_DIR$/logic/service/usercenter.lua" />
-        <option value="$PROJECT_DIR$/common/lualib/utils/allocid.lua" />
         <option value="$PROJECT_DIR$/common/lualib/basic/lservice.lua" />
-        <option value="$PROJECT_DIR$/logic/lualib/handler/net_player.lua" />
+        <option value="$PROJECT_DIR$/center/lualib/combat/room.lua" />
+        <option value="$PROJECT_DIR$/common/lualib/utils/allocid.lua" />
         <option value="$PROJECT_DIR$/center/service/usercenter.lua" />
+        <option value="$PROJECT_DIR$/logic/lualib/handler/net_player.lua" />
+        <option value="$PROJECT_DIR$/center/service/combat/room.lua" />
       </list>
     </option>
   </component>
@@ -354,7 +372,7 @@
       <select />
     </treeState>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="500" />
     <option name="y" value="105" />
     <option name="width" value="1400" />
@@ -385,7 +403,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -408,6 +425,27 @@
               <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
               <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
               <item name="center" type="462c0819:PsiDirectoryNode" />
+              <item name="lualib" type="462c0819:PsiDirectoryNode" />
+              <item name="combat" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
+              <item name="center" type="462c0819:PsiDirectoryNode" />
+              <item name="lualib" type="462c0819:PsiDirectoryNode" />
+              <item name="handler" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
+              <item name="center" type="462c0819:PsiDirectoryNode" />
+              <item name="lualib" type="462c0819:PsiDirectoryNode" />
+              <item name="pdk" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
+              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
+              <item name="center" type="462c0819:PsiDirectoryNode" />
               <item name="service" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -420,13 +458,6 @@
             <path>
               <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
               <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
-              <item name="center" type="462c0819:PsiDirectoryNode" />
-              <item name="service" type="462c0819:PsiDirectoryNode" />
-              <item name="common" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
               <item name="common" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -434,13 +465,6 @@
               <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
               <item name="common" type="462c0819:PsiDirectoryNode" />
               <item name="lualib" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
-              <item name="common" type="462c0819:PsiDirectoryNode" />
-              <item name="lualib" type="462c0819:PsiDirectoryNode" />
-              <item name="basic" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
@@ -448,19 +472,6 @@
               <item name="common" type="462c0819:PsiDirectoryNode" />
               <item name="lualib" type="462c0819:PsiDirectoryNode" />
               <item name="utils" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
-              <item name="common" type="462c0819:PsiDirectoryNode" />
-              <item name="service" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
-              <item name="mmoServer" type="462c0819:PsiDirectoryNode" />
-              <item name="common" type="462c0819:PsiDirectoryNode" />
-              <item name="service" type="462c0819:PsiDirectoryNode" />
-              <item name="client" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="mmoServer" type="b2602c69:ProjectViewProjectNode" />
@@ -527,13 +538,14 @@
           <select />
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
       <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="MASTER_TYPE&#9;null&#9;null" />
     <property name="ToolWindowEvent Log.ShowToolbar" value="false" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1577358767170" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1577358773048" />
     <property name="jdk.selected.LUA_MODULE" value="Lua" />
     <property name="last_opened_file_path" value="F:/dcs/java_workspace/GameAccess/.project" />
     <property name="project.structure.last.edited" value="Artifacts" />
@@ -595,7 +607,7 @@
     <frame x="-7" y="-7" width="2062" height="1126" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25399202" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26147705" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -748,13 +760,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/logic/lualib/model/player.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="316">
-          <caret line="71" column="28" selection-start-line="71" selection-start-column="16" selection-end-line="71" selection-end-column="28" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/common/lualib/basic/errno.lua">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -776,20 +781,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="625">
           <caret line="86" column="9" selection-start-line="86" selection-start-column="9" selection-end-line="86" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/center/lualib/combat/room.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1029">
-          <caret line="160" column="17" selection-start-line="160" selection-start-column="8" selection-end-line="160" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_core.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-4206">
-          <caret line="153" column="20" selection-start-line="153" selection-start-column="20" selection-end-line="153" selection-end-column="20" />
         </state>
       </provider>
     </entry>
@@ -821,13 +812,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="12">
           <caret line="262" column="61" selection-start-line="262" selection-start-column="50" selection-end-line="262" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/center/service/combat/room.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="734">
-          <caret line="301" column="17" selection-start-line="301" selection-start-column="17" selection-end-line="301" selection-end-column="17" />
         </state>
       </provider>
     </entry>
@@ -919,20 +903,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/common/lualib/utils/allocid.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="342">
-          <caret line="18" column="9" selection-start-line="18" selection-start-column="3" selection-end-line="18" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/logic/lualib/handler/net_player.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="28" column="9" lean-forward="true" selection-start-line="28" selection-start-column="9" selection-end-line="28" selection-end-column="9" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/common/lualib/basic/macros.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="19">
@@ -940,10 +910,52 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/center/lualib/pdk/play_core.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3211">
+          <caret line="169" column="26" selection-start-line="169" selection-start-column="18" selection-end-line="169" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/lualib/utils/allocid.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="772">
+          <caret line="51" column="18" selection-start-line="51" selection-start-column="18" selection-end-line="51" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/center/service/usercenter.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="494">
-          <caret line="101" column="10" selection-start-line="101" selection-start-column="10" selection-end-line="101" selection-end-column="10" />
+        <state relative-caret-position="589">
+          <caret line="106" column="19" selection-start-line="106" selection-start-column="19" selection-end-line="106" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logic/lualib/model/player.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="190">
+          <caret line="55" column="37" selection-start-line="55" selection-start-column="29" selection-end-line="55" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/logic/lualib/handler/net_player.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="696">
+          <caret line="44" column="69" selection-start-line="44" selection-start-column="69" selection-end-line="44" selection-end-column="69" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/center/lualib/combat/room.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="209">
+          <caret line="365" column="25" selection-start-line="365" selection-start-column="14" selection-end-line="365" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/center/service/combat/room.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="335">
+          <caret line="203" column="20" selection-start-line="203" selection-start-column="9" selection-end-line="203" selection-end-column="20" />
         </state>
       </provider>
     </entry>

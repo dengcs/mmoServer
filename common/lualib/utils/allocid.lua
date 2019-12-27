@@ -49,7 +49,9 @@ end
 -- 分离出节点ID
 function M.get_node(pid)
     local pid_no = tonumber(pid)
-    return pid_no >> (SERVICE_XTIME_BITS + SERVICE_SEQNO_BITS)
+    if pid_no then
+        return pid_no >> (SERVICE_XTIME_BITS + SERVICE_SEQNO_BITS)
+    end
 end
 
 return M

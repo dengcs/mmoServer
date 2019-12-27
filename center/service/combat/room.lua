@@ -201,7 +201,7 @@ function COMMAND.on_restart(cid, tid, pid)
         return ERRCODE.COMMON_FIND_ERROR
     end
     member:convert("READY")
-    team:can_ready()
+    team:robot_ready()
     team:synchronize()
 end
 
