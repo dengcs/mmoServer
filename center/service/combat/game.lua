@@ -105,10 +105,6 @@ function COMMAND.on_game_forward(alias, name, data)
 	return 0
 end
 
------------------------------------------------------------
---- 结算相关逻辑
------------------------------------------------------------
-
 -- 战场关闭（延时关闭，确保用户成功返回组队服务）
 -- 1. 战场编号
 function COMMAND.game_finish(alias, data)
@@ -119,6 +115,10 @@ function COMMAND.game_finish(alias, data)
 
 	skynet.send(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_game_finish", game.channel, game.teamid, data)
 end
+
+-----------------------------------------------------------
+--- 重连相关逻辑
+-----------------------------------------------------------
 
 -- 成员掉线通知
 -- 1. 战场编号

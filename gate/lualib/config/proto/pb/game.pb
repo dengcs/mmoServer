@@ -1,7 +1,7 @@
 
-Õ
+í
 src/game.proto
-game.proto"ç
+game.proto"ÿ
 
 GameMember
 pid (	Rpid
@@ -12,7 +12,9 @@ GameMember
 portrait_box (RportraitBox
 state (Rstate
 ulevel (Rulevel
-vlevel	 (Rvlevel"!
+vlevel	 (Rvlevel
+online
+ (Ronline"!
 game_update
 data (	Rdata"
 game_submit

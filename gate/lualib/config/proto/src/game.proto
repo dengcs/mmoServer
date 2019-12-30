@@ -9,15 +9,16 @@ package game.proto;
 // 参赛者信息
 message GameMember
 {
-	string     pid			        = 1;	// 参赛者编号
-	uint32     place			    = 2;	// 参赛者座位
-	uint32     sex                  = 3;	// 参赛者性别
-	string     nickname	            = 4;	// 参赛者昵称
-	string     portrait	            = 5;	// 参赛者头像
-	uint32 	   portrait_box	    = 6;	// 头像像框
-	uint32     state                = 7;	// 参赛者状态(0 - 未准备就绪， 1 - 已准备就绪)
-	uint32     ulevel		        = 8;	// 参赛者角色等级
-	uint32     vlevel               = 9;	// 参赛者贵族等级
+	string      pid			        = 1;	// 参赛者编号
+	uint32      place			    = 2;	// 参赛者座位
+	uint32      sex                 = 3;	// 参赛者性别
+	string      nickname	        = 4;	// 参赛者昵称
+	string      portrait	        = 5;	// 参赛者头像
+	uint32 	    portrait_box	    = 6;	// 头像像框
+	uint32      state               = 7;	// 参赛者状态(0 - 未准备就绪， 1 - 已准备就绪)
+	uint32      ulevel		        = 8;	// 参赛者角色等级
+	uint32      vlevel              = 9;	// 参赛者贵族等级
+	uint32      online              = 10;   // 在线状态
 }
 
 

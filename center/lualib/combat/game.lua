@@ -8,7 +8,6 @@ local play_manager	= require "pdk.play_manager"
 local tinsert 		= table.insert
 
 local PLAYER_STATE_TYPE = ENUM.PLAYER_STATE_TYPE
-local GAME_MEMBER_STATE = ENUM.GAME_MEMBER_STATE
 local GAME_STATE		= ENUM.GAME_STATE
 local PLAY_EVENT		= ENUM.PLAY_EVENT
 
@@ -58,7 +57,7 @@ function Member.new(vdata)
 		ulevel     		= vdata.ulevel,					-- 角色等级
 		vlevel     		= vdata.vlevel,					-- 贵族等级
 		score      		= vdata.score,					-- 角色积分
-		state     		= GAME_MEMBER_STATE.ONLINE,		-- 在线状态（1 - 在线， 2 - 离线， 3 - 退出）
+		online     		= 0,							-- 在线状态
 		robot      		= vdata.robot,					-- 是否是机器人
 		place			= vdata.place,					-- 角色座位
 		portrait_box 	= vdata.portrait_box,
@@ -72,7 +71,7 @@ end
 -- 2. 消息内容
 function Member:notify(name, data)
 	-- 过滤掉线成员
-	if self.state ~= GAME_MEMBER_STATE.ONLINE then
+	if self.online ~= 0 then
 		return
 	end
 	-- 过滤机器人
@@ -98,7 +97,7 @@ function Member:snapshot()
 		ulevel   		= self.ulevel,
 		vlevel   		= self.vlevel,
 		place			= self.place,
-		state	  		= self.state,
+		online	  		= self.online,
 		portrait_box 	= self.portrait_box,
 	}
 	return snapshot
@@ -190,7 +189,7 @@ function Game:quit(pid)
 	for _, v in pairs(self.members) do
 		-- 成员离线处理
 		if v.pid == pid then
-			v.state = GAME_MEMBER_STATE.QUIT
+			v.online = this.time()
 			-- 记录退出成员
 			member = v
 			if not v.robot then
@@ -215,7 +214,7 @@ end
 -- 判断是否空战场
 function Game:empty()
 	for _, member in pairs(self.members) do
-		if member.state ~= GAME_MEMBER_STATE.QUIT then
+		if member.online == 0 then
 			return false
 		end
 	end
@@ -224,40 +223,27 @@ end
 
 -- 成员掉线
 function Game:disconnect(pid)
-	local member = nil
-	for _, v in pairs(self.members) do
-		repeat
-			if v.state == GAME_MEMBER_STATE.QUIT then
-				break
-			end
-			if v.pid == pid then
-				member   = v
-				v.state = GAME_MEMBER_STATE.OFFLINE
-			end
-		until(true)
+	for _, member in pairs(self.members) do
+		if member.pid == pid then
+			member.online = this.time()
+		end
 	end
-	return member
 end
 
 -- 成员重连
 function Game:reconnect(pid)
-	local member = nil
-	for _, v in pairs(self.members) do
-		if v.state ~= GAME_MEMBER_STATE.QUIT then
-			if v.pid == pid then
-				member = v
-			end
-			v.state = GAME_MEMBER_STATE.ONLINE
+	for _, member in pairs(self.members) do
+		if member.pid == pid then
+			member.online = 0
 		end
 	end
-	return member
 end
 
 -- 游戏结束
 function Game:over(data)
-	for _, v in pairs(self.members) do
-		if not v.robot then
-			leave_environment(v.pid, self.alias)
+	for _, member in pairs(self.members) do
+		if not member.robot then
+			leave_environment(member.pid, self.alias)
 		end
 	end
 	skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "game_finish", self.alias, data)

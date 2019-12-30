@@ -60,8 +60,8 @@ function Member.new(vdata)
 		local member =
 		{
 			agent				= vdata.agent,			-- 角色句柄
-			pid             	= vdata.pid,				-- 角色编号
-			sex             	= vdata.sex,				-- 角色性别
+			pid             	= vdata.pid,			-- 角色编号
+			sex             	= vdata.sex,			-- 角色性别
 			nickname        	= vdata.nickname,		-- 角色昵称
 			portrait        	= vdata.portrait,		-- 角色头像
 			portrait_box 		= vdata.portrait_box,	-- 角色像框
@@ -71,6 +71,7 @@ function Member.new(vdata)
 			state           	= ESTATES.PREPARE,		-- 角色状态
 			robot		   		= vdata.robot,			-- 机器人标识
 			place		   		= vdata.place,			-- 角色座次
+			online 				= 0,					-- 在线状态
 		}
 		return setmetatable(member, Member)
 	end
@@ -163,6 +164,14 @@ function Member:convert(alias)
   end
 end
 
+function Member:disconnect()
+	self.online = this.time()
+end
+
+function Member:reconnect()
+	self.online = 0
+end
+
 -----------------------------------------------------------
 --- 队伍模型
 -----------------------------------------------------------
@@ -244,8 +253,8 @@ function Team:snapshot()
 		members		= {},
 	}
 
-	for _, v in pairs(self.members or {}) do
-		snapshot.members[v.place] = v:snapshot()
+	for _, member in pairs(self.members or {}) do
+		snapshot.members[member.place] = member:snapshot()
 	end
 
 	return snapshot
@@ -261,8 +270,8 @@ function Team:snapshotToC()
 		members		= {},
 	}
 
-	for _, v in pairs(self.members or {}) do
-		table.insert(snapshot.members, v:snapshotToC())
+	for _, member in pairs(self.members or {}) do
+		table.insert(snapshot.members, member:snapshotToC())
 	end
 
 	return snapshot
@@ -322,34 +331,30 @@ end
 -- 离开队伍
 function Team:quit(pid)
 	-- 移除队伍成员
-	local member = nil
-	for _, v in pairs(self.members) do
-		if (v.pid == pid) then
-			member            = v
-			self.members[pid] = nil
-			self.count = self.count - 1
-			break
-		end
-	end
+	local member = self.members[pid]
+	if member then
+		self.members[pid] = nil
+		self.count = self.count - 1
 
-	-- 转移队长权限
-	if (member ~= nil) and (member.pid == self.owner) then
-		for _, v in pairs(self.members) do
-			self.owner = v.pid
-			v:convert("PREPARE")
-			break
+		-- 转移队长权限
+		if member.pid == self.owner then
+			for _, v in pairs(self.members) do
+				self.owner = v.pid
+				v:convert("PREPARE")
+				break
+			end
 		end
-	end
 
-	self:synchronize()
+		self:synchronize()
+	end
 
 	return member
 end
 
 -- 消息广播
 function Team:broadcast(name, data)
-	for _, v in pairs(self.members) do
-		v:notify(name, data)
+	for _, member in pairs(self.members) do
+		member:notify(name, data)
 	end
 end
 
@@ -417,7 +422,7 @@ function Team:convert(alias)
 				member:convert(alias)
 			end
 		else
-			ERROR("team.convert(%s) failed!!!", alias)
+			LOG_ERROR("team.convert(%s) failed!!!", alias)
 		end
 	end
 end
@@ -425,9 +430,9 @@ end
 -- 队伍等级（成员最高等级）
 function Team:level()
 	local maxlv = 0
-	for _, v in pairs(self.members) do
-		if v.ulevel > maxlv then
-			maxlv = v.ulevel
+	for _, member in pairs(self.members) do
+		if member.ulevel > maxlv then
+			maxlv = member.ulevel
 		end
 	end
 	return maxlv
@@ -438,6 +443,22 @@ function Team:synchronize()
 	-- 房间同步逻辑
 	local name = "room_synchronize_notify"
 	self:broadcast(name, self:snapshotToC())
+end
+
+-- 掉线
+function Team:disconnect(pid)
+	local member = self.members[pid]
+	if member then
+		member:disconnect()
+	end
+end
+
+-- 重连
+function Team:reconnect(pid)
+	local member = self.members[pid]
+	if member then
+		member:reconnect()
+	end
 end
 
 -----------------------------------------------------------
