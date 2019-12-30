@@ -1,5 +1,5 @@
 
-Ì
+¡
 src/game.proto
 game.proto"ˇ
 
@@ -28,16 +28,14 @@ game_leave"#
 game_quit_notify
 pid (	Rpid",
 game_complete_notify
-score (Rscore"£
+score (Rscore"ç
 game_start_notify
 teamid (Rteamid
 channel (Rchannel
-owner (	Rowner
-state (Rstate0
-members (2.game.proto.GameMemberRmembers"©
+state (Rstate0
+members (2.game.proto.GameMemberRmembers"ì
 room_synchronize_notify
 teamid (Rteamid
 channel (Rchannel
-owner (	Rowner
-state (Rstate0
-members (2.game.proto.GameMemberRmembersbproto3
+state (Rstate0
+members (2.game.proto.GameMemberRmembersbproto3

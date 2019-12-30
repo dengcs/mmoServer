@@ -135,6 +135,7 @@ function Member:snapshotToC()
 		place				= self.place,
 		state				= self.state,
 		portrait_box 		= self.portrait_box,
+		online				= self.online,
 	}
 	return snapshot
 end
@@ -184,7 +185,6 @@ function Team.new(vdata)
 	local team_dt =
 	{
 		id      	= allocid(),				-- 队伍编号（顺序递增）
-		owner   	= vdata.pid,				-- 领队编号
 		state   	= ESTATES.PREPARE,			-- 队伍状态
 		xtime   	= 0,						-- 匹配时间
 		count	 	= 0,						-- 成员数量
@@ -248,7 +248,6 @@ function Team:snapshot()
 	{
 		teamid 		= self.id,
 		channel 	= self.channel,
-		owner 		= self.owner,
 		state		= self.state,
 		members		= {},
 	}
@@ -265,7 +264,6 @@ function Team:snapshotToC()
 	{
 		teamid 		= self.id,
 		channel 	= self.channel,
-		owner 		= self.owner,
 		state		= self.state,
 		members		= {},
 	}
@@ -275,15 +273,6 @@ function Team:snapshotToC()
 	end
 
 	return snapshot
-end
-
--- 成员数量
-function Team:size()
-	local count = 0
-	for _, v in pairs(self.members) do
-		count = count + 1
-	end
-	return count
 end
 
 -- 指定成员
@@ -329,21 +318,12 @@ function Team:auto_ready()
 end
 
 -- 离开队伍
-function Team:quit(pid)
+function Team:remove(pid)
 	-- 移除队伍成员
 	local member = self.members[pid]
 	if member then
 		self.members[pid] = nil
 		self.count = self.count - 1
-
-		-- 转移队长权限
-		if member.pid == self.owner then
-			for _, v in pairs(self.members) do
-				self.owner = v.pid
-				v:convert("PREPARE")
-				break
-			end
-		end
 
 		self:synchronize()
 	end
@@ -375,6 +355,14 @@ function Team:robot_ready()
 		end
 	end
 	self:auto_ready()
+end
+
+function Team:clean()
+	for _, member in pairs(self.members) do
+		if member.online ~= 0 then
+
+		end
+	end
 end
 
 -- 通知匹配（快速状态转换）

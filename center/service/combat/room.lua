@@ -36,7 +36,7 @@ local function schedule()
 			for _, team in pairs(channel.teams) do
 				if team:can_start() then
 					team:start()
-                elseif team:size() == 3 then
+                elseif team.count == 3 then
                     team:robot_ready()
 				else
 					local member = robot.generate_robot()
@@ -250,7 +250,7 @@ function COMMAND.on_exit(cid, tid, pid)
 		return ERRCODE.ROOM_NOT_EXISTS
 	end
 	-- 成员检查
-	local member = team:quit(pid)
+	local member = team:remove(pid)
 	if member == nil then
 		return ERRCODE.COMMON_FIND_ERROR
 	end

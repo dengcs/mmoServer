@@ -122,7 +122,6 @@ function Game.new(alias, data)
 		members  	= {},								-- 成员列表
 		channel		= data.channel,
 		teamid		= data.teamid,
-		owner		= data.owner,
 	}
 
 	local game = setmetatable(game_dt, Game)
@@ -290,7 +289,6 @@ function Game:snapshot()
 	-- 构造信息
 	local data =
 	{
-		owner	= self.owner,
 		state 	= self.state,
 		channel	= self.channel,
 		teamid	= self.teamid,
