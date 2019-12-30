@@ -18,7 +18,7 @@ local PLAYER_STATE_TYPE = ENUM.PLAYER_STATE_TYPE
 local function change_user_state(user, state, param)
 	-- 变更角色状态
 	user.state = state
-	user.scene = param
+	user.param = param
 end
 
 -- 角色状态变化通知（服务通知角色角色进入指定场景）
@@ -40,23 +40,20 @@ function COMMAND:on_enter_environment(state, param)
 		end,
 	}
 	local fn = switch[state]
-	if fn ~= nil then
+	if fn then
 		return fn(user, param)
-	else
-		return false
 	end
+	return false
 end
 
 -- 角色状态变化通知（服务通知角色离开指定场景）
 function COMMAND:on_leave_environment(state)
 	local user = self.user
 	if user.state == state then
-		local param = user.scene
 		change_user_state(user, PLAYER_STATE_TYPE.PLAYER_STATE_IDLE)
-		return param
-	else
-		return nil
+		return true
 	end
+	return false
 end
 
 -- '请求/命令' - 注册

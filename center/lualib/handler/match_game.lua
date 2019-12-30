@@ -30,7 +30,7 @@ function REQUEST:game_update()
 	local player  = self.user
 	if ENUM.inspect_player_game(player) then
 		local pid     = player.pid
-		local alias   = player.scene
+		local alias   = player.param
 		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "on_game_update", alias, pid, self.proto.data)
 	end
 	return 0
@@ -41,7 +41,7 @@ function REQUEST:game_leave()
 	local player  = self.user
 	if ENUM.inspect_player_game(player) then
 		local pid     = player.pid
-		local alias   = player.scene
+		local alias   = player.param
 		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "on_leave", alias, pid)
 	end
 	

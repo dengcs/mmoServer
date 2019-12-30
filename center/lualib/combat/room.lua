@@ -358,15 +358,21 @@ function Team:robot_ready()
 end
 
 function Team:clean()
+	local off_lines = {}
 	for _, member in pairs(self.members) do
 		if member.online ~= 0 then
-
+			table.insert(off_lines, member.pid)
 		end
+	end
+
+	for _,pid in pairs(off_lines) do
+		self:remove(pid)
 	end
 end
 
 -- 通知匹配（快速状态转换）
 function Team:stop()
+	self:clean()
 	self:convert("PREPARE")
 	self.xtime = 0
 	return true

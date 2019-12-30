@@ -182,24 +182,6 @@ function Game:join(member)
 	return member
 end
 
--- 离开战场
-function Game:quit(pid)
-	local member = nil
-	for _, v in pairs(self.members) do
-		-- 成员离线处理
-		if v.pid == pid then
-			v.online = this.time()
-			-- 记录退出成员
-			member = v
-			if not v.robot then
-				leave_environment(pid, self.alias)
-			end
-			break
-		end
-	end
-	return member
-end
-
 -- 指定成员
 function Game:get(pid)
 	for _, member in pairs(self.members) do
