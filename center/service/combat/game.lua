@@ -78,9 +78,9 @@ end
 -- 1. 战场编号
 -- 2. 角色编号
 -- 3. 战场数据
-function COMMAND.on_game_update(alias, pid, data)
+function COMMAND.on_update(alias, pid, data)
 	local game = games[alias]
-	assert(game, "on_game_update() : game not exists!!!")
+	assert(game, "on_update() : game not exists!!!")
 
 	-- 成员检查
 	local member = game:get(pid)
@@ -97,9 +97,9 @@ end
 -- 1. 战场编号
 -- 2. 数据名称
 -- 3. 数据内容
-function COMMAND.on_game_forward(alias, name, data)
+function COMMAND.on_forward(alias, name, data)
 	local game = games[alias]
-	assert(game, "on_game_forward() : game not exists!!!")
+	assert(game, "on_forward() : game not exists!!!")
 
 	game:broadcast(name, data)
 	return 0

@@ -47,7 +47,7 @@ function CMD.load_data(source, pid)
 	if user_data then
 		user_data.pid 	= pid
 		user_data.state	= 1
-		user_data.scene = nil
+		user_data.param = nil
 	end
 end
 

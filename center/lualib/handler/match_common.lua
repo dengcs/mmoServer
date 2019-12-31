@@ -19,6 +19,9 @@ local function change_user_state(user, state, param)
 	-- 变更角色状态
 	user.state = state
 	user.param = param
+
+	local battle = {state = state, param = param}
+	skynet.send(GLOBAL.SERVICE_NAME.SOCIAL, "lua", "update", user.pid, {battle = battle})
 end
 
 -- 角色状态变化通知（服务通知角色角色进入指定场景）

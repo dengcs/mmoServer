@@ -31,7 +31,7 @@ function REQUEST:game_update()
 	if ENUM.inspect_player_game(player) then
 		local pid     = player.pid
 		local alias   = player.param
-		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "on_game_update", alias, pid, self.proto.data)
+		skynet.send(GLOBAL.SERVICE_NAME.GAME, "lua", "on_update", alias, pid, self.proto.data)
 	end
 	return 0
 end
