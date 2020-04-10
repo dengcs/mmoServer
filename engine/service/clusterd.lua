@@ -1,22 +1,13 @@
 local skynet = require "skynet"
 require "skynet.manager"
-local sc = require "skynet.socketchannel"
-local socket = require "skynet.socket"
 local cluster = require "skynet.cluster.core"
 
 local config_name = skynet.getenv "cluster"
 local node_address = {}
-local node_session = {}
 local node_sender = {}
 local command = {}
 local config = {}
 local nodename = cluster.nodename()
-
-local function read_response(sock)
-	local sz = socket.header(sock:read(2))
-	local msg = sock:read(sz)
-	return cluster.unpackresponse(msg)	-- session, ok, data, padding
-end
 
 local connecting = {}
 
@@ -44,7 +35,7 @@ local function open_channel(t, key)
 		local host, port = string.match(address, "([^:]+):(.*)$")
 		c = node_sender[key]
 		if c == nil then
-			c = skynet.newservice "clustersender"
+			c = skynet.newservice("clustersender", key, nodename, host, port)
 			if node_sender[key] then
 				-- double check
 				skynet.kill(c)
@@ -59,6 +50,8 @@ local function open_channel(t, key)
 		if succ then
 			t[key] = c
 			ct.channel = c
+		else
+			err = string.format("changenode [%s] (%s:%s) failed", key, host, port)
 		end
 	else
 		err = string.format("cluster node [%s] is %s.", key,  address == false and "down" or "absent")
@@ -68,6 +61,9 @@ local function open_channel(t, key)
 		skynet.wakeup(co)
 	end
 	assert(succ, err)
+	if node_address[key] ~= address then
+		return open_channel(t,key)
+	end
 	return c
 end
 
@@ -83,6 +79,7 @@ local function loadconfig(tmp)
 			assert(load(source, "@"..config_name, "t", tmp))()
 		end
 	end
+	local reload = {}
 	for name,address in pairs(tmp) do
 		if name:sub(1,2) == "__" then
 			name = name:sub(3)
@@ -94,6 +91,7 @@ local function loadconfig(tmp)
 				-- address changed
 				if rawget(node_channel, name) then
 					node_channel[name] = nil	-- reset connection
+					table.insert(reload, name)
 				end
 				node_address[name] = address
 			end
@@ -111,6 +109,10 @@ local function loadconfig(tmp)
 				skynet.wakeup(ct.namequery)
 			end
 		end
+	end
+	for _, name in ipairs(reload) do
+		-- open_channel would block
+		skynet.fork(open_channel, node_channel, name)
 	end
 end
 
@@ -131,6 +133,10 @@ end
 
 function command.sender(source, node)
 	skynet.ret(skynet.pack(node_channel[node]))
+end
+
+function command.senders(source)
+	skynet.retpack(node_sender)
 end
 
 local proxy = {}
