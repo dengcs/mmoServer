@@ -1,8 +1,6 @@
-local skynet = require "skynet"
-local socket = require "skynet.socket"
-local websocket = require "websocket"
-local httpd = require "http.httpd"
-local sockethelper = require "http.sockethelper"
+local skynet    = require "skynet"
+local socket    = require "skynet.socket"
+local websocket = require "http.websocket"
 
 local wsService = {}
 
@@ -12,46 +10,51 @@ function wsService.start(module)
 
     local client_number = 0
 
-    local handler = {}
+    local handle = {}
 
-    function handler.connect(ws)
+    function handle.connect(id)
+        skynet.error("websocket connect from: " .. tostring(id))
         client_number = client_number + 1
 
         if module.on_connect then
-            module.on_connect(ws)
+            module.on_connect(id)
         end
     end
 
-    function handler.disconnect(fd)
+    function handle.handshake(id, header, url)
+        local addr = websocket.addrinfo(id)
+        skynet.error("websocket handshake from: " .. tostring(id), "url", url, "addr:", addr)
+        skynet.error("----header-----")
+        for k,v in pairs(header) do
+            skynet.error(k,v)
+        end
+        skynet.error("--------------")
+    end
+
+    function handle.message(id, msg, msg_type)
+        assert(msg_type == "binary" or msg_type == "text")
+        module.on_message(id, msg)
+    end
+
+    function handle.ping(id)
+        skynet.error("websocket ping from: " .. tostring(id) .. "\n")
+    end
+
+    function handle.pong(id)
+        skynet.error("websocket pong from: " .. tostring(id))
+    end
+
+    function handle.close(id, code, reason)
+        skynet.error("websocket close from: " .. tostring(id), code, reason)
         client_number = client_number - 1
 
         if module.on_disconnect then
-            module.on_disconnect(fd)
+            module.on_disconnect(id)
         end
     end
 
-    function handler.message(fd, msgData)
-        module.on_message(fd, msgData)
-    end
-
-
-    local function accept(fd, addr)
-        -- limit request body size to 8192 (you can pass nil to unlimit)
-        local code, url, method, header, body = httpd.read_request(sockethelper.readfunc(fd), 8192)
-        if code then
-            if header.upgrade == "websocket" then
-                local params =
-                {
-                    addr = addr,
-                    check_origin = false,
-                }
-                local ws = websocket.new(fd, header, handler, params)
-                if ws then
-                    return true
-                end
-            end
-        end
-        return false
+    function handle.error(id)
+        skynet.error("websocket error from: " .. tostring(id))
     end
 
     local CMD = {}
@@ -70,10 +73,9 @@ function wsService.start(module)
             if client_number > conf.maxclient then
                 socket.close(socket_id)
             else
-                socket.start(socket_id)
-                local ok = pcall(accept, socket_id, addr)
+                local ok, err = websocket.accept(socket_id, handle, "ws", addr)
                 if not ok then
-                    socket.close(socket_id)
+                    LOG_ERROR("wsservice accept error[%s]", tostring(err))
                 end
             end
         end)
@@ -94,6 +96,6 @@ function wsService.start(module)
             end
         end)
     end)
-    end
+end
 
 return wsService

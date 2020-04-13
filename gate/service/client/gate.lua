@@ -2,6 +2,7 @@ local skynet 		= require "skynet_ex"
 local pbhelper      = require "net.pbhelper"
 local wsservice 	= require "factory.wsservice"
 local random		= require "utils.random"
+local websocket 	= require "http.websocket"
 
 local encode 	= pbhelper.pb_encode
 local decode 	= pbhelper.pb_decode
@@ -26,14 +27,11 @@ local function response(message)
 	local fd	= message.header.fd
 	local session = sessions[fd]
 	if session then
-		local web_socket = session.web_socket
-		if web_socket and web_socket:is_alive() then
-			local protoName = message.header.proto
-			local data      = message.payload
-			local errCode   = message.header.errcode
-			local msgData 	= encode(protoName, data, errCode)
-			web_socket:send_binary(msgData)
-		end
+		local protoName = message.header.proto
+		local data      = message.payload
+		local errCode   = message.header.errcode
+		local msgData 	= encode(protoName, data, errCode)
+		websocket.write(fd, msgData, "binary")
 	end
 end
 
@@ -86,11 +84,9 @@ function server.on_init(conf)
 	pbhelper.register()
 end
 
-function server.on_connect(web_socket)
-	local fd = web_socket.id
+function server.on_connect(fd)
 	local session = {
 		fd			= fd,
-		web_socket 	= web_socket,
 		state		= MSG_STATE.PREPARE
 	}
 	sessions[fd] = session
