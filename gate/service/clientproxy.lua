@@ -27,9 +27,12 @@ local function dispatch_reply(so)
     local reply	= so:read(len_reply)
     local result = skynet.unpack(reply)
 
-    if result then
+    if result and result.header and result.header.fd then
         skynet.error("dcs----response--", table.tostring(result))
-        skynet.send(GLOBAL.SERVICE_NAME.GATE, "lua", "response", result)
+        local fd	= result.header.fd
+        local balance = (fd % 10) + 1
+        local svr_name = string.format("wsagent%s", balance)
+        skynet.send(svr_name, "lua", "response", result)
     end
 
     return 0,true

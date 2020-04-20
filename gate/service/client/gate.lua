@@ -4,6 +4,8 @@ local wsservice 	= require "factory.wsservice"
 local random		= require "utils.random"
 local websocket 	= require "http.websocket"
 
+local MODE = ...
+
 local encode 	= pbhelper.pb_encode
 local decode 	= pbhelper.pb_decode
 
@@ -80,7 +82,7 @@ end
 ---------------------------------------------------------------------
 local server = {}
 
-function server.on_init(conf)
+function server.on_init()
 	pbhelper.register()
 end
 
@@ -165,4 +167,4 @@ function server.command(cmd,...)
     end
 end
 
-wsservice.start(server)
+wsservice.start(server, MODE)
