@@ -2,11 +2,12 @@ local skynet 		= require "skynet_ex"
 local pbhelper      = require "net.pbhelper"
 local wsservice 	= require "factory.wsservice"
 local random		= require "utils.random"
-local websocket 	= require "http.websocket"
+local wshelper 		= require "wshelper"
+local gameproxy 	= require "proxy.gameproxy"
+local logicproxy 	= require "proxy.logicproxy"
 
 local MODE = ...
 
-local encode 	= pbhelper.pb_encode
 local decode 	= pbhelper.pb_decode
 
 local MSG_STATE = {
@@ -29,11 +30,7 @@ local function response(message)
 	local fd	= message.header.fd
 	local session = sessions[fd]
 	if session then
-		local protoName = message.header.proto
-		local data      = message.payload
-		local errCode   = message.header.errcode
-		local msgData 	= encode(protoName, data, errCode)
-		websocket.write(fd, msgData, "binary")
+		wshelper.write(fd, message)
 	end
 end
 
@@ -51,9 +48,9 @@ local function resp_msg(fd, proto, data)
 end
 
 -- 推送消息的代理
-local function send_to_proxy(cmd, fd, msg)
-	skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", cmd, fd, msg)
-	skynet.send(GLOBAL.SERVICE_NAME.GAMEPROXY, "lua", cmd, fd, msg)
+local function signal_to_proxy(fd, msg)
+	logicproxy.signal(fd, msg)
+	gameproxy.signal(fd, msg)
 end
 
 -- 游戏服协议匹配
@@ -68,22 +65,14 @@ local function game_proto_find(proto)
 end
 
 ---------------------------------------------------------------------
---- 服务导出接口
----------------------------------------------------------------------
-local CMD = {}
-
--- 返回消息到客户端
-function CMD.response(message)
-	response(message)
-end
-
----------------------------------------------------------------------
 --- 服务事件回调（底层事件通知）
 ---------------------------------------------------------------------
 local server = {}
 
 function server.on_init()
 	pbhelper.register()
+	logicproxy.init()
+	gameproxy.init()
 end
 
 function server.on_connect(fd)
@@ -98,7 +87,7 @@ function server.on_disconnect(fd)
 	local session = sessions[fd]
 	if session then
 		sessions[fd] = nil
-		send_to_proxy("signal", fd, "disconnect")
+		signal_to_proxy(fd, "disconnect")
 
 		if session.state == MSG_STATE.REQUEST then
 			session_map[session.account] = nil
@@ -114,9 +103,9 @@ function server.on_message(fd, message)
 			local proto 	= msg.header.proto
 			if session.state == MSG_STATE.REQUEST then
 				if game_proto_find(proto) then
-					skynet.send(GLOBAL.SERVICE_NAME.GAMEPROXY, "lua", "forward", fd, msg)
+					gameproxy.forward(fd, msg)
 				else
-					skynet.send(GLOBAL.SERVICE_NAME.LOGICPROXY, "lua", "forward", fd, msg)
+					logicproxy.forward(fd, msg)
 				end
 			else
 				local message	= msg.payload
@@ -149,7 +138,7 @@ function server.on_message(fd, message)
 							if session.token == message.token then
 								session.state = MSG_STATE.REQUEST
 								-- 和逻辑服建立虚拟连接
-								send_to_proxy("signal", fd, "connect")
+								signal_to_proxy(fd, "connect")
 								resp_msg(fd, "verify_resp", {ret = 0})
 							end
 						end
@@ -157,13 +146,6 @@ function server.on_message(fd, message)
 				end
 			end
 		end
-    end
-end
-
-function server.command(cmd,...)
-    local fn = CMD[cmd]
-    if fn then
-      	return fn(...)
     end
 end
 

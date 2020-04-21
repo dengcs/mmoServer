@@ -60,15 +60,9 @@ function wsService.start(module, mode)
 
         skynet.start(function ()
             skynet.dispatch("lua", function (_,_, id, protocol, addr)
-                if IS_STRING(id) then
-                    if module.command then
-                        module.command(id, protocol)
-                    end
-                else
-                    local ok, err = websocket.accept(id, handle, protocol, addr)
-                    if not ok then
-                        LOG_ERROR("wsservice accept error[%s]", tostring(err))
-                    end
+                local ok, err = websocket.accept(id, handle, protocol, addr)
+                if not ok then
+                    LOG_ERROR("wsservice accept error[%s]", tostring(err))
                 end
             end)
         end)
@@ -80,20 +74,22 @@ function wsService.start(module, mode)
             conf.maxclient    = conf.maxclient or 1024
             assert(conf.port, "配置缺少port项")
 
-            local agent_count = 10
             local agents = {}
-            for i= 1, agent_count do
+            for i= 1, 10 do
                 agents[i] = skynet.newservice(SERVICE_NAME, "agent")
-                local svr_name = string.format("wsagent%s", i)
-                skynet.name(svr_name, agents[i])
             end
+            local balance = 1
+            local protocol = "ws"
 
             local address = string.format("%s:%d",conf.ip, conf.port)
             skynet.error("Listening "..address)
             local listen_id = assert(socket.listen(conf.ip, conf.port))
             socket.start(listen_id , function(socket_id, addr)
-                local balance = (socket_id % agent_count) + 1
-                skynet.send(agents[balance], "lua", socket_id, "ws", addr)
+                skynet.send(agents[balance], "lua", socket_id, protocol, addr)
+                balance = balance + 1
+                if balance > #agents then
+                    balance = 1
+                end
             end)
         end
 
@@ -103,8 +99,6 @@ function wsService.start(module, mode)
                 local f = CMD[cmd]
                 if f then
                     safe_handler(f, source, ...)
-                else
-                    safe_handler(module.command, cmd, ...)
                 end
             end)
         end)
