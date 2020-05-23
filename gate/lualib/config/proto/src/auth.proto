@@ -65,15 +65,3 @@ message player_login_resp
     uint32 ret    = 1;          // 应答结果  （0 : 成功，否则失败）
     string pid    = 2;          // 角色编号
 }
-
-// 游戏登录
-message game_login
-{
-    string pid    = 1;          // 角色编号
-}
-
-// 游戏登录应答
-message game_login_resp
-{
-    uint32 ret    = 1;          // 应答结果  （0 : 成功，否则失败）
-}

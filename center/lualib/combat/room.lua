@@ -181,14 +181,14 @@ Team.__index = Team
 
 -- 构造队伍
 -- 1. 创建者信息
-function Team.new(vdata)
+function Team.new(cid, vdata)
 	local team_dt =
 	{
 		id      	= allocid(),				-- 队伍编号（顺序递增）
 		state   	= ESTATES.PREPARE,			-- 队伍状态
 		xtime   	= 0,						-- 匹配时间
 		count	 	= 0,						-- 成员数量
-		channel 	= 0,						-- 频道
+		channel 	= cid or 0,					-- 频道
 		members 	= {},						-- 成员列表
 	}
 
@@ -485,9 +485,8 @@ end
 
 -- 创建队伍
 function Channel:create(vdata)
-	local team = Team.new(vdata)
+	local team = Team.new(self.id, vdata)
 	if team then
-		team.channel		= self.id
 		self.teams[team.id] = team
 	end
 	return team

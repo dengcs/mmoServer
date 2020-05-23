@@ -1,7 +1,12 @@
 
-Ö
+›
 src/room.proto
-game.proto"'
+game.proto"
+
+room_login
+pid (	Rpid"#
+room_login_resp
+ret (Rret"'
 room_create
 channel (Rchannel"$
 room_create_resp

@@ -26,6 +26,17 @@ message GameMember
 // 请求/应答
 ///////////////////////////////////////////////////////////
 
+// 游戏登录
+message game_login
+{
+    string pid    = 1;          // 角色编号
+}
+
+// 游戏登录应答
+message game_login_resp
+{
+    uint32 ret    = 1;          // 应答结果  （0 : 成功，否则失败）
+}
 
 // 参赛者比赛数据更新(这个请求不返回应答信息)
 message game_update

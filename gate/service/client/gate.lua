@@ -3,8 +3,9 @@ local pbhelper      = require "net.pbhelper"
 local wsservice 	= require "factory.wsservice"
 local random		= require "utils.random"
 local wshelper 		= require "wshelper"
-local gameproxy 	= require "proxy.gameproxy"
+local centerproxy 	= require "proxy.centerproxy"
 local logicproxy 	= require "proxy.logicproxy"
+local arenaproxy 	= require "proxy.arenaproxy"
 
 local MODE = ...
 
@@ -50,12 +51,24 @@ end
 -- 推送消息的代理
 local function signal_to_proxy(fd, msg)
 	logicproxy.signal(fd, msg)
-	gameproxy.signal(fd, msg)
+	centerproxy.signal(fd, msg)
+	arenaproxy.signal(fd, msg)
 end
 
--- 游戏服协议匹配
-local function game_proto_find(proto)
-	local prefix_list = {"game_", "room_", "mail_", "friend_", "chat_"}
+-- 中心服协议匹配
+local function center_proto_find(proto)
+	local prefix_list = {"room_", "mail_", "friend_", "chat_"}
+	for _, prefix in pairs(prefix_list) do
+		if proto:find(prefix)==1 then
+			return true
+		end
+	end
+	return false
+end
+
+-- 战斗服协议匹配
+local function arena_proto_find(proto)
+	local prefix_list = {"game_"}
 	for _, prefix in pairs(prefix_list) do
 		if proto:find(prefix)==1 then
 			return true
@@ -72,7 +85,8 @@ local server = {}
 function server.on_init()
 	pbhelper.register()
 	logicproxy.init()
-	gameproxy.init()
+	centerproxy.init()
+	arenaproxy.init()
 end
 
 function server.on_connect(fd)
@@ -102,8 +116,10 @@ function server.on_message(fd, message)
 		if msg then
 			local proto 	= msg.header.proto
 			if session.state == MSG_STATE.REQUEST then
-				if game_proto_find(proto) then
-					gameproxy.forward(fd, msg)
+				if center_proto_find(proto) then
+					centerproxy.forward(fd, msg)
+				elseif arena_proto_find(proto) then
+					arenaproxy.forward(fd, msg)
 				else
 					logicproxy.forward(fd, msg)
 				end

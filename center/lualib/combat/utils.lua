@@ -1,7 +1,7 @@
 --
 -- 战斗服务相关工具集合
 --
-local skynet = require "skynet"
+local cluster	= require "skynet.cluster"
 
 -----------------------------------------------------------
 --- 工具集合
@@ -15,7 +15,7 @@ local utils =
 	-- 3. 成员集合
 	start = function(major, minor, data)
 		-- 启动战场服务
-		local ok, ret = skynet.call(GLOBAL.SERVICE_NAME.GAME, "lua", "on_create", major, minor, data)
+		local ok, ret = cluster.call("arena", GLOBAL.SERVICE_NAME.GAME, "on_create", major, minor, data)
 		if ok ~= 0 then
 			return ok
 		else

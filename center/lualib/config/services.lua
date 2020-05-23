@@ -14,10 +14,6 @@ M.list = {
         module = "common.sociald",
     },
     {
-        name = GLOBAL.SERVICE_NAME.GAME,
-        module = "combat.game",
-    },
-    {
         name = GLOBAL.SERVICE_NAME.ROOM,
         module = "combat.room",
     },

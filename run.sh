@@ -1,4 +1,5 @@
 #!/bin/bash
+ARENA_CMD_PORT=43002
 CENTER_CMD_PORT=42002
 LOGIC_CMD_PORT=41002
 
@@ -24,6 +25,7 @@ exit(){
 start_all(){
     start center
     start logic
+    start arena
     for((i=3;i>=1;i--));
     do
         echo ${i};
@@ -35,12 +37,14 @@ start_all(){
 stop_all(){
     exit ${CENTER_CMD_PORT}
     exit ${LOGIC_CMD_PORT}
+    exit ${ARENA_CMD_PORT}
     for((i=3;i>=1;i--));
     do
         echo ${i};
         sleep 1;
     done
     stop gate
+    stop arena
     stop logic
     stop center
 }
@@ -48,9 +52,11 @@ stop_all(){
 case "${1}" in
     start_center)start center;;
     start_logic)start logic;;
+    start_arena)start arena;;
     start_gate)start gate;;
     stop_center)exit ${CENTER_CMD_PORT};stop center;;
     stop_logic)exit ${LOGIC_CMD_PORT};stop logic;;
+    stop_arena)exit ${ARENA_CMD_PORT};stop arena;;
     stop_gate)stop gate;;
     start_all)start_all;;
     stop_all)stop_all;;

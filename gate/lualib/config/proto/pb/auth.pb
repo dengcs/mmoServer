@@ -1,5 +1,5 @@
 
-∆
+Å
 src/auth.proto
 game.proto"
 	heartbeat"
@@ -19,9 +19,4 @@ game.proto"
 player_login"7
 player_login_resp
 ret (Rret
-pid (	Rpid"
-
-game_login
-pid (	Rpid"#
-game_login_resp
-ret (Rretbproto3
+pid (	Rpidbproto3

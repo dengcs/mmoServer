@@ -1,5 +1,5 @@
 
-Á
+†
 src/game.proto
 game.proto"ÿ
 
@@ -14,7 +14,12 @@ GameMember
 ulevel (Rulevel
 vlevel	 (Rvlevel
 online
- (Ronline"!
+ (Ronline"
+
+game_login
+pid (	Rpid"#
+game_login_resp
+ret (Rret"!
 game_update
 data (	Rdata"
 game_submit

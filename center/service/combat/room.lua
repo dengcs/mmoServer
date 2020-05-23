@@ -82,8 +82,6 @@ function COMMAND.on_create(cid, vdata)
 		if team == nil then
 			return ERRCODE.ROOM_CREATE_FAILED
 		end
-
-        team:synchronize()
 	end
 
 	return 0

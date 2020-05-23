@@ -25,7 +25,6 @@ function REQUEST:room_create()
             break
         end
 
-        vdata.agent = skynet.self()
         local ok,ret_code = skynet.call(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_create", channel, vdata)
         if ok ~= 0 then
             ret = ERRCODE.COMMON_SYSTEM_ERROR

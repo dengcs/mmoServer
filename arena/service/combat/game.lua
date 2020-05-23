@@ -2,6 +2,7 @@
 -- 对战战场服务
 --
 local skynet  	= require "skynet"
+local cluster	= require "skynet.cluster"
 local service 	= require "factory.service"
 local model		= require "combat.game"
 
@@ -113,7 +114,7 @@ function COMMAND.game_finish(alias, data)
 
 	games[alias] = nil
 
-	skynet.send(GLOBAL.SERVICE_NAME.ROOM, "lua", "on_game_finish", game.channel, game.teamid, data)
+	cluster.send("center", GLOBAL.SERVICE_NAME.ROOM, "on_game_finish", game.channel, game.teamid, data)
 end
 
 -----------------------------------------------------------
